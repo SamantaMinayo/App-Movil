@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "780852680495",
+    "firebase_url": "https://saludable-fba9c.firebaseio.com",
+    "project_id": "saludable-fba9c",
+    "storage_bucket": "saludable-fba9c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:780852680495:android:0b5a0f87d81e1da97633da",
+        "android_client_info": {
+          "package_name": "com.example.saludable"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "780852680495-ekkq99kvl5objtg3dcvpajpgvqhqoolb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.saludable",
+            "certificate_hash": "78158b683ce79007e0dcbb8698f910aaef23fca2"
+          }
+        },
+        {
+          "client_id": "780852680495-1nqltujlhv8t62osirnit1us1gmioc58.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBUhSQFVKfst3XcrupPHHF06S7dFmRdOC0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "780852680495-1nqltujlhv8t62osirnit1us1gmioc58.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
