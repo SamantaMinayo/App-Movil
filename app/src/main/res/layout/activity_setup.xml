@@ -1,14 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/register"
-    app:popupTheme="@style/Theme.AppCompat.Light"
-    app:theme="@style/ThemeOverlay.AppCompat.ActionBar"
     tools:context=".SetupActivity">
-
     <Button
         android:id="@+id/setup_button"
         android:layout_width="200dp"
@@ -17,16 +13,14 @@
         android:layout_marginTop="550dp"
         android:background="@drawable/button"
         android:padding="10dp"
-        android:text="SAVE"
-        app:layout_aspectRatio="50%"
-        app:layout_widthPercent="10%" />
+        android:text="SAVE" />
 
     <EditText
         android:id="@+id/setup_username"
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="250dp"
+        android:layout_marginTop="200dp"
         android:background="@drawable/inputs"
         android:drawableLeft="@drawable/username"
         android:ems="10"
@@ -39,7 +33,7 @@
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="300dp"
+        android:layout_marginTop="250dp"
         android:background="@drawable/inputs"
         android:drawableLeft="@drawable/name"
         android:ems="10"
@@ -48,16 +42,16 @@
 
     <EditText
 
-        android:id="@+id/setup_fecha_nacimiento"
+        android:id="@+id/setup_edad"
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="400dp"
+        android:layout_marginTop="350dp"
         android:background="@drawable/inputs"
         android:drawableLeft="@drawable/name"
         android:ems="10"
         android:hint="Edad"
-        android:inputType="datetime"
+        android:inputType="number"
         android:padding="10dp" />
 
     <EditText
@@ -66,11 +60,25 @@
         android:layout_width="match_parent"
         android:layout_height="40dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="350dp"
+        android:layout_marginTop="300dp"
         android:background="@drawable/inputs"
         android:drawableLeft="@drawable/username"
         android:ems="10"
         android:hint="Country"
+        android:padding="10dp" />
+
+    <EditText
+
+        android:id="@+id/setup_genero"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="400dp"
+        android:background="@drawable/inputs"
+        android:drawableLeft="@drawable/name"
+        android:ems="10"
+        android:hint="Genero (Femenino/Masculino)"
+        android:maxLength="10"
         android:padding="10dp" />
 
     <EditText
@@ -84,6 +92,7 @@
         android:drawableLeft="@drawable/name"
         android:ems="10"
         android:hint="Estatura(cm)"
+        android:inputType="number"
         android:padding="10dp" />
 
     <EditText
@@ -97,12 +106,13 @@
         android:drawableLeft="@drawable/name"
         android:ems="10"
         android:hint="Peso (Kg)"
+        android:inputType="number"
         android:padding="10dp" />
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/setup_profile_image"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
         android:layout_marginLeft="100dp"
         android:layout_marginTop="30dp"
         android:src="@drawable/profile">
