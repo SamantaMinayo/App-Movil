@@ -2,6 +2,7 @@ package com.example.saludable;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
@@ -10,6 +11,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -17,6 +19,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.util.HashMap;
 
@@ -24,13 +28,16 @@ import de.hdodenhof.circleimageview.CircleImageView;
 
 public class SetupActivity extends AppCompatActivity {
 
-    String currentUserID;
+
     private Button SaveInformation;
     private CircleImageView ProfileImage;
     private EditText UserName, FullName, Country, Altura, Peso, Edad, Genero;
     private FirebaseAuth mAuth;
     private DatabaseReference UserRef;
     private ProgressDialog loadingBar;
+
+    final static int Gallery_Pick = 1;
+    String currentUserID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,7 +68,36 @@ public class SetupActivity extends AppCompatActivity {
             }
         } );
 
+        ProfileImage.setOnClickListener ( new View.OnClickListener () {
+            @Override
+            public void onClick(View view) {
+                Intent galleryIntent = new Intent ();
+                galleryIntent.setAction ( Intent.ACTION_GET_CONTENT );
+                galleryIntent.setType ( "image/*" );
+                startActivityForResult ( galleryIntent, Gallery_Pick );
+            }
+        } );
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult ( requestCode, resultCode, data );
+
+        if (requestCode == Gallery_Pick && resultCode == RESULT_OK && data != null) {
+            Uri ImageUri = data.getData ();
+            CropImage.activity ()
+                    .setGuidelines ( CropImageView.Guidelines.ON )
+                    .setAspectRatio ( 1, 1 )
+                    .start ( this );
+        }
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+
+            CropImage.ActivityResult result = CropImage.getActivityResult ( data );
+            if (requestCode == RESULT_OK) {
+                Uri resultUri = result.getUri ();
+            }
+        }
     }
 
     private void SaveAccountSetupInformation() {
