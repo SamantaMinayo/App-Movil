@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -21,6 +22,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -29,8 +33,12 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView postList;
     private Toolbar mToolbar;
     private ActionBarDrawerToggle actionBarDrawerToggle;
+    private CircleImageView NavProfileImage;
+    private TextView NavProfileusername;
+
     private FirebaseAuth mAuth;
     private DatabaseReference UsersRef;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView ( R.layout.activity_main );
 
         mAuth = FirebaseAuth.getInstance ();
+
         UsersRef = FirebaseDatabase.getInstance ().getReference ().child ( "Users" );
 
 
@@ -52,6 +61,10 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar ().setDisplayHomeAsUpEnabled ( true );
         navigationView = findViewById ( R.id.navigation_view );
         View navView = navigationView.inflateHeaderView ( R.layout.navigation_header );
+
+        NavProfileImage = navView.findViewById ( R.id.nav_profile_image );
+        NavProfileusername = navView.findViewById ( R.id.nav_user_full_name );
+
 
 
         navigationView.setNavigationItemSelectedListener ( new NavigationView.OnNavigationItemSelectedListener () {
@@ -87,6 +100,16 @@ public class MainActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (!dataSnapshot.hasChild ( current_user_id )) {
                     SendUserToSetupActivity ();
+                } else {
+                    if (!dataSnapshot.child ( current_user_id ).hasChild ( "username" )) {
+                        SendUserToSetupActivity ();
+                    } else {
+                        String fullname = dataSnapshot.child ( current_user_id ).child ( "fullname" ).getValue ().toString ();
+                        String image = dataSnapshot.child ( current_user_id ).child ( "profileimage" ).getValue ().toString ();
+
+                        NavProfileusername.setText ( fullname );
+                        Picasso.with ( MainActivity.this ).load ( image ).placeholder ( R.drawable.profile ).into ( NavProfileImage );
+                    }
                 }
             }
 

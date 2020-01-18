@@ -17,11 +17,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
@@ -49,11 +53,10 @@ public class SetupActivity extends AppCompatActivity {
         super.onCreate ( savedInstanceState );
         setContentView ( R.layout.activity_setup );
 
-
         mAuth = FirebaseAuth.getInstance ();
         currentUserID = mAuth.getCurrentUser ().getUid ();
         UserRef = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( currentUserID );
-        UserProfileImageRef = FirebaseStorage.getInstance ().getReference ().child ( "Profile Images" );
+        UserProfileImageRef = FirebaseStorage.getInstance ().getReference ().child ( "ProfileImages" );
 
         loadingBar = new ProgressDialog ( this );
 
@@ -85,6 +88,21 @@ public class SetupActivity extends AppCompatActivity {
             }
         } );
 
+        UserRef.addValueEventListener ( new ValueEventListener () {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists ()) {
+                    String image = dataSnapshot.child ( "profileimage" ).getValue ().toString ();
+                    Picasso.with ( SetupActivity.this ).load ( image ).placeholder ( R.drawable.profile ).into ( ProfileImage );
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        } );
     }
 
     @Override
@@ -111,32 +129,39 @@ public class SetupActivity extends AppCompatActivity {
 
                 Uri resultUri = result.getUri ();
 
-                StorageReference filePath = UserProfileImageRef.child ( currentUserID + ".jpg" );
+                final StorageReference filePath = UserProfileImageRef.child ( currentUserID + ".jpg" );
 
                 filePath.putFile ( resultUri ).addOnCompleteListener ( new OnCompleteListener<UploadTask.TaskSnapshot> () {
                     @Override
                     public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                         if (task.isSuccessful ()) {
                             Toast.makeText ( SetupActivity.this, "Profile image stored successfully to Firebase", Toast.LENGTH_SHORT ).show ();
-                            final String downloadUri = task.getResult ().getStorage ().getDownloadUrl ().toString ();
-                            UserRef.child ( "profileimage" ).setValue ( downloadUri )
-                                    .addOnCompleteListener ( new OnCompleteListener<Void> () {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
 
-                                            if (task.isSuccessful ()) {
-                                                Intent selfIntent = new Intent ( SetupActivity.this, SetupActivity.class );
-                                                startActivity ( selfIntent );
+                            filePath.getDownloadUrl ().addOnCompleteListener ( new OnCompleteListener<Uri> () {
+                                @Override
+                                public void onComplete(@NonNull Task<Uri> task) {
+                                    final String downloadUri = task.getResult ().toString ();
+                                    UserRef.child ( "profileimage" ).setValue ( downloadUri )
+                                            .addOnCompleteListener ( new OnCompleteListener<Void> () {
+                                                @Override
+                                                public void onComplete(@NonNull Task<Void> task) {
 
-                                                Toast.makeText ( SetupActivity.this, "Profile image stored to Firebase Databse Storage", Toast.LENGTH_SHORT ).show ();
-                                                loadingBar.dismiss ();
-                                            } else {
-                                                String message = task.getException ().getMessage ();
-                                                Toast.makeText ( SetupActivity.this, "Error Occured: " + message, Toast.LENGTH_SHORT ).show ();
-                                                loadingBar.dismiss ();
-                                            }
-                                        }
-                                    } );
+                                                    if (task.isSuccessful ()) {
+                                                        Intent selfIntent = new Intent ( SetupActivity.this, SetupActivity.class );
+                                                        startActivity ( selfIntent );
+
+                                                        Toast.makeText ( SetupActivity.this, "Profile image stored to Firebase Databse Storage", Toast.LENGTH_SHORT ).show ();
+                                                        loadingBar.dismiss ();
+                                                    } else {
+                                                        String message = task.getException ().getMessage ();
+                                                        Toast.makeText ( SetupActivity.this, "Error Occured: " + message, Toast.LENGTH_SHORT ).show ();
+                                                        loadingBar.dismiss ();
+                                                    }
+                                                }
+                                            } );
+                                }
+                            } );
+
                         }
                     }
                 } );
