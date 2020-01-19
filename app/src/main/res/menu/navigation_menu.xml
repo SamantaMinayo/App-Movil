@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
+
     <item
         android:id="@+id/nav_profile"
         android:icon="@drawable/profile_icon"
         android:title="Profile" />
+    <item
+        android:id="@+id/nav_post"
+        android:icon="@drawable/country"
+        android:title="Add New Post" />
     <item
         android:id="@+id/nav_home"
         android:icon="@drawable/home"
@@ -15,6 +20,7 @@
         android:title="Marathon" />
     <item
         android:id="@+id/nav_find_marathon"
+
         android:title="Find Marathon" />
     <item
         android:id="@+id/nav_message"
