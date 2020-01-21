@@ -63,7 +63,7 @@ public class PostActivity extends AppCompatActivity {
 
         SelectPostImage = findViewById ( R.id.select_post_image );
         UpdatePostButton = findViewById ( R.id.update_post_button );
-        PostDescription = findViewById ( R.id.post_description );
+        PostDescription = findViewById ( R.id.click_post_description );
         loadingBar = new ProgressDialog ( this );
 
         mToolbar = findViewById ( R.id.update_post_page_toolbar );

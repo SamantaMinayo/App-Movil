@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private DatabaseReference UsersRef, PostRef;
     private FirebaseRecyclerAdapter firebaseRecyclerAdapter;
+    private String current_user_id, fullname, newfullname, imageprof, newimageprof;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void CheckUserExistence() {
-        final String current_user_id = mAuth.getCurrentUser ().getUid ();
+        current_user_id = mAuth.getCurrentUser ().getUid ();
 
         UsersRef.addValueEventListener ( new ValueEventListener () {
             @Override
@@ -127,14 +128,14 @@ public class MainActivity extends AppCompatActivity {
                         SendUserToSetupActivity ();
                     } else {
                         if (dataSnapshot.child ( current_user_id ).hasChild ( "fullname" )) {
-                            String fullname = dataSnapshot.child ( current_user_id ).child ( "fullname" ).getValue ().toString ();
+                            fullname = dataSnapshot.child ( current_user_id ).child ( "fullname" ).getValue ().toString ();
                             NavProfileusername.setText ( fullname );
 
                         }
                         if (dataSnapshot.child ( current_user_id ).hasChild ( "profileimage" )) {
-                            String image = dataSnapshot.child ( current_user_id ).child ( "profileimage" ).getValue ().toString ();
+                            imageprof = dataSnapshot.child ( current_user_id ).child ( "profileimage" ).getValue ().toString ();
 
-                            Picasso.with ( MainActivity.this ).load ( image ).placeholder ( R.drawable.profile ).into ( NavProfileImage );
+                            Picasso.with ( MainActivity.this ).load ( imageprof ).placeholder ( R.drawable.profile ).into ( NavProfileImage );
                         } else {
                             Toast.makeText ( MainActivity.this, "El usuario no tiene foto de perfil", Toast.LENGTH_SHORT ).show ();
                         }
@@ -154,14 +155,11 @@ public class MainActivity extends AppCompatActivity {
                 SendUserToPostActivity ();
             }
         } );
-
-
         DisplayAllUsersPosts ();
     }
 
 
     protected void DisplayAllUsersPosts() {
-
 
         FirebaseRecyclerOptions<Post> options = new FirebaseRecyclerOptions.Builder<Post> ()
                 .setQuery ( PostRef, Post.class ).build ();
@@ -176,13 +174,25 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    protected void onBindViewHolder(PostViewHolder postViewHolder, int i, @NonNull Post post) {
-                        postViewHolder.setFullname ( post.getFullname () );
+                    protected void onBindViewHolder(PostViewHolder postViewHolder, int position, @NonNull Post post) {
+
+                        final String PostKey = getRef ( position ).getKey ();
+
+                        postViewHolder.setFullname ( post.fullname );
                         postViewHolder.setTime ( post.getTime () );
                         postViewHolder.setDate ( post.getDate () );
                         postViewHolder.setDescription ( post.getDescription () );
-                        postViewHolder.setProfileimage ( getApplicationContext (), post.getProfileimage () );
+                        postViewHolder.setProfileimage ( getApplicationContext (), post.profileimage );
                         postViewHolder.setPostImage ( getApplicationContext (), post.getPostimage () );
+
+                        postViewHolder.mView.setOnClickListener ( new View.OnClickListener () {
+                            @Override
+                            public void onClick(View v) {
+                                Intent clickPostIntent = new Intent ( MainActivity.this, ClickPostActivity.class );
+                                clickPostIntent.putExtra ( "PostKey", PostKey );
+                                startActivity ( clickPostIntent );
+                            }
+                        } );
 
                     }
 
@@ -193,11 +203,14 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void SendUserToPostActivity() {
-
-        Intent addNewPostIntent = new Intent ( MainActivity.this, PostActivity.class );
-        startActivity ( addNewPostIntent );
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (actionBarDrawerToggle.onOptionsItemSelected ( item )) {
+            return true;
+        }
+        return super.onOptionsItemSelected ( item );
     }
+
 
     private void UserMenuSelector(MenuItem item) {
         switch (item.getItemId ()) {
@@ -220,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText ( this, "Messages", Toast.LENGTH_SHORT ).show ();
                 break;
             case R.id.nav_settings:
-                Toast.makeText ( this, "Settings", Toast.LENGTH_SHORT ).show ();
+                SendUserToSettingsActivity ();
                 break;
             case R.id.nav_Logout:
                 mAuth.signOut ();
@@ -238,7 +251,6 @@ public class MainActivity extends AppCompatActivity {
         finish ();
     }
 
-
     private void SendUserTologinActivity() {
         Intent loginIntent = new Intent ( MainActivity.this, LoginActivity.class );
         loginIntent.addFlags ( Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK );
@@ -246,13 +258,15 @@ public class MainActivity extends AppCompatActivity {
         finish ();
     }
 
+    private void SendUserToSettingsActivity() {
+        Intent loginIntent = new Intent ( MainActivity.this, SettingsActivity.class );
+        startActivity ( loginIntent );
+    }
 
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (actionBarDrawerToggle.onOptionsItemSelected ( item )) {
-            return true;
-        }
-        return super.onOptionsItemSelected ( item );
+    private void SendUserToPostActivity() {
+
+        Intent addNewPostIntent = new Intent ( MainActivity.this, PostActivity.class );
+        startActivity ( addNewPostIntent );
     }
 
     public class PostViewHolder extends RecyclerView.ViewHolder {
@@ -273,26 +287,25 @@ public class MainActivity extends AppCompatActivity {
         public void setProfileimage(Context ctx, String profileimage) {
             CircleImageView image = mView.findViewById ( R.id.post_profile_image );
             Picasso.with ( ctx ).load ( profileimage ).into ( image );
-
         }
 
         public void setTime(String time) {
             TextView postTime = mView.findViewById ( R.id.post_time );
-            postTime.setText ( time );
+            postTime.setText ( "   " + time );
         }
 
         public void setDate(String date) {
             TextView postDate = mView.findViewById ( R.id.post_date );
-            postDate.setText ( date );
+            postDate.setText ( "   " + date );
         }
 
         public void setDescription(String description) {
-            TextView postDescription = mView.findViewById ( R.id.post_description );
+            TextView postDescription = mView.findViewById ( R.id.click_post_description );
             postDescription.setText ( description );
         }
 
         public void setPostImage(Context ctx, String postImage) {
-            ImageView image = mView.findViewById ( R.id.post_image );
+            ImageView image = mView.findViewById ( R.id.click_post_image );
             Picasso.with ( ctx ).load ( postImage ).into ( image );
         }
 

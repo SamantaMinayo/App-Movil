@@ -58,6 +58,7 @@ public class SetupActivity extends AppCompatActivity {
         UserRef = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( currentUserID );
         UserProfileImageRef = FirebaseStorage.getInstance ().getReference ().child ( "ProfileImages" );
 
+
         loadingBar = new ProgressDialog ( this );
 
         UserName = findViewById ( R.id.setup_username );
@@ -124,8 +125,8 @@ public class SetupActivity extends AppCompatActivity {
 
                 loadingBar.setTitle ( "Profile Image" );
                 loadingBar.setMessage ( "Please wait, while we updating your profile image..." );
-                loadingBar.show ();
                 loadingBar.setCanceledOnTouchOutside ( true );
+                loadingBar.show ();
 
                 Uri resultUri = result.getUri ();
 
