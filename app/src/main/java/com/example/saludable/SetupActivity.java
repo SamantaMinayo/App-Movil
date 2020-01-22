@@ -29,6 +29,8 @@ import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.HashMap;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -203,6 +205,13 @@ public class SetupActivity extends AppCompatActivity {
             loadingBar.show ();
             loadingBar.setCanceledOnTouchOutside ( true );
 
+            double h = Integer.parseInt ( altura );
+            double p = Integer.parseInt ( peso );
+            double cal = (p / (h * h)) * 10000;
+            MathContext m = new MathContext ( 4 );
+            BigDecimal imcnum = new BigDecimal ( cal );
+            String imc = String.valueOf ( imcnum.round ( m ) );
+
             HashMap userMap = new HashMap ();
             userMap.put ( "username", username );
             userMap.put ( "fullname", fullname );
@@ -210,11 +219,26 @@ public class SetupActivity extends AppCompatActivity {
             userMap.put ( "altura", altura );
             userMap.put ( "peso", peso );
             userMap.put ( "edad", edad );
+            userMap.put ( "imc", imc );
             userMap.put ( "genero", genero );
             userMap.put ( "status", "Here Saludable" );
             userMap.put ( "gender", "none" );
             userMap.put ( "dob", "none" );
             userMap.put ( "relationship", "none" );
+
+            //datos maratones
+            userMap.put ( "tiempopromtotal", "0" );
+            userMap.put ( "tiempopromultimo", "0" );
+            userMap.put ( "velocidadpromtotal", "0" );
+            userMap.put ( "velocidadpromedioultima", "0" );
+            userMap.put ( "distanciatotal", "0" );
+            userMap.put ( "distanciaultima", "0" );
+            //Avance por carrera
+            userMap.put ( "graficavelocidad", "-" );
+            userMap.put ( "graficatiempo", "-" );
+            userMap.put ( "graficapeso", "-" );
+            userMap.put ( "graficacalorias", "-" );
+
             UserRef.updateChildren ( userMap ).addOnCompleteListener ( new OnCompleteListener () {
                 @Override
                 public void onComplete(@NonNull Task task) {

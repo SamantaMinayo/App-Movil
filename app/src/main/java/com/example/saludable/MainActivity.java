@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -44,7 +43,6 @@ public class MainActivity extends AppCompatActivity {
     private ActionBarDrawerToggle actionBarDrawerToggle;
     private CircleImageView NavProfileImage;
     private TextView NavProfileusername;
-    private ImageButton AddNewPostButton;
 
     private FirebaseAuth mAuth;
     private DatabaseReference UsersRef, PostRef;
@@ -65,8 +63,6 @@ public class MainActivity extends AppCompatActivity {
         mToolbar = findViewById ( R.id.main_page_toolbar );
         setSupportActionBar ( mToolbar );
         getSupportActionBar ().setTitle ( "Home" );
-
-        AddNewPostButton = findViewById ( R.id.add_new_post_button );
 
 
         drawerLayout = findViewById ( R.id.drawable_layout );
@@ -149,12 +145,6 @@ public class MainActivity extends AppCompatActivity {
             }
         } );
 
-        AddNewPostButton.setOnClickListener ( new View.OnClickListener () {
-            @Override
-            public void onClick(View view) {
-                SendUserToPostActivity ();
-            }
-        } );
         DisplayAllUsersPosts ();
     }
 
@@ -218,7 +208,7 @@ public class MainActivity extends AppCompatActivity {
                 SendUserToPostActivity ();
                 break;
             case R.id.nav_profile:
-                Toast.makeText ( this, "Profile", Toast.LENGTH_SHORT ).show ();
+                SendUsertoProfileActivity ();
                 break;
             case R.id.nav_home:
                 Toast.makeText ( this, "Home", Toast.LENGTH_SHORT ).show ();
@@ -256,6 +246,11 @@ public class MainActivity extends AppCompatActivity {
         loginIntent.addFlags ( Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK );
         startActivity ( loginIntent );
         finish ();
+    }
+
+    private void SendUsertoProfileActivity() {
+        Intent loginIntent = new Intent ( MainActivity.this, ProfileActivity.class );
+        startActivity ( loginIntent );
     }
 
     private void SendUserToSettingsActivity() {

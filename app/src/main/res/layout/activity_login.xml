@@ -100,7 +100,7 @@
         android:padding="10dp"
         android:text="Don´t have an Account. Need New Account? "
         android:textAlignment="center"
-        android:textColor="#B90404" />
+        android:textColor="#5d9b9d" />
 
 
 </RelativeLayout>

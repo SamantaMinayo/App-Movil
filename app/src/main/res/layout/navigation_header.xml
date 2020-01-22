@@ -13,7 +13,7 @@
         android:layout_marginTop="175dp"
         android:text="username"
         android:textAlignment="center"
-        android:textColor="#E8FFFFFF"
+        android:textColor="#252850"
         android:textSize="16sp"
         android:textStyle="italic" />
 
