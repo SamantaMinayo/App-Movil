@@ -217,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText ( this, "Marathon", Toast.LENGTH_SHORT ).show ();
                 break;
             case R.id.nav_find_marathon:
-                Toast.makeText ( this, "Find Marathon", Toast.LENGTH_SHORT ).show ();
+                SendUserToMaratonActivity ();
                 break;
             case R.id.nav_message:
                 Toast.makeText ( this, "Messages", Toast.LENGTH_SHORT ).show ();
@@ -258,12 +258,17 @@ public class MainActivity extends AppCompatActivity {
         startActivity ( loginIntent );
     }
 
+    private void SendUserToMaratonActivity() {
+
+        Intent addNewPostIntent = new Intent ( MainActivity.this, MaratonActivity.class );
+        startActivity ( addNewPostIntent );
+    }
+
     private void SendUserToPostActivity() {
 
         Intent addNewPostIntent = new Intent ( MainActivity.this, PostActivity.class );
         startActivity ( addNewPostIntent );
     }
-
     public class PostViewHolder extends RecyclerView.ViewHolder {
         View mView;
         Context mContext;

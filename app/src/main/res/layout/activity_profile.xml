@@ -172,6 +172,18 @@
                     android:gravity="center"
                     android:orientation="vertical">
 
+                    <TextView
+                        android:id="@+id/my_title2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/tableborder"
+                        android:padding="3dp"
+                        android:text="Informacion de Carreras"
+                        android:textAlignment="center"
+                        android:textAllCaps="false"
+                        android:textColor="@color/colortitle"
+                        android:textSize="18sp" />
+
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -443,17 +455,7 @@
 
                     </LinearLayout>
 
-                    <TextView
-                        android:id="@+id/my_title2"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/tableborder"
-                        android:padding="3dp"
-                        android:text="Informacion de Carreras"
-                        android:textAlignment="center"
-                        android:textAllCaps="false"
-                        android:textColor="@color/colortitle"
-                        android:textSize="18sp" />
+
                 </LinearLayout>
 
                 <LinearLayout
@@ -463,7 +465,25 @@
                     android:layout_below="@id/profile_carreras"
                     android:gravity="center"
                     android:orientation="vertical">
+                    <LinearLayout
+                        android:id="@+id/profile_avance_carreras_tiempo"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_below="@id/profile_avance_carreras_velocidad"
+                        android:orientation="vertical">
 
+
+                        <TextView
+                            android:id="@+id/my_title_tiempo"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="10dp"
+                            android:text="Tiempo por Carrera"
+                            android:textAlignment="center"
+                            android:textAllCaps="false"
+                            android:textColor="@android:color/background_light"
+                            android:textSize="18sp" />
+                    </LinearLayout>
                     <LinearLayout
                         android:id="@+id/profile_avance_carreras_velocidad"
                         android:layout_width="match_parent"
@@ -484,24 +504,17 @@
 
                     </LinearLayout>
 
-                    <LinearLayout
-                        android:id="@+id/profile_avance_carreras_tiempo"
+                    <TextView
+                        android:id="@+id/my_title3"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_below="@id/profile_avance_carreras_velocidad"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/my_title_tiempo"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="10dp"
-                            android:text="Tiempo por Carrera"
-                            android:textAlignment="center"
-                            android:textAllCaps="false"
-                            android:textColor="@android:color/background_light"
-                            android:textSize="18sp" />
-                    </LinearLayout>
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/tableborder"
+                        android:padding="3dp"
+                        android:text="Avance por carreras"
+                        android:textAlignment="center"
+                        android:textAllCaps="false"
+                        android:textColor="@color/colortitle"
+                        android:textSize="18sp" />
 
                     <LinearLayout
                         android:id="@+id/profile_avance_carreras_calorias"
@@ -522,17 +535,7 @@
                             android:textSize="18sp" />
                     </LinearLayout>
 
-                    <TextView
-                        android:id="@+id/my_title3"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/tableborder"
-                        android:padding="3dp"
-                        android:text="Avance por carreras"
-                        android:textAlignment="center"
-                        android:textAllCaps="false"
-                        android:textColor="@color/colortitle"
-                        android:textSize="18sp" />
+
                 </LinearLayout>
             </LinearLayout>
 
