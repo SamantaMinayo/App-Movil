@@ -14,13 +14,8 @@
         android:background="@drawable/post_border"
         android:orientation="vertical">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/fecha_publicacion"
-            android:orientation="vertical">
 
-            <ImageView
+        <ImageView
                 android:id="@+id/click_maraton_image"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
@@ -73,7 +68,7 @@
                 android:textColor="@color/colortitle"
                 android:textSize="14sp"
                 android:textStyle="bold" />
-        </LinearLayout>
+
 
         <TextView
             android:id="@+id/maraton_description"
