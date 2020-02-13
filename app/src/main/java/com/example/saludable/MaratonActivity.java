@@ -130,14 +130,14 @@ public class MaratonActivity extends AppCompatActivity {
 
                         final String PostKey = getRef ( position ).getKey ();
 
-                        maratonViewHolder.setNamecarrera ( maraton.namecarrera );
+                        maratonViewHolder.setNamecarrera ( maraton.maratonname );
                         maratonViewHolder.setDate ( maraton.date );
                         maratonViewHolder.setTime ( maraton.time );
                         maratonViewHolder.setMaratonimage ( getApplication (), maraton.maratonimage );
                         maratonViewHolder.setDescription ( maraton.description );
-                        maratonViewHolder.setLugar ( maraton.lugar );
-                        maratonViewHolder.setDate_maraton ( maraton.date_maraton );
-                        maratonViewHolder.setTime_maraton ( maraton.time_maraton );
+                        maratonViewHolder.setLugar ( maraton.place );
+                        maratonViewHolder.setDate_maraton ( maraton.maratondate );
+                        maratonViewHolder.setTime_maraton ( maraton.maratontime );
                         maratonViewHolder.setContactname ( maraton.contactname );
                         maratonViewHolder.setContactnumber ( maraton.contactnumber );
 

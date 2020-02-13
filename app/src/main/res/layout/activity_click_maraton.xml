@@ -46,10 +46,25 @@
 
                 />
 
+            <Button
+                android:id="@+id/monitorear_maraton_button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/Mensaje"
+                android:layout_alignParentStart="true"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="10dp"
+                android:background="@drawable/button"
+                android:text="Monitorear Maraton"
+                android:textColor="#FDFFFFFF"
+                android:textSize="13sp" />
+
+
             <ImageView
                 android:id="@+id/maraton_image_principal"
                 android:layout_width="match_parent"
-                android:layout_height="300dp"
+                android:layout_height="200dp"
                 android:layout_below="@id/maraton_name_principal"
                 android:layout_margin="10dp"
                 app:srcCompat="@drawable/select_image" />

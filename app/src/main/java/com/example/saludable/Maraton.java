@@ -8,28 +8,30 @@ public class Maraton {
     public String description;
     public String contactname;
     public String contactnumber;
-    public String time_maraton;
-    public String date_maraton;
-    public String lugar;
-    public String namecarrera;
+    public String maratontime;
+    public String maratondate;
+    public String place;
+    public String maratonname;
 
-    public Maraton(String uid, String time, String date, String maratonimage, String description, String contactname, String contactnumbre, String time_maraton, String date_maraton, String lugar, String namecarrera) {
+    public Maraton() {
+    }
+
+    public Maraton(String uid, String time, String date, String maratonimage, String description, String contactname, String contactnumber, String maratontime, String maratondate, String place, String maratonname) {
         this.uid = uid;
         this.time = time;
         this.date = date;
         this.maratonimage = maratonimage;
         this.description = description;
         this.contactname = contactname;
-        this.contactnumber = contactnumbre;
-        this.time_maraton = time_maraton;
-        this.date_maraton = date_maraton;
-        this.lugar = lugar;
-        this.namecarrera = namecarrera;
+        this.contactnumber = contactnumber;
+        this.maratontime = maratontime;
+        this.maratondate = maratondate;
+        this.place = place;
+        this.maratonname = maratonname;
     }
 
-    public Maraton() {
 
-    }
+
 
     public String getUid() {
         return uid;
@@ -87,36 +89,35 @@ public class Maraton {
         this.contactnumber = contactnumber;
     }
 
-    public String getTime_maraton() {
-        return time_maraton;
+    public String getMaratontime() {
+        return maratontime;
     }
 
-    public void setTime_maraton(String time_maraton) {
-        this.time_maraton = time_maraton;
+    public void setMaratontime(String maratontime) {
+        this.maratontime = maratontime;
     }
 
-    public String getDate_maraton() {
-        return date_maraton;
+    public String getMaratondate() {
+        return maratondate;
     }
 
-    public void setDate_maraton(String date_maraton) {
-        this.date_maraton = date_maraton;
+    public void setMaratondate(String maratondate) {
+        this.maratondate = maratondate;
     }
 
-    public String getLugar() {
-        return lugar;
+    public String getPlace() {
+        return place;
     }
 
-    public void setLugar(String lugar) {
-        this.lugar = lugar;
+    public void setPlace(String place) {
+        this.place = place;
     }
 
-    public String getNamecarrera() {
-        return namecarrera;
+    public String getMaratonname() {
+        return maratonname;
     }
 
-    public void setNamecarrera(String namecarrera) {
-        this.namecarrera = namecarrera;
+    public void setMaratonname(String maratonname) {
+        this.maratonname = maratonname;
     }
-
 }
