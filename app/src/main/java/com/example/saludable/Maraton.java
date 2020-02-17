@@ -12,11 +12,12 @@ public class Maraton {
     public String maratondate;
     public String place;
     public String maratonname;
+    public boolean estado;
 
     public Maraton() {
     }
 
-    public Maraton(String uid, String time, String date, String maratonimage, String description, String contactname, String contactnumber, String maratontime, String maratondate, String place, String maratonname) {
+    public Maraton(String uid, String time, String date, String maratonimage, String description, String contactname, String contactnumber, String maratontime, String maratondate, String place, String maratonname, boolean estado) {
         this.uid = uid;
         this.time = time;
         this.date = date;
@@ -28,6 +29,7 @@ public class Maraton {
         this.maratondate = maratondate;
         this.place = place;
         this.maratonname = maratonname;
+        this.estado = estado;
     }
 
 
@@ -119,5 +121,13 @@ public class Maraton {
 
     public void setMaratonname(String maratonname) {
         this.maratonname = maratonname;
+    }
+
+    public boolean getEstado() {
+        return estado;
+    }
+
+    public void setEstado(boolean estado) {
+        this.estado = estado;
     }
 }

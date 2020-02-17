@@ -55,159 +55,184 @@ public class SettingsActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate ( savedInstanceState );
-        setContentView ( R.layout.activity_settings );
+        try {
+            super.onCreate ( savedInstanceState );
+            setContentView ( R.layout.activity_settings );
 
 
-        mAuth = FirebaseAuth.getInstance ();
-        currentUserId = mAuth.getCurrentUser ().getUid ();
-        SettingsUserRef = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( currentUserId );
-        UserProfileImageRef = FirebaseStorage.getInstance ().getReference ().child ( "ProfileImages" );
-        PostRef = FirebaseDatabase.getInstance ().getReference ().child ( "Posts" );
+            mAuth = FirebaseAuth.getInstance ();
+            currentUserId = mAuth.getCurrentUser ().getUid ();
+            SettingsUserRef = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( currentUserId );
+            UserProfileImageRef = FirebaseStorage.getInstance ().getReference ().child ( "ProfileImages" );
+            PostRef = FirebaseDatabase.getInstance ().getReference ().child ( "Posts" );
 
-        mToolbar = findViewById ( R.id.settings_toolbar );
-        setSupportActionBar ( mToolbar );
-        getSupportActionBar ().setTitle ( "Account Settings" );
-        getSupportActionBar ().setDisplayHomeAsUpEnabled ( true );
-
-
-        userName = findViewById ( R.id.settings_username );
-        userProfName = findViewById ( R.id.settings_profile_full_name );
-        userStatus = findViewById ( R.id.settings_status );
-        userCountry = findViewById ( R.id.settings_country );
-        userGenero = findViewById ( R.id.settings_genero );
-        userEdad = findViewById ( R.id.settings_edad );
-        userAltura = findViewById ( R.id.settings_estatura );
-        userPeso = findViewById ( R.id.settings_peso );
-        userProfileImage = findViewById ( R.id.settings_profile_image );
-        UpdateAccountSettingsButton = findViewById ( R.id.update_account_settings_button );
-        loadingBar = new ProgressDialog ( this );
-
-        SettingsUserRef.addValueEventListener ( new ValueEventListener () {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                if (dataSnapshot.exists ()) {
-                    String myProfileImage = dataSnapshot.child ( "profileimage" ).getValue ().toString ();
-                    String myUsername = dataSnapshot.child ( "username" ).getValue ().toString ();
-                    String myProfileName = dataSnapshot.child ( "fullname" ).getValue ().toString ();
-                    String myProfileStatus = dataSnapshot.child ( "status" ).getValue ().toString ();
-                    String myCountry = dataSnapshot.child ( "country" ).getValue ().toString ();
-                    String myGenero = dataSnapshot.child ( "genero" ).getValue ().toString ();
-                    String myPeso = dataSnapshot.child ( "peso" ).getValue ().toString ();
-                    String myAltura = dataSnapshot.child ( "altura" ).getValue ().toString ();
-                    String myEdad = dataSnapshot.child ( "edad" ).getValue ().toString ();
+            mToolbar = findViewById ( R.id.settings_toolbar );
+            setSupportActionBar ( mToolbar );
+            getSupportActionBar ().setTitle ( "Account Settings" );
+            getSupportActionBar ().setDisplayHomeAsUpEnabled ( true );
 
 
-                    updateprofilename = myProfileName;
-                    updateprofileimage = myProfileImage;
+            userName = findViewById ( R.id.settings_username );
+            userProfName = findViewById ( R.id.settings_profile_full_name );
+            userStatus = findViewById ( R.id.settings_status );
+            userCountry = findViewById ( R.id.settings_country );
+            userGenero = findViewById ( R.id.settings_genero );
+            userEdad = findViewById ( R.id.settings_edad );
+            userAltura = findViewById ( R.id.settings_estatura );
+            userPeso = findViewById ( R.id.settings_peso );
+            userProfileImage = findViewById ( R.id.settings_profile_image );
+            UpdateAccountSettingsButton = findViewById ( R.id.update_account_settings_button );
+            loadingBar = new ProgressDialog ( this );
 
-                    Picasso.with ( SettingsActivity.this ).load ( myProfileImage ).placeholder ( R.drawable.profile ).into ( userProfileImage );
-                    userName.setText ( myUsername );
-                    userProfName.setText ( myProfileName );
-                    userStatus.setText ( myProfileStatus );
-                    userCountry.setText ( myCountry );
-                    userGenero.setText ( myGenero );
-                    userPeso.setText ( myPeso );
-                    userAltura.setText ( myAltura );
-                    userEdad.setText ( myEdad );
+            SettingsUserRef.addValueEventListener ( new ValueEventListener () {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                    if (dataSnapshot.exists ()) {
+
+                        if (dataSnapshot.hasChild ( "profileimage" )) {
+                            String myProfileImage = dataSnapshot.child ( "profileimage" ).getValue ().toString ();
+                            updateprofileimage = myProfileImage;
+                            Picasso.with ( SettingsActivity.this ).load ( myProfileImage ).placeholder ( R.drawable.profile ).into ( userProfileImage );
+                        }
+                        if (dataSnapshot.hasChild ( "username" )) {
+                            String myUsername = dataSnapshot.child ( "username" ).getValue ().toString ();
+                            userName.setText ( myUsername );
+                        }
+
+                        if (dataSnapshot.hasChild ( "fullname" )) {
+                            String myProfileName = dataSnapshot.child ( "fullname" ).getValue ().toString ();
+                            updateprofilename = myProfileName;
+                            userProfName.setText ( myProfileName );
+                        }
+                        if (dataSnapshot.hasChild ( "status" )) {
+                            String myProfileStatus = dataSnapshot.child ( "status" ).getValue ().toString ();
+                            userStatus.setText ( myProfileStatus );
+                        }
+                        if (dataSnapshot.hasChild ( "country" )) {
+                            String myCountry = dataSnapshot.child ( "country" ).getValue ().toString ();
+                            userCountry.setText ( myCountry );
+                        }
+                        if (dataSnapshot.hasChild ( "genero" )) {
+                            String myGenero = dataSnapshot.child ( "genero" ).getValue ().toString ();
+                            userGenero.setText ( myGenero );
+                        }
+                        if (dataSnapshot.hasChild ( "peso" )) {
+                            String myPeso = dataSnapshot.child ( "peso" ).getValue ().toString ();
+                            userPeso.setText ( myPeso );
+                        }
+                        if (dataSnapshot.hasChild ( "altura" )) {
+                            String myAltura = dataSnapshot.child ( "altura" ).getValue ().toString ();
+                            userAltura.setText ( myAltura );
+                        }
+                        if (dataSnapshot.hasChild ( "edad" )) {
+                            String myEdad = dataSnapshot.child ( "edad" ).getValue ().toString ();
+                            userEdad.setText ( myEdad );
+                        }
+
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
 
                 }
-            }
+            } );
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+            UpdateAccountSettingsButton.setOnClickListener ( new View.OnClickListener () {
+                @Override
+                public void onClick(View v) {
+                    ValidateAccountInfo ();
+                }
+            } );
 
-            }
-        } );
+            userProfileImage.setOnClickListener ( new View.OnClickListener () {
+                @Override
+                public void onClick(View v) {
+                    Intent galleryIntent = new Intent ();
+                    galleryIntent.setAction ( Intent.ACTION_GET_CONTENT );
+                    galleryIntent.setType ( "image/" );
+                    startActivityForResult ( galleryIntent, Gallery_pick );
+                }
 
-        UpdateAccountSettingsButton.setOnClickListener ( new View.OnClickListener () {
-            @Override
-            public void onClick(View v) {
-                ValidateAccountInfo ();
-            }
-        } );
-
-        userProfileImage.setOnClickListener ( new View.OnClickListener () {
-            @Override
-            public void onClick(View v) {
-                Intent galleryIntent = new Intent ();
-                galleryIntent.setAction ( Intent.ACTION_GET_CONTENT );
-                galleryIntent.setType ( "image/" );
-                startActivityForResult ( galleryIntent, Gallery_pick );
-            }
-
-        } );
-
+            } );
+        } catch (Exception e) {
+        }
     }
 
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult ( requestCode, resultCode, data );
+        try {
 
-        if (requestCode == Gallery_pick && resultCode == RESULT_OK && data != null) {
-            Uri ImageUri = data.getData ();
-            CropImage.activity ()
-                    .setGuidelines ( CropImageView.Guidelines.ON )
-                    .setAspectRatio ( 1, 1 )
-                    .start ( this );
-        }
-        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            super.onActivityResult ( requestCode, resultCode, data );
 
-            CropImage.ActivityResult result = CropImage.getActivityResult ( data );
-
-            if (resultCode == RESULT_OK) {
-
-                loadingBar.setTitle ( "Profile Image" );
-                loadingBar.setMessage ( "Please wait, while we updating your profile image..." );
-                loadingBar.setCanceledOnTouchOutside ( true );
-                loadingBar.show ();
-
-
-                Uri resultUri = result.getUri ();
-
-                final StorageReference filePath = UserProfileImageRef.child ( currentUserId + ".jpg" );
-
-                filePath.putFile ( resultUri ).addOnCompleteListener ( new OnCompleteListener<UploadTask.TaskSnapshot> () {
-                    @Override
-                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                        if (task.isSuccessful ()) {
-                            Toast.makeText ( SettingsActivity.this, "Profile image stored successfully to Firebase", Toast.LENGTH_SHORT ).show ();
-
-                            filePath.getDownloadUrl ().addOnCompleteListener ( new OnCompleteListener<Uri> () {
-                                @Override
-                                public void onComplete(@NonNull Task<Uri> task) {
-                                    final String downloadUri = task.getResult ().toString ();
-                                    SettingsUserRef.child ( "profileimage" ).setValue ( downloadUri )
-                                            .addOnCompleteListener ( new OnCompleteListener<Void> () {
-                                                @Override
-                                                public void onComplete(@NonNull Task<Void> task) {
-
-                                                    if (task.isSuccessful ()) {
-                                                        Intent selfIntent = new Intent ( SettingsActivity.this, SettingsActivity.class );
-                                                        startActivity ( selfIntent );
-
-                                                        Toast.makeText ( SettingsActivity.this, "Profile image stored to Firebase Databse Storage", Toast.LENGTH_SHORT ).show ();
-                                                        loadingBar.dismiss ();
-                                                    } else {
-                                                        String message = task.getException ().getMessage ();
-                                                        Toast.makeText ( SettingsActivity.this, "Error Occured: " + message, Toast.LENGTH_SHORT ).show ();
-                                                        loadingBar.dismiss ();
-                                                    }
-                                                }
-                                            } );
-                                }
-                            } );
-
-                        }
-                    }
-                } );
-            } else {
-
-                Toast.makeText ( this, "Error Occured: Image can be cropped. Try Again", Toast.LENGTH_SHORT ).show ();
-                loadingBar.dismiss ();
+            if (requestCode == Gallery_pick && resultCode == RESULT_OK && data != null) {
+                Uri ImageUri = data.getData ();
+                CropImage.activity ()
+                        .setGuidelines ( CropImageView.Guidelines.ON )
+                        .setAspectRatio ( 1, 1 )
+                        .start ( this );
             }
+            if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+
+                CropImage.ActivityResult result = CropImage.getActivityResult ( data );
+
+                if (resultCode == RESULT_OK) {
+
+                    loadingBar.setTitle ( "Imagen de Perfil" );
+                    loadingBar.setMessage ( "Espere mientras actualizamos su imagen de perfil" );
+                    loadingBar.setCanceledOnTouchOutside ( true );
+                    loadingBar.show ();
+
+
+                    Uri resultUri = result.getUri ();
+
+                    final StorageReference filePath = UserProfileImageRef.child ( currentUserId + ".jpg" );
+
+                    filePath.putFile ( resultUri ).addOnCompleteListener ( new OnCompleteListener<UploadTask.TaskSnapshot> () {
+                        @Override
+                        public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                            if (task.isSuccessful ()) {
+                                Toast.makeText ( SettingsActivity.this, "Imagen almacenada correctamente", Toast.LENGTH_SHORT ).show ();
+
+                                filePath.getDownloadUrl ().addOnCompleteListener ( new OnCompleteListener<Uri> () {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Uri> task) {
+                                        final String downloadUri = task.getResult ().toString ();
+                                        SettingsUserRef.child ( "profileimage" ).setValue ( downloadUri )
+                                                .addOnCompleteListener ( new OnCompleteListener<Void> () {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
+
+                                                        if (task.isSuccessful ()) {
+                                                            Intent selfIntent = new Intent ( SettingsActivity.this, SettingsActivity.class );
+                                                            startActivity ( selfIntent );
+
+                                                            Toast.makeText ( SettingsActivity.this, "Imagen almacenada correctamente", Toast.LENGTH_SHORT ).show ();
+                                                            loadingBar.dismiss ();
+                                                        } else {
+                                                            String message = task.getException ().getMessage ();
+                                                            Toast.makeText ( SettingsActivity.this, "Error Occured: " + message, Toast.LENGTH_SHORT ).show ();
+                                                            loadingBar.dismiss ();
+                                                        }
+                                                    }
+                                                } );
+                                    }
+                                } );
+
+                            }
+                        }
+                    } );
+                } else {
+
+                    Toast.makeText ( this, "A ocurrido un error", Toast.LENGTH_SHORT ).show ();
+                    loadingBar.dismiss ();
+                }
+            }
+
+        } catch (Exception e) {
+
         }
     }
 
@@ -222,27 +247,14 @@ public class SettingsActivity extends AppCompatActivity {
         String altura = userAltura.getText ().toString ();
         String peso = userPeso.getText ().toString ();
 
-        if (TextUtils.isEmpty ( username )) {
-            Toast.makeText ( this, "Please write your username...", Toast.LENGTH_SHORT ).show ();
+        if (TextUtils.isEmpty ( username ) || TextUtils.isEmpty ( profilename ) || TextUtils.isEmpty ( status ) || TextUtils.isEmpty ( country ) || TextUtils.isEmpty ( genero ) || TextUtils.isEmpty ( edad )
+                || TextUtils.isEmpty ( altura ) || TextUtils.isEmpty ( peso )) {
+            Toast.makeText ( this, "Verifique que todos los campos esten completos", Toast.LENGTH_SHORT ).show ();
 
-        } else if (TextUtils.isEmpty ( profilename )) {
-            Toast.makeText ( this, "Please write your username...", Toast.LENGTH_SHORT ).show ();
-        } else if (TextUtils.isEmpty ( status )) {
-            Toast.makeText ( this, "Please write your username...", Toast.LENGTH_SHORT ).show ();
-        } else if (TextUtils.isEmpty ( country )) {
-            Toast.makeText ( this, "Please write your username...", Toast.LENGTH_SHORT ).show ();
-        } else if (TextUtils.isEmpty ( genero )) {
-            Toast.makeText ( this, "Please write your username...", Toast.LENGTH_SHORT ).show ();
-        } else if (TextUtils.isEmpty ( edad )) {
-            Toast.makeText ( this, "Please write your username...", Toast.LENGTH_SHORT ).show ();
-        } else if (TextUtils.isEmpty ( altura )) {
-            Toast.makeText ( this, "Please write your username...", Toast.LENGTH_SHORT ).show ();
-        } else if (TextUtils.isEmpty ( peso )) {
-            Toast.makeText ( this, "Please write your username...", Toast.LENGTH_SHORT ).show ();
         } else {
 
-            loadingBar.setTitle ( "Profile Image" );
-            loadingBar.setMessage ( "Please wait, while we updating your profile image..." );
+            loadingBar.setTitle ( "Imagen de Perfil" );
+            loadingBar.setMessage ( "Espere mientras actualizamos su imagen de perfil" );
             loadingBar.setCanceledOnTouchOutside ( true );
             loadingBar.show ();
 
@@ -251,41 +263,45 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void UpdateAccountInfo(String username, final String profilename, String status, String country, String genero, String edad, String altura, String peso) {
+        try {
+            HashMap userMap = new HashMap ();
 
-        HashMap userMap = new HashMap ();
+            userMap.put ( "username", username );
+            userMap.put ( "fullname", profilename );
+            userMap.put ( "status", status );
+            userMap.put ( "country", country );
+            userMap.put ( "genero", genero );
+            userMap.put ( "edad", edad );
+            userMap.put ( "altura", altura );
+            userMap.put ( "peso", peso );
 
-        userMap.put ( "username", username );
-        userMap.put ( "fullname", profilename );
-        userMap.put ( "status", status );
-        userMap.put ( "country", country );
-        userMap.put ( "genero", genero );
-        userMap.put ( "edad", edad );
-        userMap.put ( "altura", altura );
-        userMap.put ( "peso", peso );
-
-        SettingsUserRef.updateChildren ( userMap ).addOnCompleteListener ( new OnCompleteListener () {
-            @Override
-            public void onComplete(@NonNull Task task) {
-                if (task.isSuccessful ()) {
-                    SendUserToMainActivity ();
-                    Toast.makeText ( SettingsActivity.this, "Upload succesfully...", Toast.LENGTH_SHORT ).show ();
-                    loadingBar.dismiss ();
-                } else {
-                    String message = task.getException ().getMessage ();
-                    Toast.makeText ( SettingsActivity.this, "Error Ocurred: " + message, Toast.LENGTH_SHORT ).show ();
-                    loadingBar.dismiss ();
-
+            SettingsUserRef.updateChildren ( userMap ).addOnCompleteListener ( new OnCompleteListener () {
+                @Override
+                public void onComplete(@NonNull Task task) {
+                    if (task.isSuccessful ()) {
+                        SendUserToMainActivity ();
+                        Toast.makeText ( SettingsActivity.this, "Usuario actualizado correctamente", Toast.LENGTH_SHORT ).show ();
+                        loadingBar.dismiss ();
+                    } else {
+                        String message = task.getException ().getMessage ();
+                        Toast.makeText ( SettingsActivity.this, "Error Ocurred: " + message, Toast.LENGTH_SHORT ).show ();
+                        loadingBar.dismiss ();
+                    }
                 }
-            }
-        } );
-
+            } );
+        } catch (Exception e) {
+        }
     }
 
     private void SendUserToMainActivity() {
-        Intent mainIntent = new Intent ( SettingsActivity.this, MainActivity.class );
-        mainIntent.addFlags ( Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK );
-        startActivity ( mainIntent );
-        finish ();
+        try {
+            Intent mainIntent = new Intent ( SettingsActivity.this, MainActivity.class );
+            mainIntent.addFlags ( Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK );
+            startActivity ( mainIntent );
+            finish ();
+        } catch (Exception e) {
+        }
+
     }
 
 }

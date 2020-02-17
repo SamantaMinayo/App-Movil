@@ -167,7 +167,7 @@
                 android:layout_marginRight="10dp"
                 android:layout_marginBottom="10dp"
                 android:padding="5dp"
-                android:text="Post description..."
+                android:text="Maraton description..."
                 android:textAlignment="textStart"
                 android:textColor="@android:color/black"
                 android:textSize="14sp" />
@@ -178,7 +178,7 @@
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/informacion_contacto"
                 android:layout_centerHorizontal="true"
-                android:text="MENSAJR"
+                android:text=""
                 android:textAlignment="center"
                 android:textColor="@color/colortitle"
                 android:textSize="14sp" />

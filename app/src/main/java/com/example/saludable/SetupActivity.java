@@ -52,60 +52,67 @@ public class SetupActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate ( savedInstanceState );
-        setContentView ( R.layout.activity_setup );
+        try {
 
-        mAuth = FirebaseAuth.getInstance ();
-        currentUserID = mAuth.getCurrentUser ().getUid ();
-        UserRef = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( currentUserID );
-        UserProfileImageRef = FirebaseStorage.getInstance ().getReference ().child ( "ProfileImages" );
+            super.onCreate ( savedInstanceState );
+            setContentView ( R.layout.activity_setup );
 
-
-        loadingBar = new ProgressDialog ( this );
-
-        UserName = findViewById ( R.id.setup_username );
-        FullName = findViewById ( R.id.setup_fullname );
-        Country = findViewById ( R.id.setup_country );
-        Altura = findViewById ( R.id.setup_estatura );
-        Peso = findViewById ( R.id.setup_peso );
-        Edad = findViewById ( R.id.setup_edad );
-        Genero = findViewById ( R.id.setup_genero );
-        SaveInformation = findViewById ( R.id.setup_button );
-        ProfileImage = findViewById ( R.id.setup_profile_image );
+            mAuth = FirebaseAuth.getInstance ();
+            currentUserID = mAuth.getCurrentUser ().getUid ();
+            UserRef = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( currentUserID );
+            UserProfileImageRef = FirebaseStorage.getInstance ().getReference ().child ( "ProfileImages" );
 
 
-        SaveInformation.setOnClickListener ( new View.OnClickListener () {
-            @Override
-            public void onClick(View view) {
-                SaveAccountSetupInformation ();
-            }
-        } );
+            loadingBar = new ProgressDialog ( this );
 
-        ProfileImage.setOnClickListener ( new View.OnClickListener () {
-            @Override
-            public void onClick(View view) {
-                Intent galleryIntent = new Intent ();
-                galleryIntent.setAction ( Intent.ACTION_GET_CONTENT );
-                galleryIntent.setType ( "image/*" );
-                startActivityForResult ( galleryIntent, Gallery_Pick );
-            }
-        } );
+            UserName = findViewById ( R.id.setup_username );
+            FullName = findViewById ( R.id.setup_fullname );
+            Country = findViewById ( R.id.setup_country );
+            Altura = findViewById ( R.id.setup_estatura );
+            Peso = findViewById ( R.id.setup_peso );
+            Edad = findViewById ( R.id.setup_edad );
+            Genero = findViewById ( R.id.setup_genero );
+            SaveInformation = findViewById ( R.id.setup_button );
+            ProfileImage = findViewById ( R.id.setup_profile_image );
 
-        UserRef.addValueEventListener ( new ValueEventListener () {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists ()) {
-                    String image = dataSnapshot.child ( "profileimage" ).getValue ().toString ();
-                    Picasso.with ( SetupActivity.this ).load ( image ).placeholder ( R.drawable.profile ).into ( ProfileImage );
+
+            SaveInformation.setOnClickListener ( new View.OnClickListener () {
+                @Override
+                public void onClick(View view) {
+                    SaveAccountSetupInformation ();
+                }
+            } );
+
+            ProfileImage.setOnClickListener ( new View.OnClickListener () {
+                @Override
+                public void onClick(View view) {
+                    Intent galleryIntent = new Intent ();
+                    galleryIntent.setAction ( Intent.ACTION_GET_CONTENT );
+                    galleryIntent.setType ( "image/*" );
+                    startActivityForResult ( galleryIntent, Gallery_Pick );
+                }
+            } );
+
+            UserRef.addValueEventListener ( new ValueEventListener () {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists ()) {
+                        if (dataSnapshot.hasChild ( "profileimage" )) {
+                            String image = dataSnapshot.child ( "profileimage" ).getValue ().toString ();
+                            if (!image.isEmpty ()) {
+                                Picasso.with ( SetupActivity.this ).load ( image ).placeholder ( R.drawable.profile ).into ( ProfileImage );
+                            }
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
 
                 }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        } );
+            } );
+        } catch (Exception e) {
+        }
     }
 
     @Override
@@ -125,11 +132,10 @@ public class SetupActivity extends AppCompatActivity {
 
             if (resultCode == RESULT_OK) {
 
-                loadingBar.setTitle ( "Profile Image" );
-                loadingBar.setMessage ( "Please wait, while we updating your profile image..." );
+                loadingBar.setTitle ( "Imagen de Perfil" );
+                loadingBar.setMessage ( "Espere mientras cargamos su imagen de perfil" );
                 loadingBar.setCanceledOnTouchOutside ( true );
                 loadingBar.show ();
-
                 Uri resultUri = result.getUri ();
 
                 final StorageReference filePath = UserProfileImageRef.child ( currentUserID + ".jpg" );
@@ -138,7 +144,7 @@ public class SetupActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                         if (task.isSuccessful ()) {
-                            Toast.makeText ( SetupActivity.this, "Profile image stored successfully to Firebase", Toast.LENGTH_SHORT ).show ();
+                            Toast.makeText ( SetupActivity.this, "Su foto de perfil se ha cargado correctamente", Toast.LENGTH_SHORT ).show ();
 
                             filePath.getDownloadUrl ().addOnCompleteListener ( new OnCompleteListener<Uri> () {
                                 @Override
@@ -153,11 +159,11 @@ public class SetupActivity extends AppCompatActivity {
                                                         Intent selfIntent = new Intent ( SetupActivity.this, SetupActivity.class );
                                                         startActivity ( selfIntent );
 
-                                                        Toast.makeText ( SetupActivity.this, "Profile image stored to Firebase Databse Storage", Toast.LENGTH_SHORT ).show ();
+                                                        Toast.makeText ( SetupActivity.this, "Su imagen de perfil cargada correctamente", Toast.LENGTH_SHORT ).show ();
                                                         loadingBar.dismiss ();
                                                     } else {
                                                         String message = task.getException ().getMessage ();
-                                                        Toast.makeText ( SetupActivity.this, "Error Occured: " + message, Toast.LENGTH_SHORT ).show ();
+                                                        Toast.makeText ( SetupActivity.this, "A ocurrido un error: " + message, Toast.LENGTH_SHORT ).show ();
                                                         loadingBar.dismiss ();
                                                     }
                                                 }
@@ -170,7 +176,7 @@ public class SetupActivity extends AppCompatActivity {
                 } );
             } else {
 
-                Toast.makeText ( this, "Error Occured: Image can be cropped. Try Again", Toast.LENGTH_SHORT ).show ();
+                Toast.makeText ( this, "A ocurrido un error. Intentelo nuevamente", Toast.LENGTH_SHORT ).show ();
                 loadingBar.dismiss ();
             }
         }
@@ -184,24 +190,12 @@ public class SetupActivity extends AppCompatActivity {
         String peso = Peso.getText ().toString ();
         String edad = Edad.getText ().toString ();
         String genero = Genero.getText ().toString ();
-        if (TextUtils.isEmpty ( username )) {
-            Toast.makeText ( this, "Please write your username..", Toast.LENGTH_SHORT ).show ();
-        } else if (TextUtils.isEmpty ( country )) {
-            Toast.makeText ( this, "Please write your country..", Toast.LENGTH_SHORT ).show ();
-        } else if (TextUtils.isEmpty ( altura )) {
-            Toast.makeText ( this, "Please write your altura..", Toast.LENGTH_SHORT ).show ();
-        } else if (TextUtils.isEmpty ( fullname )) {
-            Toast.makeText ( this, "Please write your fullname..", Toast.LENGTH_SHORT ).show ();
-        } else if (TextUtils.isEmpty ( peso )) {
-            Toast.makeText ( this, "Please write your peso..", Toast.LENGTH_SHORT ).show ();
-        } else if (TextUtils.isEmpty ( edad )) {
-            Toast.makeText ( this, "Please write your age..", Toast.LENGTH_SHORT ).show ();
-        } else if (TextUtils.isEmpty ( genero )) {
-            Toast.makeText ( this, "Please write your genero..", Toast.LENGTH_SHORT ).show ();
+        if (TextUtils.isEmpty ( username ) || TextUtils.isEmpty ( country ) || TextUtils.isEmpty ( altura ) || TextUtils.isEmpty ( fullname ) || TextUtils.isEmpty ( peso ) || TextUtils.isEmpty ( edad ) || TextUtils.isEmpty ( genero )) {
+            Toast.makeText ( this, "Porfavor verifique que todos los campos se encuentren llenos", Toast.LENGTH_SHORT ).show ();
         } else {
 
-            loadingBar.setTitle ( "Saving Information" );
-            loadingBar.setMessage ( "Please wait, while we are saving your information" );
+            loadingBar.setTitle ( "Guardando Informacion" );
+            loadingBar.setMessage ( "Espere mientras guardamos su informacion" );
             loadingBar.show ();
             loadingBar.setCanceledOnTouchOutside ( true );
 
@@ -244,20 +238,19 @@ public class SetupActivity extends AppCompatActivity {
                 public void onComplete(@NonNull Task task) {
                     if (task.isSuccessful ()) {
                         SendUserToMainActivity ();
-                        Toast.makeText ( SetupActivity.this, "Your Account is create successfully..", Toast.LENGTH_SHORT ).show ();
+                        Toast.makeText ( SetupActivity.this, "Usuario creado correctamente.", Toast.LENGTH_SHORT ).show ();
                         loadingBar.dismiss ();
                     } else {
                         String message = task.getException ().getMessage ();
-                        Toast.makeText ( SetupActivity.this, "Error Occured" + message, Toast.LENGTH_SHORT ).show ();
+                        Toast.makeText ( SetupActivity.this, "A ocurrido un error" + message, Toast.LENGTH_SHORT ).show ();
                         loadingBar.dismiss ();
                     }
 
                 }
             } );
         }
-
-
     }
+
 
     private void SendUserToMainActivity() {
         Intent setupIntent = new Intent ( SetupActivity.this, MainActivity.class );

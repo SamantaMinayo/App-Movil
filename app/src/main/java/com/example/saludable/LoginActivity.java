@@ -43,178 +43,203 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate ( savedInstanceState );
-        setContentView ( R.layout.activity_login );
+        try {
+            super.onCreate ( savedInstanceState );
+            setContentView ( R.layout.activity_login );
 
-        mAuth = FirebaseAuth.getInstance ();
+            mAuth = FirebaseAuth.getInstance ();
+            NeedNewAccountLink = findViewById ( R.id.register_account_link );
+            UserEmail = findViewById ( R.id.login_email );
+            UserPassword = findViewById ( R.id.login_password );
+            LoginButton = findViewById ( R.id.login_button );
+            GoogleSingButton = findViewById ( R.id.google_signin_button );
 
-        NeedNewAccountLink = findViewById ( R.id.register_account_link );
-        UserEmail = findViewById ( R.id.login_email );
-        UserPassword = findViewById ( R.id.login_password );
-        LoginButton = findViewById ( R.id.login_button );
-        GoogleSingButton = findViewById ( R.id.google_signin_button );
+            loadingBar = new ProgressDialog ( this );
 
+            NeedNewAccountLink.setOnClickListener ( new View.OnClickListener () {
+                @Override
+                public void onClick(View view) {
+                    SendUserToRegisterActivity ();
+                }
 
-        loadingBar = new ProgressDialog ( this );
+            } );
 
+            LoginButton.setOnClickListener ( new View.OnClickListener () {
+                @Override
+                public void onClick(View view) {
 
-        NeedNewAccountLink.setOnClickListener ( new View.OnClickListener () {
-            @Override
-            public void onClick(View view) {
-                SendUserToRegisterActivity ();
-            }
+                    AllowingUserToLogin ();
+                }
+            } );
 
-        } );
+            GoogleSignInOptions gso = new GoogleSignInOptions.Builder ( GoogleSignInOptions.DEFAULT_SIGN_IN )
+                    .requestIdToken ( getString ( R.string.default_web_client_id ) )
+                    .requestEmail ()
+                    .build ();
 
-        LoginButton.setOnClickListener ( new View.OnClickListener () {
-            @Override
-            public void onClick(View view) {
-                AllowingUserToLogin ();
-            }
-        } );
+            mGoogleSignInClient = new GoogleApiClient.Builder ( this ).
+                    enableAutoManage ( this, new GoogleApiClient.OnConnectionFailedListener () {
+                        @Override
+                        public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+                            Toast.makeText ( LoginActivity.this, "Conexión con Google fallida", Toast.LENGTH_SHORT ).show ();
 
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder ( GoogleSignInOptions.DEFAULT_SIGN_IN )
-                .requestIdToken ( getString ( R.string.default_web_client_id ) )
-                .requestEmail ()
-                .build ();
+                        }
+                    } ).addApi ( Auth.GOOGLE_SIGN_IN_API, gso ).build ();
 
-        mGoogleSignInClient = new GoogleApiClient.Builder ( this ).
-                enableAutoManage ( this, new GoogleApiClient.OnConnectionFailedListener () {
-                    @Override
-                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-                        Toast.makeText ( LoginActivity.this, "Conexión con Google fallida", Toast.LENGTH_SHORT ).show ();
+            GoogleSingButton.setOnClickListener ( new View.OnClickListener () {
+                @Override
+                public void onClick(View v) {
+                    signIn ();
+                }
 
-                    }
-                } ).addApi ( Auth.GOOGLE_SIGN_IN_API, gso ).build ();
+            } );
 
-
-        GoogleSingButton.setOnClickListener ( new View.OnClickListener () {
-            @Override
-            public void onClick(View v) {
-                signIn ();
-            }
-
-        } );
-
-
+        } catch (Exception e) {
+        }
     }
 
     private void signIn() {
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent ( mGoogleSignInClient );
-        startActivityForResult ( signInIntent, RC_SIGN_IN );
+        try {
+            Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent ( mGoogleSignInClient );
+            startActivityForResult ( signInIntent, RC_SIGN_IN );
+        } catch (Exception e) {
+        }
+
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult ( requestCode, resultCode, data );
+        try {
+            super.onActivityResult ( requestCode, resultCode, data );
+            // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
+            if (requestCode == RC_SIGN_IN) {
 
-        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
-        if (requestCode == RC_SIGN_IN) {
+                loadingBar.setTitle ( "Inicio de sesion con Google" );
+                loadingBar.setMessage ( "Espere mientras lo autenticamos con la cuenta de Google" );
+                loadingBar.setCanceledOnTouchOutside ( true );
+                loadingBar.show ();
 
-            loadingBar.setTitle ( "Google sign in" );
-            loadingBar.setMessage ( "Please wait, while we are allowing you to login using your Google Account..." );
-            loadingBar.setCanceledOnTouchOutside ( true );
-            loadingBar.show ();
+                GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent ( data );
 
-            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent ( data );
+                if (result.isSuccess ()) {
+                    GoogleSignInAccount account = result.getSignInAccount ();
+                    firebaseAuthWithGoogle ( account );
+                    Toast.makeText ( this, "Usuario autenticado correctamente con la cuenta de Google", Toast.LENGTH_SHORT ).show ();
 
-            if (result.isSuccess ()) {
-                GoogleSignInAccount account = result.getSignInAccount ();
-                firebaseAuthWithGoogle ( account );
-                Toast.makeText ( this, "Please sait, while we are getting your auth result...", Toast.LENGTH_SHORT ).show ();
-
-            } else {
-                Toast.makeText ( this, "Cant get auth result... ", Toast.LENGTH_SHORT ).show ();
-                loadingBar.dismiss ();
+                } else {
+                    Toast.makeText ( this, "No se ha podido autenticar el usuario con la cuenta de Google.", Toast.LENGTH_SHORT ).show ();
+                    loadingBar.dismiss ();
+                }
             }
+        } catch (Exception e) {
         }
     }
 
 
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
-        Log.d ( TAG, "firebaseAuthWithGoogle:" + acct.getId () );
+        try {
 
-        AuthCredential credential = GoogleAuthProvider.getCredential ( acct.getIdToken (), null );
-        mAuth.signInWithCredential ( credential )
-                .addOnCompleteListener ( this, new OnCompleteListener<AuthResult> () {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful ()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.d ( TAG, "signInWithCredential:success" );
-                            SendUserToMainActivity ();
-                            loadingBar.dismiss ();
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            Log.w ( TAG, "signInWithCredential:failure", task.getException () );
-                            String message = task.getException ().toString ();
-                            SendUserToLoginActivity ();
-                            Toast.makeText ( LoginActivity.this, "Not Authenticated: " + message, Toast.LENGTH_SHORT ).show ();
-                            loadingBar.dismiss ();
-                        }
-                    }
-                } );
-    }
+            Log.d ( TAG, "firebaseAuthWithGoogle:" + acct.getId () );
 
-    @Override
-    protected void onStart() {
-        super.onStart ();
-        FirebaseUser currentUser = mAuth.getCurrentUser ();
-
-        if (currentUser != null) {
-            SendUserToMainActivity ();
-        }
-    }
-
-    private void AllowingUserToLogin() {
-        String email = UserEmail.getText ().toString ();
-        String password = UserPassword.getText ().toString ();
-        if (TextUtils.isEmpty ( email )) {
-            Toast.makeText ( this, "Please write your email", Toast.LENGTH_SHORT ).show ();
-        } else if (TextUtils.isEmpty ( password )) {
-            Toast.makeText ( this, "Please write your password", Toast.LENGTH_SHORT ).show ();
-        } else {
-            loadingBar.setTitle ( "Login" );
-            loadingBar.setMessage ( "Please wait, while we are allowing you to login into your Account..." );
-            loadingBar.setCanceledOnTouchOutside ( true );
-            loadingBar.show ();
-
-            mAuth.signInWithEmailAndPassword ( email, password )
-                    .addOnCompleteListener ( new OnCompleteListener<AuthResult> () {
+            AuthCredential credential = GoogleAuthProvider.getCredential ( acct.getIdToken (), null );
+            mAuth.signInWithCredential ( credential )
+                    .addOnCompleteListener ( this, new OnCompleteListener<AuthResult> () {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful ()) {
+                                // Sign in success, update UI with the signed-in user's information
+                                Log.d ( TAG, "signInWithCredential:success" );
                                 SendUserToMainActivity ();
-                                Toast.makeText ( LoginActivity.this, "you are Logged In successfully", Toast.LENGTH_SHORT ).show ();
                                 loadingBar.dismiss ();
                             } else {
-                                String message = task.getException ().getMessage ();
-                                Toast.makeText ( LoginActivity.this, "Error Occured: " + message, Toast.LENGTH_SHORT ).show ();
+                                // If sign in fails, display a message to the user.
+                                Log.w ( TAG, "signInWithCredential:failure", task.getException () );
+                                String message = task.getException ().toString ();
+                                SendUserToLoginActivity ();
+                                Toast.makeText ( LoginActivity.this, "Not Authenticated: " + message, Toast.LENGTH_SHORT ).show ();
                                 loadingBar.dismiss ();
                             }
                         }
                     } );
+        } catch (Exception e) {
         }
     }
 
+    @Override
+    protected void onStart() {
+        try {
+            super.onStart ();
+            FirebaseUser currentUser = mAuth.getCurrentUser ();
+
+            if (currentUser != null) {
+                SendUserToMainActivity ();
+            }
+        } catch (Exception e) {
+        }
+    }
+
+    private void AllowingUserToLogin() {
+        try {
+            String email = UserEmail.getText ().toString ();
+            String password = UserPassword.getText ().toString ();
+            if (TextUtils.isEmpty ( email )) {
+                Toast.makeText ( this, "Porfavor ingrese su correo", Toast.LENGTH_SHORT ).show ();
+            } else if (TextUtils.isEmpty ( password )) {
+                Toast.makeText ( this, "Porfavor ingrese su contrasena", Toast.LENGTH_SHORT ).show ();
+            } else {
+                loadingBar.setTitle ( "Login" );
+                loadingBar.setMessage ( "Espero mientras autenticamos el usuario ingresado." );
+                loadingBar.setCanceledOnTouchOutside ( true );
+                loadingBar.show ();
+
+                mAuth.signInWithEmailAndPassword ( email, password )
+                        .addOnCompleteListener ( new OnCompleteListener<AuthResult> () {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                if (task.isSuccessful ()) {
+                                    SendUserToMainActivity ();
+                                    Toast.makeText ( LoginActivity.this, "Usted se autentico correctamente", Toast.LENGTH_SHORT ).show ();
+                                    loadingBar.dismiss ();
+                                } else {
+                                    String message = task.getException ().getMessage ();
+                                    Toast.makeText ( LoginActivity.this, "A ocurrido un error: " + message, Toast.LENGTH_SHORT ).show ();
+                                    loadingBar.dismiss ();
+                                }
+                            }
+                        } );
+            }
+        } catch (Exception e) {
+        }
+
+    }
+
     private void SendUserToMainActivity() {
-        Intent mainIntent = new Intent ( LoginActivity.this, MainActivity.class );
-        mainIntent.addFlags ( Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK );
-        startActivity ( mainIntent );
-        finish ();
+        try {
+            Intent mainIntent = new Intent ( LoginActivity.this, MainActivity.class );
+            mainIntent.addFlags ( Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK );
+            startActivity ( mainIntent );
+            finish ();
+        } catch (Exception e) {
+        }
     }
 
     private void SendUserToLoginActivity() {
-        Intent mainIntent = new Intent ( LoginActivity.this, LoginActivity.class );
-        mainIntent.addFlags ( Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK );
-        startActivity ( mainIntent );
-        finish ();
+        try {
+            Intent mainIntent = new Intent ( LoginActivity.this, LoginActivity.class );
+            mainIntent.addFlags ( Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK );
+            startActivity ( mainIntent );
+            finish ();
+        } catch (Exception e) {
+        }
+
     }
 
     private void SendUserToRegisterActivity() {
-        Intent registerIntent = new Intent ( LoginActivity.this, RegisterActivity.class );
-        startActivity ( registerIntent );
-
+        try {
+            Intent registerIntent = new Intent ( LoginActivity.this, RegisterActivity.class );
+            startActivity ( registerIntent );
+        } catch (Exception e) {
+        }
     }
 
 }

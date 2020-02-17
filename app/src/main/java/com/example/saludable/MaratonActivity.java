@@ -31,30 +31,36 @@ public class MaratonActivity extends AppCompatActivity {
     private RecyclerView postList;
 
     private FirebaseAuth mAuth;
-    private DatabaseReference UsersRef, MaratonRef;
+    private DatabaseReference UsersRef, MaratonRef, RegistrarUsuario;
     private FirebaseRecyclerAdapter firebaseRecyclerAdapter;
 
     private String current_user_id;
+    private boolean inscrito = false;
+    private int eliminarrow = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate ( savedInstanceState );
-        setContentView ( R.layout.activity_maraton );
+        try {
+            super.onCreate ( savedInstanceState );
+            setContentView ( R.layout.activity_maraton );
 
-        mAuth = FirebaseAuth.getInstance ();
+            mAuth = FirebaseAuth.getInstance ();
 
-        UsersRef = FirebaseDatabase.getInstance ().getReference ().child ( "Users" );
-        MaratonRef = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" );
+            UsersRef = FirebaseDatabase.getInstance ().getReference ().child ( "Users" );
+            MaratonRef = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" );
 
 
-        postList = findViewById ( R.id.all_maraton_list );
-        postList.setHasFixedSize ( true );
+            postList = findViewById ( R.id.all_maraton_list );
+            postList.setHasFixedSize ( true );
 
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager ( this );
-        linearLayoutManager.setReverseLayout ( true );
-        linearLayoutManager.setStackFromEnd ( true );
+            LinearLayoutManager linearLayoutManager = new LinearLayoutManager ( this );
+            linearLayoutManager.setReverseLayout ( true );
+            linearLayoutManager.setStackFromEnd ( true );
 
-        postList.setLayoutManager ( linearLayoutManager );
+            postList.setLayoutManager ( linearLayoutManager );
+        } catch (Exception e) {
+        }
+
     }
 
     @Override
@@ -73,89 +79,96 @@ public class MaratonActivity extends AppCompatActivity {
 
 
     private void CheckUserExistence() {
-        current_user_id = mAuth.getCurrentUser ().getUid ();
+        try {
+            current_user_id = mAuth.getCurrentUser ().getUid ();
 
-        UsersRef.addValueEventListener ( new ValueEventListener () {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (!dataSnapshot.hasChild ( current_user_id )) {
-                    SendUserToSetupActivity ();
-                } else {
-                    if (!dataSnapshot.child ( current_user_id ).hasChild ( "username" )) {
+            UsersRef.addValueEventListener ( new ValueEventListener () {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (!dataSnapshot.hasChild ( current_user_id )) {
                         SendUserToSetupActivity ();
+                    } else {
+                        if (!dataSnapshot.child ( current_user_id ).hasChild ( "username" )) {
+                            SendUserToSetupActivity ();
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
 
-            }
-        } );
-
-        DisplayAllMaraton ();
+                }
+            } );
+            DisplayAllMaraton ();
+        } catch (Exception e) {
+        }
     }
 
     private void SendUserToSetupActivity() {
-        Intent setupIntent = new Intent ( MaratonActivity.this, SetupActivity.class );
-        setupIntent.addFlags ( Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK );
-        startActivity ( setupIntent );
-        finish ();
+        try {
+            Intent setupIntent = new Intent ( MaratonActivity.this, SetupActivity.class );
+            setupIntent.addFlags ( Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK );
+            startActivity ( setupIntent );
+            finish ();
+        } catch (Exception e) {
+        }
     }
 
     private void SendUserTologinActivity() {
-        Intent loginIntent = new Intent ( MaratonActivity.this, LoginActivity.class );
-        loginIntent.addFlags ( Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK );
-        startActivity ( loginIntent );
-        finish ();
+        try {
+            Intent loginIntent = new Intent ( MaratonActivity.this, LoginActivity.class );
+            loginIntent.addFlags ( Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK );
+            startActivity ( loginIntent );
+            finish ();
+        } catch (Exception e) {
+        }
     }
 
 
     protected void DisplayAllMaraton() {
+        try {
 
-        FirebaseRecyclerOptions<Maraton> options = new FirebaseRecyclerOptions.Builder<Maraton> ()
-                .setQuery ( MaratonRef, Maraton.class ).build ();
+            FirebaseRecyclerOptions<Maraton> options = new FirebaseRecyclerOptions.Builder<Maraton> ()
+                    .setQuery ( MaratonRef, Maraton.class ).build ();
+            firebaseRecyclerAdapter =
+                    new FirebaseRecyclerAdapter<Maraton, MaratonActivity.CarreraViewHolder> ( options ) {
+                        @Override
+                        public MaratonActivity.CarreraViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+                            View view = LayoutInflater.from ( parent.getContext () )
+                                    .inflate ( R.layout.all_carreras_layout, parent, false );
+                            return new MaratonActivity.CarreraViewHolder ( view );
+                        }
 
-        firebaseRecyclerAdapter =
-                new FirebaseRecyclerAdapter<Maraton, MaratonActivity.CarreraViewHolder> ( options ) {
-                    @Override
-                    public MaratonActivity.CarreraViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-                        View view = LayoutInflater.from ( parent.getContext () )
-                                .inflate ( R.layout.all_carreras_layout, parent, false );
-                        return new MaratonActivity.CarreraViewHolder ( view );
-                    }
+                        @Override
+                        protected void onBindViewHolder(MaratonActivity.CarreraViewHolder maratonViewHolder, int position, @NonNull Maraton maraton) {
 
-                    @Override
-                    protected void onBindViewHolder(MaratonActivity.CarreraViewHolder maratonViewHolder, int position, @NonNull Maraton maraton) {
+                            final String PostKey = getRef ( position ).getKey ();
 
-                        final String PostKey = getRef ( position ).getKey ();
+                            maratonViewHolder.setNamecarrera ( maraton.maratonname );
+                            maratonViewHolder.setDate ( maraton.date );
+                            maratonViewHolder.setTime ( maraton.time );
+                            maratonViewHolder.setMaratonimage ( getApplication (), maraton.maratonimage );
+                            maratonViewHolder.setDescription ( maraton.description );
+                            maratonViewHolder.setLugar ( maraton.place );
+                            maratonViewHolder.setDate_maraton ( maraton.maratondate );
+                            maratonViewHolder.setTime_maraton ( maraton.maratontime );
+                            maratonViewHolder.setContactname ( maraton.contactname );
+                            maratonViewHolder.setContactnumber ( maraton.contactnumber );
 
-                        maratonViewHolder.setNamecarrera ( maraton.maratonname );
-                        maratonViewHolder.setDate ( maraton.date );
-                        maratonViewHolder.setTime ( maraton.time );
-                        maratonViewHolder.setMaratonimage ( getApplication (), maraton.maratonimage );
-                        maratonViewHolder.setDescription ( maraton.description );
-                        maratonViewHolder.setLugar ( maraton.place );
-                        maratonViewHolder.setDate_maraton ( maraton.maratondate );
-                        maratonViewHolder.setTime_maraton ( maraton.maratontime );
-                        maratonViewHolder.setContactname ( maraton.contactname );
-                        maratonViewHolder.setContactnumber ( maraton.contactnumber );
+                            maratonViewHolder.mView.setOnClickListener ( new View.OnClickListener () {
+                                @Override
+                                public void onClick(View v) {
+                                    Intent clickPostIntent = new Intent ( MaratonActivity.this, ClickMaratonActivity.class );
+                                    clickPostIntent.putExtra ( "PostKey", PostKey );
+                                    startActivity ( clickPostIntent );
+                                }
+                            } );
+                        }
+                    };
+            postList.setAdapter ( firebaseRecyclerAdapter );
 
-                        maratonViewHolder.mView.setOnClickListener ( new View.OnClickListener () {
-                            @Override
-                            public void onClick(View v) {
-                                Intent clickPostIntent = new Intent ( MaratonActivity.this, ClickMaratonActivity.class );
-                                clickPostIntent.putExtra ( "PostKey", PostKey );
-                                startActivity ( clickPostIntent );
-                            }
-                        } );
-
-                    }
-
-                };
-
-        postList.setAdapter ( firebaseRecyclerAdapter );
-
+        } catch (Exception e) {
+        }
     }
 
     public class CarreraViewHolder extends RecyclerView.ViewHolder {
@@ -169,8 +182,10 @@ public class MaratonActivity extends AppCompatActivity {
         }
 
         public void setDescription(String description) {
-            TextView username = mView.findViewById ( R.id.maraton_description );
-            username.setText ( description );
+            if (!description.isEmpty ()) {
+                TextView username = mView.findViewById ( R.id.maraton_description );
+                username.setText ( description );
+            }
         }
 
         public void setContactname(String contactname) {

@@ -29,78 +29,112 @@ public class ProfileActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate ( savedInstanceState );
-        setContentView ( R.layout.activity_profile );
+        try {
 
-        mAuth = FirebaseAuth.getInstance ();
-        currentUserId = mAuth.getCurrentUser ().getUid ();
-        profileuserRef = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( currentUserId );
+            super.onCreate ( savedInstanceState );
+            setContentView ( R.layout.activity_profile );
 
-
-        userName = findViewById ( R.id.my_profile_username );
-        userimc = findViewById ( R.id.my_profile_IMC );
-        userStatus = findViewById ( R.id.my_profile_state );
-        userFullname = findViewById ( R.id.my_profile_full_name );
-        userCountry = findViewById ( R.id.my_profile_country );
-        userEdad = findViewById ( R.id.my_profile_edad );
-        userPeso = findViewById ( R.id.my_profile_peso );
-        userAltura = findViewById ( R.id.my_profile_altura );
-        userGenero = findViewById ( R.id.my_profile_genero );
-        velpromtot = findViewById ( R.id.profile_velpromtotal );
-        velpromult = findViewById ( R.id.profile_velpromfinal );
-        tiempromtot = findViewById ( R.id.profile_tiempopromtotal );
-        tiempromult = findViewById ( R.id.profile_tiempopromfinal );
-        disttot = findViewById ( R.id.profile_distanciatotal );
-        distult = findViewById ( R.id.profile_distanciafinal );
+            mAuth = FirebaseAuth.getInstance ();
+            currentUserId = mAuth.getCurrentUser ().getUid ();
+            profileuserRef = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( currentUserId );
 
 
-        userProfileImage = findViewById ( R.id.my_profile_pic );
+            userName = findViewById ( R.id.my_profile_username );
+            userimc = findViewById ( R.id.my_profile_IMC );
+            userStatus = findViewById ( R.id.my_profile_state );
+            userFullname = findViewById ( R.id.my_profile_full_name );
+            userCountry = findViewById ( R.id.my_profile_country );
+            userEdad = findViewById ( R.id.my_profile_edad );
+            userPeso = findViewById ( R.id.my_profile_peso );
+            userAltura = findViewById ( R.id.my_profile_altura );
+            userGenero = findViewById ( R.id.my_profile_genero );
+            velpromtot = findViewById ( R.id.profile_velpromtotal );
+            velpromult = findViewById ( R.id.profile_velpromfinal );
+            tiempromtot = findViewById ( R.id.profile_tiempopromtotal );
+            tiempromult = findViewById ( R.id.profile_tiempopromfinal );
+            disttot = findViewById ( R.id.profile_distanciatotal );
+            distult = findViewById ( R.id.profile_distanciafinal );
 
-        profileuserRef.addValueEventListener ( new ValueEventListener () {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists ()) {
-                    String myProfileImage = dataSnapshot.child ( "profileimage" ).getValue ().toString ();
-                    String myUsername = dataSnapshot.child ( "username" ).getValue ().toString ();
-                    String myProfileName = dataSnapshot.child ( "fullname" ).getValue ().toString ();
-                    String myProfileStatus = dataSnapshot.child ( "status" ).getValue ().toString ();
-                    String myCountry = dataSnapshot.child ( "country" ).getValue ().toString ();
-                    String myGenero = dataSnapshot.child ( "genero" ).getValue ().toString ();
-                    String myPeso = dataSnapshot.child ( "peso" ).getValue ().toString ();
-                    String myAltura = dataSnapshot.child ( "altura" ).getValue ().toString ();
-                    String myEdad = dataSnapshot.child ( "edad" ).getValue ().toString ();
-                    String myveltot = dataSnapshot.child ( "velocidadpromtotal" ).getValue ().toString ();
-                    String myvelfin = dataSnapshot.child ( "velocidadpromedioultima" ).getValue ().toString ();
-                    String mytiemtot = dataSnapshot.child ( "tiempopromtotal" ).getValue ().toString ();
-                    String mytiemfin = dataSnapshot.child ( "tiempopromultimo" ).getValue ().toString ();
-                    String mydistot = dataSnapshot.child ( "distanciatotal" ).getValue ().toString ();
-                    String mydisfin = dataSnapshot.child ( "distanciaultima" ).getValue ().toString ();
-                    String myimc = dataSnapshot.child ( "imc" ).getValue ().toString ();
 
-                    Picasso.with ( ProfileActivity.this ).load ( myProfileImage ).placeholder ( R.drawable.profile ).into ( userProfileImage );
-                    userName.setText ( "@" + myUsername );
-                    userFullname.setText ( myProfileName );
-                    userStatus.setText ( myProfileStatus );
-                    userCountry.setText ( "Country: " + myCountry );
-                    userGenero.setText ( "Gener: " + myGenero );
-                    userPeso.setText ( "Peso: " + myPeso );
-                    userAltura.setText ( "Altura: " + myAltura );
-                    userEdad.setText ( "Edad: " + myEdad );
-                    velpromult.setText ( myvelfin );
-                    velpromtot.setText ( myveltot );
-                    tiempromtot.setText ( mytiemtot );
-                    tiempromult.setText ( mytiemfin );
-                    disttot.setText ( mydistot );
-                    distult.setText ( mydisfin );
-                    userimc.setText ( "IMC: " + myimc );
+            userProfileImage = findViewById ( R.id.my_profile_pic );
+
+            profileuserRef.addValueEventListener ( new ValueEventListener () {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists ()) {
+                        if (dataSnapshot.hasChild ( "profileimage" )) {
+                            String myProfileImage = dataSnapshot.child ( "profileimage" ).getValue ().toString ();
+                            Picasso.with ( ProfileActivity.this ).load ( myProfileImage ).placeholder ( R.drawable.profile ).into ( userProfileImage );
+                        }
+                        if (dataSnapshot.hasChild ( "username" )) {
+                            String myUsername = dataSnapshot.child ( "username" ).getValue ().toString ();
+                            userName.setText ( "@" + myUsername );
+                        }
+                        if (dataSnapshot.hasChild ( "fullname" )) {
+                            String myProfileName = dataSnapshot.child ( "fullname" ).getValue ().toString ();
+                            userFullname.setText ( myProfileName );
+                        }
+                        if (dataSnapshot.hasChild ( "status" )) {
+                            String myProfileStatus = dataSnapshot.child ( "status" ).getValue ().toString ();
+                            userStatus.setText ( myProfileStatus );
+                        }
+                        if (dataSnapshot.hasChild ( "country" )) {
+                            String myCountry = dataSnapshot.child ( "country" ).getValue ().toString ();
+                            userCountry.setText ( "Country: " + myCountry );
+                        }
+                        if (dataSnapshot.hasChild ( "genero" )) {
+                            String myGenero = dataSnapshot.child ( "genero" ).getValue ().toString ();
+                            userGenero.setText ( "Genero: " + myGenero );
+                        }
+                        if (dataSnapshot.hasChild ( "peso" )) {
+                            String myPeso = dataSnapshot.child ( "peso" ).getValue ().toString ();
+                            userPeso.setText ( "Peso: " + myPeso );
+                        }
+                        if (dataSnapshot.hasChild ( "altura" )) {
+                            String myAltura = dataSnapshot.child ( "altura" ).getValue ().toString ();
+                            userAltura.setText ( "Altura: " + myAltura );
+                        }
+                        if (dataSnapshot.hasChild ( "edad" )) {
+                            String myEdad = dataSnapshot.child ( "edad" ).getValue ().toString ();
+                            userEdad.setText ( "Edad: " + myEdad );
+                        }
+                        if (dataSnapshot.hasChild ( "velocidadpromtotal" )) {
+                            String myveltot = dataSnapshot.child ( "velocidadpromtotal" ).getValue ().toString ();
+                            velpromtot.setText ( myveltot );
+                        }
+                        if (dataSnapshot.hasChild ( "velocidadpromedioultima" )) {
+                            String myvelfin = dataSnapshot.child ( "velocidadpromedioultima" ).getValue ().toString ();
+                            velpromult.setText ( myvelfin );
+                        }
+                        if (dataSnapshot.hasChild ( "tiempopromtotal" )) {
+                            String mytiemtot = dataSnapshot.child ( "tiempopromtotal" ).getValue ().toString ();
+                            tiempromtot.setText ( mytiemtot );
+                        }
+                        if (dataSnapshot.hasChild ( "tiempopromultimo" )) {
+                            String mytiemfin = dataSnapshot.child ( "tiempopromultimo" ).getValue ().toString ();
+                            tiempromult.setText ( mytiemfin );
+                        }
+                        if (dataSnapshot.hasChild ( "distanciatotal" )) {
+                            String mydistot = dataSnapshot.child ( "distanciatotal" ).getValue ().toString ();
+                            disttot.setText ( mydistot );
+                        }
+                        if (dataSnapshot.hasChild ( "distanciaultima" )) {
+                            String mydisfin = dataSnapshot.child ( "distanciaultima" ).getValue ().toString ();
+                            distult.setText ( mydisfin );
+                        }
+                        if (dataSnapshot.hasChild ( "imc" )) {
+                            String myimc = dataSnapshot.child ( "imc" ).getValue ().toString ();
+                            userimc.setText ( "IMC: " + myimc );
+                        }
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
 
                 }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        } );
+            } );
+        } catch (Exception e) {
+        }
     }
 }

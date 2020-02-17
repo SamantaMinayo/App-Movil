@@ -8,6 +8,10 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.SystemClock;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Chronometer;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -34,32 +38,37 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
-    private static String latitudinicial = "0.0";
-    private static String longitudinicial = "0.0";
-    private static boolean monitorear = false;
-    private static ValueEventListener ls;
-    private final int TIEMPO = 30000;
+    double vel = 2.0;
+    private String latitudinicial = "0.0";
     double lat = 0.0;
     double log = 0.0;
-    double vel = 0.0;
+    private String longitudinicial = "0.0", distanciat = "0.0", velocidadt = "0.0";
     private GoogleMap mMap;
     private Marker marcador;
-    private DatabaseReference UsuarioCarreraRef, UsCarrInformationRef;
+    private DatabaseReference UsuarioCarreraRef, UsCarrInformationRef, CarreraUserInf, UserRef;
     private FirebaseAuth mAuth;
     private String PostKey, current_user_id, saveCurrenTime;
-    private long countPost = 0;
-    private Date anterior;
+    private long countPost = 1;
+    private long contguardada = 0;
     private ProgressDialog loadingBar;
+    private Location location;
+    private LocationManager locationManager;
+    private Button inicio, fin;
+    private Chronometer cronometro;
+    private int kilometro = 0;
+    private boolean iniciar = false;
+
     LocationListener locListener = new LocationListener () {
         @Override
         public void onLocationChanged(Location location) {
             actualizarUbicacion ( location );
-            SavingPostInformation ( location );
+            if (iniciar == true) {
+                SavingInformation ( location );
+            }
         }
 
         @Override
@@ -87,141 +96,278 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById ( R.id.map );
         mapFragment.getMapAsync ( this );
 
+        inicio = findViewById ( R.id.inicio_button );
+        fin = findViewById ( R.id.fin_button );
+        cronometro = findViewById ( R.id.cronometro );
 
         mAuth = FirebaseAuth.getInstance ();
         current_user_id = mAuth.getCurrentUser ().getUid ();
         PostKey = getIntent ().getExtras ().get ( "PostKey" ).toString ();
         UsuarioCarreraRef = FirebaseDatabase.getInstance ().getReference ().child ( "UsuariosCarreras" ).child ( current_user_id ).child ( PostKey );
-
         UsCarrInformationRef = FirebaseDatabase.getInstance ().getReference ().child ( "UsuariosCarreras" ).child ( current_user_id ).child ( PostKey );
+        CarreraUserInf = FirebaseDatabase.getInstance ().getReference ().child ( "CarrerasRealizadas" );
+        UserRef = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( current_user_id );
+
         loadingBar = new ProgressDialog ( this );
 
+        inicio.setEnabled ( true );
+        fin.setEnabled ( false );
 
-
-
-  /*      iniciar.setOnClickListener ( new View.OnClickListener () {
+        inicio.setOnClickListener ( new View.OnClickListener () {
             @Override
-            public void onClick(View view) {
-                monitorear=true;
-                Monitorear ();
-            }
+            public void onClick(View v) {
 
-        } );*/
-        //
-        // SavingPostInformation ();
+                iniciar = true;
+
+                Monitorear ( true );
+            }
+        } );
+        fin.setOnClickListener ( new View.OnClickListener () {
+            @Override
+            public void onClick(View v) {
+                iniciar = false;
+                Monitorear ( false );
+
+            }
+        } );
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+        location = null;
         miUbicacion ();
     }
 
+    private void Monitorear(boolean b) {
+        try {
+            if (ActivityCompat.checkSelfPermission ( this, Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission ( this, Manifest.permission.ACCESS_COARSE_LOCATION ) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+            if (b == true) {
+                cronometro.setBase ( SystemClock.elapsedRealtime () );
+                cronometro.start ();
+                inicio.setEnabled ( false );
+                fin.setEnabled ( true );
+                miUbicacion ();
+                if (location != null) SavingInformation ( location );
+
+            } else {
+                locationManager.removeUpdates ( locListener );
+                inicio.setEnabled ( true );
+                fin.setEnabled ( false );
+                if (location != null) SavingInformation ( location );
+
+                GuardarInformacionFinal ();
+            }
+        } catch (Exception e) {
+        }
+    }
+
     private void agrerarMarcador(double lat, double log) {
-        LatLng coordenada = new LatLng ( lat, log );
-        CameraUpdate miUbicacion = CameraUpdateFactory.newLatLngZoom ( coordenada, 16 );
-        if (marcador != null) marcador.remove ();
-        marcador = mMap.addMarker ( new MarkerOptions ()
-                .position ( coordenada )
-                .title ( "Mi posision actual" )
-                .icon ( BitmapDescriptorFactory.fromResource ( R.mipmap.ic_launcher ) ) );
-        mMap.animateCamera ( miUbicacion );
+        try {
+            LatLng coordenada = new LatLng ( lat, log );
+            CameraUpdate miUbicacion = CameraUpdateFactory.newLatLngZoom ( coordenada, 18 );
+            if (marcador != null) marcador.remove ();
+            marcador = mMap.addMarker ( new MarkerOptions ()
+                    .position ( coordenada )
+                    .title ( "Mi posision actual" )
+                    .icon ( BitmapDescriptorFactory.fromResource ( R.mipmap.ic_launcher ) ) );
+            mMap.animateCamera ( miUbicacion );
+        } catch (Exception e) {
+        }
+
     }
 
     private void actualizarUbicacion(Location location) {
-        if (location != null) {
-            lat = location.getLatitude ();
-            log = location.getLongitude ();
-            agrerarMarcador ( lat, log );
+        try {
+            if (location != null) {
+                lat = location.getLatitude ();
+                log = location.getLongitude ();
+                agrerarMarcador ( lat, log );
+            }
+        } catch (Exception e) {
         }
     }
 
     private void miUbicacion() {
-        if (ActivityCompat.checkSelfPermission ( this, Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission ( this, Manifest.permission.ACCESS_COARSE_LOCATION ) != PackageManager.PERMISSION_GRANTED) {
-
-            return;
+        try {
+            if (ActivityCompat.checkSelfPermission ( this, Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission ( this, Manifest.permission.ACCESS_COARSE_LOCATION ) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+            locationManager = (LocationManager) getSystemService ( Context.LOCATION_SERVICE );
+            location = locationManager.getLastKnownLocation ( LocationManager.GPS_PROVIDER );
+            actualizarUbicacion ( location );
+            locationManager.requestLocationUpdates ( LocationManager.GPS_PROVIDER, 20000, 0, locListener );
+        } catch (Exception e) {
         }
-
-        LocationManager locationManager = (LocationManager) getSystemService ( Context.LOCATION_SERVICE );
-        Location location = locationManager.getLastKnownLocation ( LocationManager.GPS_PROVIDER );
-        actualizarUbicacion ( location );
-        locationManager.requestLocationUpdates ( LocationManager.GPS_PROVIDER, 10000, 0, locListener );
     }
 
-    private void SavingPostInformation(final Location locations) {
+    private void SavingInformation(final Location locations) {
+        try {
 
+            UsuarioCarreraRef.addValueEventListener ( new ValueEventListener () {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-        //Query latitud = UsuarioCarreraRef.child ( PostKey+cont );
-        ls = new ValueEventListener () {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                if (dataSnapshot.exists ()) {
-                    countPost = dataSnapshot.getChildrenCount ();
-                    String contador = String.valueOf ( countPost );
-                    if (countPost > 1) {
-                        String cont = String.valueOf ( countPost - 1 );
-                        if (dataSnapshot.child ( PostKey + cont ).hasChild ( "latitud" )) {
-                            latitudinicial = dataSnapshot.child ( PostKey + cont ).child ( "latitud" ).getValue ().toString ();
-                        }
-                        if (dataSnapshot.child ( PostKey + cont ).hasChild ( "longitud" )) {
-                            longitudinicial = dataSnapshot.child ( PostKey + cont ).child ( "longitud" ).getValue ().toString ();
+                    if (dataSnapshot.exists ()) {
+                        countPost = dataSnapshot.getChildrenCount ();
+                        if (countPost > 1) {
+                            String cont = String.valueOf ( countPost - 1 );
+                            if (dataSnapshot.child ( PostKey + cont ).hasChild ( "latitud" )) {
+                                latitudinicial = dataSnapshot.child ( PostKey + cont ).child ( "latitud" ).getValue ().toString ();
+                            }
+                            if (dataSnapshot.child ( PostKey + cont ).hasChild ( "longitud" )) {
+                                longitudinicial = dataSnapshot.child ( PostKey + cont ).child ( "longitud" ).getValue ().toString ();
+                            }
+                            if (dataSnapshot.child ( PostKey + cont ).hasChild ( "distancia" )) {
+                                distanciat = dataSnapshot.child ( PostKey + cont ).child ( "distancia" ).getValue ().toString ();
+                            }
+                            if (dataSnapshot.child ( PostKey + cont ).hasChild ( "velocidadtotal" )) {
+                                velocidadt = dataSnapshot.child ( PostKey + cont ).child ( "velocidadtotal" ).getValue ().toString ();
+                            }
                         }
                     }
-                    Guardar ( locations, contador, latitudinicial, longitudinicial );
                 }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            } );
+            UsuarioCarreraRef.removeEventListener ( new ValueEventListener () {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            } );
+            if (countPost > 0) {
+                String contador = String.valueOf ( countPost );
+                Guardar ( locations, contador, latitudinicial, longitudinicial, distanciat, velocidadt );
             }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        };
-        UsuarioCarreraRef.addValueEventListener ( ls );
-
+        } catch (Exception e) {
+        }
     }
 
-    private void Guardar(Location location, String cont, String latitudA, String longitudA) {
-        lat = location.getLatitude ();
-        log = location.getLongitude ();
-        vel = location.getSpeed ();
-        Location locationA = new Location ( "punto A" );
-        locationA.setLatitude ( Double.parseDouble ( latitudA ) );
-        locationA.setLongitude ( Double.parseDouble ( longitudA ) );
+    private void Guardar(Location location, String cont, String latitudA, String longitudA, String distanciatA, String velocidadtA) {
+        try {
 
-        float distance = locationA.distanceTo ( location );
+            lat = location.getLatitude ();
+            log = location.getLongitude ();
+            vel = 2.0;
+            Location locationA = new Location ( "punto A" );
+            locationA.setLatitude ( Double.parseDouble ( latitudA ) );
+            locationA.setLongitude ( Double.parseDouble ( longitudA ) );
 
-        Calendar calFordTime = Calendar.getInstance ();
-        SimpleDateFormat currentTime = new SimpleDateFormat ( "HH:mm:ss" );
-        saveCurrenTime = currentTime.format ( calFordTime.getTime () );
+            float dist = (float) Double.parseDouble ( distanciatA );
+            float distance = locationA.distanceTo ( location ) + dist;
 
+            float veloct = (float) Double.parseDouble ( velocidadtA );
+            float velocidadtotal = (float) (veloct + vel);
 
-        String latitud = String.valueOf ( lat );
-        String longitud = String.valueOf ( log );
-        String velo = String.valueOf ( vel );
-        String distancia = String.valueOf ( distance );
+            Calendar calFordTime = Calendar.getInstance ();
+            SimpleDateFormat currentTime = new SimpleDateFormat ( "HH:mm:ss" );
+            saveCurrenTime = currentTime.format ( calFordTime.getTime () );
+            String tiempo = cronometro.getText ().toString ();
 
-        HashMap puntos = new HashMap ();
-
-        puntos.put ( "latitud", latitud );
-        puntos.put ( "longitud", longitud );
-        puntos.put ( "vel", velo );
-        puntos.put ( "hora", saveCurrenTime );
-        puntos.put ( "distancia", distancia );
-        puntos.put ( "contador", cont );
-
-        UsuarioCarreraRef.removeEventListener ( ls );
-
-        UsCarrInformationRef.child ( PostKey + cont ).updateChildren ( puntos ).addOnCompleteListener ( new OnCompleteListener () {
-            @Override
-            public void onComplete(@NonNull Task task) {
-                if (task.isSuccessful ()) {
-                    Toast.makeText ( MapsActivity.this, "New Post is Update succesfully..", Toast.LENGTH_SHORT ).show ();
-                    loadingBar.dismiss ();
-                }
+            if (countPost == 1) {
+                distance = (float) 0.0;
             }
-        } );
 
+            if (distance > 10) {
+                kilometro = kilometro + 1;
+                contguardada = countPost - contguardada;
+                float velocidadkilometro = velocidadtotal / contguardada;
+                GuardarInformacionKilometro ( kilometro, velocidadkilometro, tiempo, saveCurrenTime );
+                distance = distance - 10;
+                velocidadtotal = (float) vel;
+            }
+
+            String latitud = String.valueOf ( lat );
+            String longitud = String.valueOf ( log );
+            String velo = String.valueOf ( vel );
+            String distancia = String.valueOf ( distance );
+            String veltot = String.valueOf ( velocidadtotal );
+
+            HashMap puntos = new HashMap ();
+
+            puntos.put ( "latitud", latitud );
+            puntos.put ( "longitud", longitud );
+            puntos.put ( "velocidad", velo );
+            puntos.put ( "hora", saveCurrenTime );
+            puntos.put ( "distancia", distancia );
+            puntos.put ( "contador", cont );
+            puntos.put ( "tiempo", tiempo );
+            puntos.put ( "velocidadtotal", veltot );
+
+            UsCarrInformationRef.child ( PostKey + cont ).updateChildren ( puntos ).addOnCompleteListener ( new OnCompleteListener () {
+                @Override
+                public void onComplete(@NonNull Task task) {
+                    if (task.isSuccessful ()) {
+                        Toast.makeText ( MapsActivity.this, "New Post is Update succesfully..", Toast.LENGTH_SHORT ).show ();
+                        loadingBar.dismiss ();
+                    }
+                }
+            } );
+        } catch (Exception e) {
+        }
+    }
+
+    private void GuardarInformacionKilometro(int km, float velocid, String tiempokm, String hora) {
+
+        try {
+
+            HashMap user = new HashMap ();
+            user.put ( "vel", String.valueOf ( velocid ) );
+            user.put ( "time", tiempokm );
+
+            CarreraUserInf.child ( "Carreras" ).child ( PostKey ).child ( String.valueOf ( km ) ).child ( current_user_id ).updateChildren ( user ).addOnCompleteListener ( new OnCompleteListener () {
+                @Override
+                public void onComplete(@NonNull Task task) {
+                    if (task.isSuccessful ()) {
+                        Toast.makeText ( MapsActivity.this, "New Post is Update succesfully..", Toast.LENGTH_SHORT ).show ();
+                        loadingBar.dismiss ();
+                    }
+                }
+            } );
+
+            HashMap velocidadusr = new HashMap ();
+            velocidadusr.put ( String.valueOf ( km ), String.valueOf ( velocid ) );
+            HashMap tiempousr = new HashMap ();
+            tiempousr.put ( String.valueOf ( km ), tiempokm );
+
+            CarreraUserInf.child ( "Usuarios" ).child ( current_user_id ).child ( PostKey ).child ( "tiempo" ).updateChildren ( tiempousr ).addOnCompleteListener ( new OnCompleteListener () {
+                @Override
+                public void onComplete(@NonNull Task task) {
+                    if (task.isSuccessful ()) {
+                        Toast.makeText ( MapsActivity.this, "New Post is Update succesfully..", Toast.LENGTH_SHORT ).show ();
+                        loadingBar.dismiss ();
+                    }
+                }
+            } );
+
+            CarreraUserInf.child ( "Usuarios" ).child ( current_user_id ).child ( PostKey ).child ( "velocidad" ).updateChildren ( velocidadusr ).addOnCompleteListener ( new OnCompleteListener () {
+                @Override
+                public void onComplete(@NonNull Task task) {
+                    if (task.isSuccessful ()) {
+                        Toast.makeText ( MapsActivity.this, "New Post is Update succesfully..", Toast.LENGTH_SHORT ).show ();
+                        loadingBar.dismiss ();
+                    }
+                }
+            } );
+
+
+        } catch (Exception e) {
+        }
+    }
+
+    private void GuardarInformacionFinal() {
     }
 
 }
+
