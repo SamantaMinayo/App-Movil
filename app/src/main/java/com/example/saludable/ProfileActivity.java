@@ -5,6 +5,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -21,6 +22,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     private TextView userName, userStatus, userFullname, userCountry, userEdad, userPeso, userAltura, userGenero, velpromtot, velpromult, tiempromtot, tiempromult, disttot, distult, userimc;
     private CircleImageView userProfileImage;
+    private Toolbar mToolbar;
 
     private DatabaseReference profileuserRef;
     private FirebaseAuth mAuth;
@@ -38,6 +40,10 @@ public class ProfileActivity extends AppCompatActivity {
             currentUserId = mAuth.getCurrentUser ().getUid ();
             profileuserRef = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( currentUserId );
 
+            mToolbar = findViewById ( R.id.mi_perfil_toolbar );
+            setSupportActionBar ( mToolbar );
+            getSupportActionBar ().setTitle ( "Mi Perfil" );
+            getSupportActionBar ().setDisplayHomeAsUpEnabled ( true );
 
             userName = findViewById ( R.id.my_profile_username );
             userimc = findViewById ( R.id.my_profile_IMC );

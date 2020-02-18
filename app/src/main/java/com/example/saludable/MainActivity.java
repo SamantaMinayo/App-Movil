@@ -221,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText ( this, "Home", Toast.LENGTH_SHORT ).show ();
                     break;
                 case R.id.nav_marathon:
-                    Toast.makeText ( this, "Marathon", Toast.LENGTH_SHORT ).show ();
+                    SendUserToMiMaratonActivity ();
                     break;
                 case R.id.nav_find_marathon:
                     SendUserToMaratonActivity ();
@@ -280,6 +280,14 @@ public class MainActivity extends AppCompatActivity {
     private void SendUserToMaratonActivity() {
         try {
             Intent addNewPostIntent = new Intent ( MainActivity.this, MaratonActivity.class );
+            startActivity ( addNewPostIntent );
+        } catch (Exception e) {
+        }
+    }
+
+    private void SendUserToMiMaratonActivity() {
+        try {
+            Intent addNewPostIntent = new Intent ( MainActivity.this, MiMaratonActivity.class );
             startActivity ( addNewPostIntent );
         } catch (Exception e) {
         }

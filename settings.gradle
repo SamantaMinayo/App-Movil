@@ -1,2 +1,2 @@
-include ':app'
+include ':app', ':jplot1.1'
 rootProject.name='Saludable'

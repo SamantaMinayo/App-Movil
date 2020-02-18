@@ -9,7 +9,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MiMaratonActivity"></activity>
+        <activity
+            android:name=".MiMaratonActivity"
+            android:parentActivityName=".MainActivity"></activity>
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -23,9 +25,15 @@
             android:label="@string/title_activity_maps"
             android:screenOrientation="portrait"></activity>
         <activity android:name=".ClickMaratonActivity" />
-        <activity android:name=".MaratonActivity" />
-        <activity android:name=".ProfileActivity" />
-        <activity android:name=".SettingsActivity" />
+        <activity
+            android:name=".MaratonActivity"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".ProfileActivity"
+            android:parentActivityName=".MainActivity" />
+        <activity
+            android:name=".SettingsActivity"
+            android:parentActivityName=".MainActivity" />
         <activity android:name=".ClickPostActivity" />
         <activity android:name=".LoginActivity" />
         <activity android:name=".RegisterActivity" />
@@ -36,7 +44,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SetupActivity" />
+        <activity
+            android:name=".SetupActivity"
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
             android:theme="@style/Base.Theme.AppCompat" />
@@ -49,7 +59,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
 
 </manifest>

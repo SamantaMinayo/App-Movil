@@ -10,7 +10,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true">
+        android:layout_below="@+id/mi_perfil_toolbar"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="55dp">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -452,10 +454,7 @@
                                 android:textColor="@android:color/background_light"
                                 android:textSize="12sp" />
                         </LinearLayout>
-
                     </LinearLayout>
-
-
                 </LinearLayout>
 
                 <LinearLayout
@@ -534,8 +533,6 @@
                             android:textColor="@android:color/background_light"
                             android:textSize="18sp" />
                     </LinearLayout>
-
-
                 </LinearLayout>
             </LinearLayout>
 
@@ -548,4 +545,8 @@
                 android:src="@drawable/profile" />
         </RelativeLayout>
     </ScrollView>
+
+    <include
+        android:id="@+id/mi_perfil_toolbar"
+        layout="@layout/app_bar_layout"></include>
 </RelativeLayout>

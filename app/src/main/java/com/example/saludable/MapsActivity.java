@@ -49,7 +49,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private String longitudinicial = "0.0", distanciat = "0.0", velocidadt = "0.0";
     private GoogleMap mMap;
     private Marker marcador;
-    private DatabaseReference UsuarioCarreraRef, UsCarrInformationRef, CarreraUserInf, UserRef;
+    private DatabaseReference UsuarioCarreraRef, UsCarrInformationRef, CarreraUserInf, CarreraRef;
     private FirebaseAuth mAuth;
     private String PostKey, current_user_id, saveCurrenTime;
     private long countPost = 1;
@@ -61,6 +61,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Chronometer cronometro;
     private int kilometro = 0;
     private boolean iniciar = false;
+    private String imagencarrera, nombrecarrera, uid, descripcion;
 
     LocationListener locListener = new LocationListener () {
         @Override
@@ -106,7 +107,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         UsuarioCarreraRef = FirebaseDatabase.getInstance ().getReference ().child ( "UsuariosCarreras" ).child ( current_user_id ).child ( PostKey );
         UsCarrInformationRef = FirebaseDatabase.getInstance ().getReference ().child ( "UsuariosCarreras" ).child ( current_user_id ).child ( PostKey );
         CarreraUserInf = FirebaseDatabase.getInstance ().getReference ().child ( "CarrerasRealizadas" );
-        UserRef = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( current_user_id );
+        CarreraRef = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( PostKey );
+
 
         loadingBar = new ProgressDialog ( this );
 
@@ -130,6 +132,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             }
         } );
+        CarreraRef.addValueEventListener ( new ValueEventListener () {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists ()) {
+                    nombrecarrera = dataSnapshot.child ( "maratonname" ).getValue ().toString ();
+                    imagencarrera = dataSnapshot.child ( "maratonimage" ).getValue ().toString ();
+                    descripcion = dataSnapshot.child ( "description" ).getValue ().toString ();
+                    uid = dataSnapshot.child ( "uid" ).getValue ().toString ();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        } );
+        CarreraRef.removeEventListener ( new ValueEventListener () {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        } );
     }
 
     @Override
@@ -150,6 +178,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 inicio.setEnabled ( false );
                 fin.setEnabled ( true );
                 miUbicacion ();
+                HashMap carrusr = new HashMap ();
+                carrusr.put ( "nombre", nombrecarrera );
+                carrusr.put ( "imagen", imagencarrera );
+                carrusr.put ( "descripcion", descripcion );
+                carrusr.put ( "uid", uid );
+
+                CarreraUserInf.child ( "Usuarios" ).child ( current_user_id ).child ( PostKey ).updateChildren ( carrusr );
                 if (location != null) SavingInformation ( location );
 
             } else {
@@ -259,7 +294,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             lat = location.getLatitude ();
             log = location.getLongitude ();
-            vel = 2.0;
+            vel = location.getSpeed ();
             Location locationA = new Location ( "punto A" );
             locationA.setLatitude ( Double.parseDouble ( latitudA ) );
             locationA.setLongitude ( Double.parseDouble ( longitudA ) );
@@ -277,14 +312,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             if (countPost == 1) {
                 distance = (float) 0.0;
+                HashMap inscrito = new HashMap ();
+                inscrito.put ( "inscrito", "false" );
+                UsuarioCarreraRef.updateChildren ( inscrito );
             }
 
-            if (distance > 10) {
+            if (distance > 500) {
                 kilometro = kilometro + 1;
                 contguardada = countPost - contguardada;
                 float velocidadkilometro = velocidadtotal / contguardada;
                 GuardarInformacionKilometro ( kilometro, velocidadkilometro, tiempo, saveCurrenTime );
-                distance = distance - 10;
+                distance = distance - 500;
                 velocidadtotal = (float) vel;
             }
 

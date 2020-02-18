@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -29,14 +30,13 @@ public class MaratonActivity extends AppCompatActivity {
 
 
     private RecyclerView postList;
+    private Toolbar mToolbar;
 
     private FirebaseAuth mAuth;
-    private DatabaseReference UsersRef, MaratonRef, RegistrarUsuario;
+    private DatabaseReference UsersRef, MaratonRef;
     private FirebaseRecyclerAdapter firebaseRecyclerAdapter;
 
     private String current_user_id;
-    private boolean inscrito = false;
-    private int eliminarrow = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +49,10 @@ public class MaratonActivity extends AppCompatActivity {
             UsersRef = FirebaseDatabase.getInstance ().getReference ().child ( "Users" );
             MaratonRef = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" );
 
+            mToolbar = findViewById ( R.id.maraton_toolbar );
+            setSupportActionBar ( mToolbar );
+            getSupportActionBar ().setTitle ( "Carreras" );
+            getSupportActionBar ().setDisplayHomeAsUpEnabled ( true );
 
             postList = findViewById ( R.id.all_maraton_list );
             postList.setHasFixedSize ( true );
@@ -93,7 +97,6 @@ public class MaratonActivity extends AppCompatActivity {
                         }
                     }
                 }
-
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) {
 
