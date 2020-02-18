@@ -12,6 +12,7 @@ import android.os.SystemClock;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Chronometer;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -23,7 +24,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -58,10 +59,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Location location;
     private LocationManager locationManager;
     private Button inicio, fin;
+    private TextView mensaje;
     private Chronometer cronometro;
     private int kilometro = 0;
     private boolean iniciar = false;
-    private String imagencarrera, nombrecarrera, uid, descripcion;
+    private String imagencarrera, nombrecarrera, uid, descripcion, estado;
 
     LocationListener locListener = new LocationListener () {
         @Override
@@ -100,6 +102,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         inicio = findViewById ( R.id.inicio_button );
         fin = findViewById ( R.id.fin_button );
         cronometro = findViewById ( R.id.cronometro );
+        mensaje = findViewById ( R.id.monitor_message );
 
         mAuth = FirebaseAuth.getInstance ();
         current_user_id = mAuth.getCurrentUser ().getUid ();
@@ -118,9 +121,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         inicio.setOnClickListener ( new View.OnClickListener () {
             @Override
             public void onClick(View v) {
-
                 iniciar = true;
-
                 Monitorear ( true );
             }
         } );
@@ -132,6 +133,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             }
         } );
+        inicio.setVisibility ( View.INVISIBLE );
+        fin.setVisibility ( View.INVISIBLE );
+        mensaje.setVisibility ( View.INVISIBLE );
+
         CarreraRef.addValueEventListener ( new ValueEventListener () {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -140,17 +145,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     imagencarrera = dataSnapshot.child ( "maratonimage" ).getValue ().toString ();
                     descripcion = dataSnapshot.child ( "description" ).getValue ().toString ();
                     uid = dataSnapshot.child ( "uid" ).getValue ().toString ();
+                    estado = dataSnapshot.child ( "estado" ).getValue ().toString ();
+                    if (estado.equals ( "true" )) {
+                        Monitorear ( false );
+                        if (location != null) SavingInformation ( location );
+
+                        inicio.setVisibility ( View.INVISIBLE );
+                        fin.setVisibility ( View.INVISIBLE );
+                        mensaje.setVisibility ( View.VISIBLE );
+                        mensaje.setText ( "La carrera a terminado. Mire sus datos en sus carreras realizadas" );
+
+                    } else {
+                        inicio.setVisibility ( View.VISIBLE );
+                        fin.setVisibility ( View.VISIBLE );
+                        mensaje.setText ( "" );
+
+                    }
                 }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        } );
-        CarreraRef.removeEventListener ( new ValueEventListener () {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
             }
 
             @Override
@@ -178,21 +189,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 inicio.setEnabled ( false );
                 fin.setEnabled ( true );
                 miUbicacion ();
-                HashMap carrusr = new HashMap ();
-                carrusr.put ( "nombre", nombrecarrera );
-                carrusr.put ( "imagen", imagencarrera );
-                carrusr.put ( "descripcion", descripcion );
-                carrusr.put ( "uid", uid );
-
-                CarreraUserInf.child ( "Usuarios" ).child ( current_user_id ).child ( PostKey ).updateChildren ( carrusr );
-                if (location != null) SavingInformation ( location );
-
+                mensaje.setText ( "" );
             } else {
                 locationManager.removeUpdates ( locListener );
                 inicio.setEnabled ( true );
                 fin.setEnabled ( false );
                 if (location != null) SavingInformation ( location );
-
                 GuardarInformacionFinal ();
             }
         } catch (Exception e) {
@@ -202,14 +204,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void agrerarMarcador(double lat, double log) {
         try {
             LatLng coordenada = new LatLng ( lat, log );
-            CameraUpdate miUbicacion = CameraUpdateFactory.newLatLngZoom ( coordenada, 18 );
+
             if (marcador != null) marcador.remove ();
             marcador = mMap.addMarker ( new MarkerOptions ()
                     .position ( coordenada )
                     .title ( "Mi posision actual" )
-                    .icon ( BitmapDescriptorFactory.fromResource ( R.mipmap.ic_launcher ) ) );
+            );
+            CameraUpdate miUbicacion = CameraUpdateFactory.newLatLngZoom ( coordenada, 18 );
+            CameraPosition cameraPosition = CameraPosition.builder ().
+                    target ( coordenada ).zoom ( 17 ).build ();
             mMap.animateCamera ( miUbicacion );
+            mMap.moveCamera ( CameraUpdateFactory.newCameraPosition ( cameraPosition ) );
         } catch (Exception e) {
+            String error = "ERROR";
         }
 
     }
@@ -317,12 +324,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 UsuarioCarreraRef.updateChildren ( inscrito );
             }
 
-            if (distance > 500) {
+            if (distance > 10) {
                 kilometro = kilometro + 1;
                 contguardada = countPost - contguardada;
                 float velocidadkilometro = velocidadtotal / contguardada;
                 GuardarInformacionKilometro ( kilometro, velocidadkilometro, tiempo, saveCurrenTime );
-                distance = distance - 500;
+                distance = distance - 10;
                 velocidadtotal = (float) vel;
             }
 
@@ -405,6 +412,77 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void GuardarInformacionFinal() {
+
+        UsCarrInformationRef.addValueEventListener ( new ValueEventListener () {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                if (dataSnapshot.exists ()) {
+                    if (dataSnapshot.hasChild ( "inscrito" )) {
+                        if (dataSnapshot.child ( "inscrito" ).getValue ().toString ().equals ( "false" )) {
+                            inicio.setVisibility ( View.INVISIBLE );
+                            fin.setVisibility ( View.INVISIBLE );
+                            mensaje.setVisibility ( View.VISIBLE );
+                            mensaje.setText ( "Usted a finalizado la transmision. Mire sus datos en sus carreras realizadas" );
+                        } else {
+                            inicio.setVisibility ( View.INVISIBLE );
+                            fin.setVisibility ( View.INVISIBLE );
+                            mensaje.setVisibility ( View.VISIBLE );
+                            mensaje.setText ( "Se produjo un error mientras intentabamos monitorear su participacion. Lamentamos los inconvenientes" );
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        } );
+
+        UsCarrInformationRef.removeEventListener ( new ValueEventListener () {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists ()) {
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
+        } );
+
+
+        if (location != null) SavingInformation ( location );
+
+        CarreraUserInf.child ( "Usuarios" ).child ( current_user_id ).child ( PostKey ).addValueEventListener ( new ValueEventListener () {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                if (dataSnapshot.exists ()) {
+                    HashMap carrusr = new HashMap ();
+                    carrusr.put ( "nombre", nombrecarrera );
+                    carrusr.put ( "imagen", imagencarrera );
+                    carrusr.put ( "descripcion", descripcion );
+                    carrusr.put ( "uid", uid );
+                    CarreraUserInf.child ( "Usuarios" ).child ( current_user_id ).child ( PostKey ).updateChildren ( carrusr );
+                } else {
+                    inicio.setVisibility ( View.INVISIBLE );
+                    fin.setVisibility ( View.INVISIBLE );
+                    mensaje.setVisibility ( View.VISIBLE );
+                    mensaje.setText ( "Se produjo un error mientras intentabamos monitorear su participacion. Lamentamos los inconvenientes" );
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        } );
+
+
+
     }
 
 }

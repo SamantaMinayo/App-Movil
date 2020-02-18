@@ -31,7 +31,7 @@ public class ClickMaratonActivity extends AppCompatActivity {
     private TextView maratonName, maratondescription, maratondate, maratontime, maratoncontactname, maratoncontactnumber, maratonPlace, mensaje;
     private Button registermaratonButton, cancelregistermaratonButton, monitorearmaratonButton;
 
-    private DatabaseReference ClickMaratonRef, UsuarioInscrito, RegistrarUsuario;
+    private DatabaseReference ClickMaratonRef, UsuarioInscrito, RegistrarUsuario, CarreraUserInf;
     private FirebaseAuth mAuth;
 
     private String smaratonName, smaratondescription, smaratondate, smaratontime, smaratoncontactname, smaratoncontactnumber, smaratonImage, smaratonPlace, smaratonUid;
@@ -50,6 +50,8 @@ public class ClickMaratonActivity extends AppCompatActivity {
 
             PostKey = getIntent ().getExtras ().get ( "PostKey" ).toString ();
             ClickMaratonRef = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( PostKey );
+            CarreraUserInf = FirebaseDatabase.getInstance ().getReference ().child ( "CarrerasRealizadas" ).child ( "Usuarios" ).child ( current_user_id );
+            UsuarioInscrito = FirebaseDatabase.getInstance ().getReference ().child ( "UsuariosCarreras" ).child ( current_user_id );
 
             maratonImage = findViewById ( R.id.maraton_image_principal );
             maratonName = findViewById ( R.id.maraton_name_principal );
@@ -67,9 +69,6 @@ public class ClickMaratonActivity extends AppCompatActivity {
 
             registermaratonButton = findViewById ( R.id.register_maraton_button );
             cancelregistermaratonButton = findViewById ( R.id.cancel_register_maraton_button );
-
-            registermaratonButton.setVisibility ( View.INVISIBLE );
-            cancelregistermaratonButton.setVisibility ( View.INVISIBLE );
 
             registermaratonButton.setVisibility ( View.INVISIBLE );
             cancelregistermaratonButton.setVisibility ( View.INVISIBLE );
@@ -116,42 +115,73 @@ public class ClickMaratonActivity extends AppCompatActivity {
                         if (dataSnapshot.hasChild ( "uid" )) {
                             smaratonUid = dataSnapshot.child ( "uid" ).getValue ().toString ();
                         }
+                        if (dataSnapshot.hasChild ( "estado" )) {
+                            if (dataSnapshot.child ( "estado" ).getValue ().toString ().equals ( "true" )) {
+                                registermaratonButton.setVisibility ( View.INVISIBLE );
+                                cancelregistermaratonButton.setVisibility ( View.INVISIBLE );
+                                monitorearmaratonButton.setVisibility ( View.INVISIBLE );
+                                mensaje.setText ( "Carrera ya Realizada" );
+                            } else {
+                                UsuarioInscrito.addValueEventListener ( new ValueEventListener () {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        RegistrarUsuario = FirebaseDatabase.getInstance ().getReference ().child ( "UsuariosCarreras" ).child ( current_user_id ).child ( smaratonUid );
 
+                                        if (dataSnapshot.exists ()) {
+                                            if (dataSnapshot.hasChild ( smaratonUid )) {
+                                                String prueba = (String) dataSnapshot.child ( smaratonUid ).child ( "inscrito" ).getValue ();
+                                                if (prueba.equals ( "true" )) {
+                                                    registermaratonButton.setVisibility ( View.INVISIBLE );
+                                                    cancelregistermaratonButton.setVisibility ( View.VISIBLE );
+                                                    monitorearmaratonButton.setVisibility ( View.VISIBLE );
+                                                    mensaje.setText ( "USUARIO INSCRITO EXITOSAMENTE!" );
+                                                } else {
+                                                    registermaratonButton.setVisibility ( View.INVISIBLE );
+                                                    cancelregistermaratonButton.setVisibility ( View.INVISIBLE );
+                                                    monitorearmaratonButton.setVisibility ( View.INVISIBLE );
+                                                    mensaje.setText ( "USTED YA REGISTRO DATOS EN ESTA CARRERA." );
+                                                }
 
-                        UsuarioInscrito = FirebaseDatabase.getInstance ().getReference ().child ( "UsuariosCarreras" ).child ( current_user_id );
+                                            } else {
+                                                registermaratonButton.setVisibility ( View.VISIBLE );
+                                                cancelregistermaratonButton.setVisibility ( View.INVISIBLE );
+                                                monitorearmaratonButton.setVisibility ( View.INVISIBLE );
+                                                mensaje.setText ( "" );
+                                            }
+                                        } else {
+                                            CarreraUserInf.addValueEventListener ( new ValueEventListener () {
+                                                @Override
+                                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                    if (dataSnapshot.exists ()) {
+                                                        registermaratonButton.setVisibility ( View.INVISIBLE );
+                                                        cancelregistermaratonButton.setVisibility ( View.INVISIBLE );
+                                                        monitorearmaratonButton.setVisibility ( View.INVISIBLE );
+                                                        mensaje.setText ( "USTED YA REGISTRO DATOS EN ESTA CARRERA." );
+                                                    } else {
+                                                        registermaratonButton.setVisibility ( View.VISIBLE );
+                                                        cancelregistermaratonButton.setVisibility ( View.INVISIBLE );
+                                                        monitorearmaratonButton.setVisibility ( View.INVISIBLE );
+                                                        mensaje.setText ( "" );
+                                                    }
+                                                }
 
-                        UsuarioInscrito.addValueEventListener ( new ValueEventListener () {
-                            @Override
-                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                RegistrarUsuario = FirebaseDatabase.getInstance ().getReference ().child ( "UsuariosCarreras" ).child ( current_user_id ).child ( smaratonUid );
+                                                @Override
+                                                public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                                if (dataSnapshot.hasChild ( smaratonUid )) {
-                                    String prueba = (String) dataSnapshot.child ( smaratonUid ).child ( "inscrito" ).getValue ();
-                                    if (prueba.equals ( "true" )) {
-                                        registermaratonButton.setVisibility ( View.INVISIBLE );
-                                        cancelregistermaratonButton.setVisibility ( View.VISIBLE );
-                                        monitorearmaratonButton.setVisibility ( View.VISIBLE );
-                                        mensaje.setText ( "USUARIO INSCRITO EXITOSAMENTE!" );
-                                    } else {
-                                        registermaratonButton.setVisibility ( View.INVISIBLE );
-                                        cancelregistermaratonButton.setVisibility ( View.INVISIBLE );
-                                        monitorearmaratonButton.setVisibility ( View.INVISIBLE );
-                                        mensaje.setText ( "USTED YA REGISTRO DATOS EN ESTA CARRERA." );
+                                                }
+                                            } );
+                                        }
                                     }
 
-                                } else {
-                                    registermaratonButton.setVisibility ( View.VISIBLE );
-                                    cancelregistermaratonButton.setVisibility ( View.INVISIBLE );
-                                    monitorearmaratonButton.setVisibility ( View.INVISIBLE );
-                                    mensaje.setText ( "" );
-                                }
-                            }
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                            @Override
-                            public void onCancelled(@NonNull DatabaseError databaseError) {
+                                    }
+                                } );
+
 
                             }
-                        } );
+                        }
                     }
                 }
 
@@ -160,6 +190,7 @@ public class ClickMaratonActivity extends AppCompatActivity {
 
                 }
             } );
+
 
             registermaratonButton.setOnClickListener ( new View.OnClickListener () {
                 @Override

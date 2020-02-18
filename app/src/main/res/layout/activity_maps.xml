@@ -13,10 +13,19 @@
         android:layout_height="40dp"
         android:layout_below="@+id/map"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="20dp"
         android:background="@drawable/button"
         android:padding="10dp"
         android:text="INICIO" />
+
+    <TextView
+        android:id="@+id/monitor_message"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_below="@id/map"
+        android:layout_marginTop="20dp"
+        android:text=""
+        android:textAlignment="center" />
 
     <Button
         android:id="@+id/fin_button"
@@ -44,7 +53,7 @@
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="350dp"
         android:layout_below="@+id/cronometro"
         android:layout_margin="5px" />
 
