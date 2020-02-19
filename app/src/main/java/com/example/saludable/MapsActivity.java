@@ -24,7 +24,6 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -50,7 +49,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private String longitudinicial = "0.0", distanciat = "0.0", velocidadt = "0.0";
     private GoogleMap mMap;
     private Marker marcador;
-    private DatabaseReference UsuarioCarreraRef, UsCarrInformationRef, CarreraUserInf, CarreraRef;
+    private DatabaseReference UsuarioCarreraRef, UsCarrInformationRef, CarreraUserInf, CarreraRef, RegistrarUsuario;
     private FirebaseAuth mAuth;
     private String PostKey, current_user_id, saveCurrenTime;
     private long countPost = 1;
@@ -92,97 +91,105 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate ( savedInstanceState );
-        setContentView ( R.layout.activity_maps );
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager ()
-                .findFragmentById ( R.id.map );
-        mapFragment.getMapAsync ( this );
 
-        inicio = findViewById ( R.id.inicio_button );
-        fin = findViewById ( R.id.fin_button );
-        cronometro = findViewById ( R.id.cronometro );
-        mensaje = findViewById ( R.id.monitor_message );
+        try {
 
-        mAuth = FirebaseAuth.getInstance ();
-        current_user_id = mAuth.getCurrentUser ().getUid ();
-        PostKey = getIntent ().getExtras ().get ( "PostKey" ).toString ();
-        UsuarioCarreraRef = FirebaseDatabase.getInstance ().getReference ().child ( "UsuariosCarreras" ).child ( current_user_id ).child ( PostKey );
-        UsCarrInformationRef = FirebaseDatabase.getInstance ().getReference ().child ( "UsuariosCarreras" ).child ( current_user_id ).child ( PostKey );
-        CarreraUserInf = FirebaseDatabase.getInstance ().getReference ().child ( "CarrerasRealizadas" );
-        CarreraRef = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( PostKey );
+            super.onCreate ( savedInstanceState );
+            setContentView ( R.layout.activity_maps );
+            // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager ()
+                    .findFragmentById ( R.id.map );
+            mapFragment.getMapAsync ( this );
 
+            inicio = findViewById ( R.id.inicio_button );
+            fin = findViewById ( R.id.fin_button );
+            cronometro = findViewById ( R.id.cronometro );
+            mensaje = findViewById ( R.id.monitor_message );
 
-        loadingBar = new ProgressDialog ( this );
+            mAuth = FirebaseAuth.getInstance ();
+            current_user_id = mAuth.getCurrentUser ().getUid ();
+            PostKey = getIntent ().getExtras ().get ( "PostKey" ).toString ();
+            UsuarioCarreraRef = FirebaseDatabase.getInstance ().getReference ().child ( "UsuariosCarreras" ).child ( current_user_id ).child ( PostKey );
+            UsCarrInformationRef = FirebaseDatabase.getInstance ().getReference ().child ( "UsuariosCarreras" ).child ( current_user_id ).child ( PostKey );
+            CarreraUserInf = FirebaseDatabase.getInstance ().getReference ().child ( "CarrerasRealizadas" );
+            CarreraRef = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( PostKey );
+            RegistrarUsuario = FirebaseDatabase.getInstance ().getReference ().child ( "UsuariosCarreras" ).child ( current_user_id ).child ( PostKey );
 
-        inicio.setEnabled ( true );
-        fin.setEnabled ( false );
+            loadingBar = new ProgressDialog ( this );
 
-        inicio.setOnClickListener ( new View.OnClickListener () {
-            @Override
-            public void onClick(View v) {
-                iniciar = true;
-                Monitorear ( true );
-            }
-        } );
-        fin.setOnClickListener ( new View.OnClickListener () {
-            @Override
-            public void onClick(View v) {
-                iniciar = false;
-                Monitorear ( false );
+            inicio.setEnabled ( true );
+            fin.setEnabled ( false );
 
-            }
-        } );
-        inicio.setVisibility ( View.INVISIBLE );
-        fin.setVisibility ( View.INVISIBLE );
-        mensaje.setVisibility ( View.INVISIBLE );
+            inicio.setOnClickListener ( new View.OnClickListener () {
+                @Override
+                public void onClick(View v) {
+                    iniciar = true;
+                    Monitorear ( true );
+                }
+            } );
+            fin.setOnClickListener ( new View.OnClickListener () {
+                @Override
+                public void onClick(View v) {
+                    iniciar = false;
+                    Monitorear ( false );
 
-        CarreraRef.addValueEventListener ( new ValueEventListener () {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists ()) {
-                    nombrecarrera = dataSnapshot.child ( "maratonname" ).getValue ().toString ();
-                    imagencarrera = dataSnapshot.child ( "maratonimage" ).getValue ().toString ();
-                    descripcion = dataSnapshot.child ( "description" ).getValue ().toString ();
-                    uid = dataSnapshot.child ( "uid" ).getValue ().toString ();
-                    estado = dataSnapshot.child ( "estado" ).getValue ().toString ();
-                    if (estado.equals ( "true" )) {
-                        Monitorear ( false );
-                        if (location != null) SavingInformation ( location );
+                }
+            } );
+            inicio.setVisibility ( View.INVISIBLE );
+            fin.setVisibility ( View.INVISIBLE );
+            mensaje.setVisibility ( View.INVISIBLE );
 
-                        inicio.setVisibility ( View.INVISIBLE );
-                        fin.setVisibility ( View.INVISIBLE );
-                        mensaje.setVisibility ( View.VISIBLE );
-                        mensaje.setText ( "La carrera a terminado. Mire sus datos en sus carreras realizadas" );
+            CarreraRef.addValueEventListener ( new ValueEventListener () {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    if (dataSnapshot.exists ()) {
+                        nombrecarrera = dataSnapshot.child ( "maratonname" ).getValue ().toString ();
+                        imagencarrera = dataSnapshot.child ( "maratonimage" ).getValue ().toString ();
+                        descripcion = dataSnapshot.child ( "description" ).getValue ().toString ();
+                        uid = dataSnapshot.child ( "uid" ).getValue ().toString ();
+                        estado = dataSnapshot.child ( "estado" ).getValue ().toString ();
+                        if (estado.equals ( "true" )) {
+                            Monitorear ( false );
+                            if (location != null) SavingInformation ( location );
 
-                    } else {
-                        inicio.setVisibility ( View.VISIBLE );
-                        fin.setVisibility ( View.VISIBLE );
-                        mensaje.setText ( "" );
+                            inicio.setVisibility ( View.INVISIBLE );
+                            fin.setVisibility ( View.INVISIBLE );
+                            mensaje.setVisibility ( View.VISIBLE );
+                            mensaje.setText ( "La carrera a terminado. Mire sus datos en sus carreras realizadas" );
 
+                        } else {
+                            inicio.setVisibility ( View.VISIBLE );
+                            fin.setVisibility ( View.VISIBLE );
+                            mensaje.setText ( "" );
+
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
 
-            }
-        } );
+                }
+            } );
+        } catch (Exception e) {
+        }
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-        location = null;
-        miUbicacion ();
+        try {
+
+            mMap = googleMap;
+            location = null;
+            miUbicacion ();
+        } catch (Exception e) {
+        }
+
     }
 
     private void Monitorear(boolean b) {
         try {
-            if (ActivityCompat.checkSelfPermission ( this, Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission ( this, Manifest.permission.ACCESS_COARSE_LOCATION ) != PackageManager.PERMISSION_GRANTED) {
-                return;
-            }
+
             if (b == true) {
                 cronometro.setBase ( SystemClock.elapsedRealtime () );
                 cronometro.start ();
@@ -204,17 +211,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void agrerarMarcador(double lat, double log) {
         try {
             LatLng coordenada = new LatLng ( lat, log );
+            CameraUpdate miUbicacion = CameraUpdateFactory.newLatLngZoom ( coordenada, 17 );
 
             if (marcador != null) marcador.remove ();
             marcador = mMap.addMarker ( new MarkerOptions ()
                     .position ( coordenada )
                     .title ( "Mi posision actual" )
             );
-            CameraUpdate miUbicacion = CameraUpdateFactory.newLatLngZoom ( coordenada, 18 );
-            CameraPosition cameraPosition = CameraPosition.builder ().
-                    target ( coordenada ).zoom ( 17 ).build ();
             mMap.animateCamera ( miUbicacion );
-            mMap.moveCamera ( CameraUpdateFactory.newCameraPosition ( cameraPosition ) );
         } catch (Exception e) {
             String error = "ERROR";
         }
@@ -238,9 +242,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 return;
             }
             locationManager = (LocationManager) getSystemService ( Context.LOCATION_SERVICE );
-            location = locationManager.getLastKnownLocation ( LocationManager.GPS_PROVIDER );
+            location = locationManager.getLastKnownLocation ( LocationManager.NETWORK_PROVIDER );
             actualizarUbicacion ( location );
-            locationManager.requestLocationUpdates ( LocationManager.GPS_PROVIDER, 20000, 0, locListener );
+            if (iniciar == false) {
+                locationManager.requestLocationUpdates ( LocationManager.NETWORK_PROVIDER, 20000, 0, locListener );
+            }
+            String error = "ERROR";
+
         } catch (Exception e) {
         }
     }
@@ -429,6 +437,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             fin.setVisibility ( View.INVISIBLE );
                             mensaje.setVisibility ( View.VISIBLE );
                             mensaje.setText ( "Se produjo un error mientras intentabamos monitorear su participacion. Lamentamos los inconvenientes" );
+                            EliminarRegistros ();
                         }
                     }
                 }
@@ -471,7 +480,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     fin.setVisibility ( View.INVISIBLE );
                     mensaje.setVisibility ( View.VISIBLE );
                     mensaje.setText ( "Se produjo un error mientras intentabamos monitorear su participacion. Lamentamos los inconvenientes" );
-
+                    EliminarRegistros ();
                 }
             }
 
@@ -480,10 +489,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             }
         } );
-
-
-
     }
 
+    public void EliminarRegistros() {
+        loadingBar.setTitle ( "Cancelar Inscripcion" );
+        loadingBar.setMessage ( "Espere mientras cancelamos su inscripcion en la carrera." );
+        loadingBar.setCanceledOnTouchOutside ( true );
+        loadingBar.show ();
+        RegistrarUsuario.removeValue ();
+    }
 }
 

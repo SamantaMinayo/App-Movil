@@ -5,35 +5,25 @@
     <item
         android:id="@+id/nav_profile"
         android:icon="@drawable/profile_icon"
-        android:title="Profile" />
-    <item
-        android:id="@+id/nav_post"
-        android:icon="@drawable/country"
-        android:title="Add New Post" />
+        android:title="Perfil" />
     <item
         android:id="@+id/nav_home"
         android:icon="@drawable/home"
-        android:title="Home" />
+        android:title="Pagina de Inicio" />
     <item
         android:id="@+id/nav_marathon"
         android:icon="@drawable/friends"
-        android:title="Marathon" />
+        android:title="Mis Carreras" />
     <item
         android:id="@+id/nav_find_marathon"
-
-        android:title="Find Marathon" />
-    <item
-        android:id="@+id/nav_message"
-        android:icon="@drawable/messages"
-        android:title="Message" />
+        android:icon="@drawable/friends"
+        android:title="Buscar Carreras" />
     <item
         android:id="@+id/nav_settings"
         android:icon="@drawable/settings"
-        android:title="Settings" />
+        android:title="Configuraciones de Perfil" />
     <item
         android:id="@+id/nav_Logout"
         android:icon="@drawable/logout"
-        android:title="Logout" />
-
-
+        android:title="Cerrar Sesion" />
 </menu>

@@ -212,8 +212,6 @@ public class MainActivity extends AppCompatActivity {
     private void UserMenuSelector(MenuItem item) {
         try {
             switch (item.getItemId ()) {
-                case R.id.nav_post:
-                    break;
                 case R.id.nav_profile:
                     SendUsertoProfileActivity ();
                     break;
@@ -225,9 +223,6 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case R.id.nav_find_marathon:
                     SendUserToMaratonActivity ();
-                    break;
-                case R.id.nav_message:
-                    Toast.makeText ( this, "Messages", Toast.LENGTH_SHORT ).show ();
                     break;
                 case R.id.nav_settings:
                     SendUserToSettingsActivity ();
