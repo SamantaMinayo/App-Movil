@@ -34,7 +34,7 @@ public class ClickMaratonActivity extends AppCompatActivity {
     private DatabaseReference ClickMaratonRef, UsuarioInscrito, RegistrarUsuario, CarreraUserInf;
     private FirebaseAuth mAuth;
 
-    private String smaratonName, smaratondescription, smaratondate, smaratontime, smaratoncontactname, smaratoncontactnumber, smaratonImage, smaratonPlace, smaratonUid;
+    private String smaratonName, smaratondescription, smaratondate, smaratontime, smaratoncontactname, smaratoncontactnumber, smaratonImage, smaratonPlace;
     private String PostKey, current_user_id;
 
     private ProgressDialog loadingBar;
@@ -52,7 +52,7 @@ public class ClickMaratonActivity extends AppCompatActivity {
             ClickMaratonRef = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( PostKey );
             CarreraUserInf = FirebaseDatabase.getInstance ().getReference ().child ( "CarrerasRealizadas" ).child ( "Usuarios" ).child ( current_user_id ).child ( PostKey );
             UsuarioInscrito = FirebaseDatabase.getInstance ().getReference ().child ( "UsuariosCarreras" ).child ( current_user_id );
-
+            RegistrarUsuario = FirebaseDatabase.getInstance ().getReference ().child ( "UsuariosCarreras" ).child ( current_user_id ).child ( PostKey );
             maratonImage = findViewById ( R.id.maraton_image_principal );
             maratonName = findViewById ( R.id.maraton_name_principal );
             maratondescription = findViewById ( R.id.maraton_description_principal );
@@ -123,11 +123,10 @@ public class ClickMaratonActivity extends AppCompatActivity {
                                 UsuarioInscrito.addValueEventListener ( new ValueEventListener () {
                                     @Override
                                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                        RegistrarUsuario = FirebaseDatabase.getInstance ().getReference ().child ( "UsuariosCarreras" ).child ( current_user_id ).child ( PostKey );
 
                                         if (dataSnapshot.exists ()) {
-                                            if (dataSnapshot.hasChild ( smaratonUid )) {
-                                                String prueba = (String) dataSnapshot.child ( smaratonUid ).child ( "inscrito" ).getValue ();
+                                            if (dataSnapshot.hasChild ( PostKey )) {
+                                                String prueba = (String) dataSnapshot.child ( PostKey ).child ( "inscrito" ).getValue ();
                                                 if (prueba.equals ( "true" )) {
                                                     registermaratonButton.setVisibility ( View.INVISIBLE );
                                                     cancelregistermaratonButton.setVisibility ( View.VISIBLE );

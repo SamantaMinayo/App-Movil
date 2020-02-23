@@ -7,15 +7,15 @@ public class MiMaraton {
     public ArrayList<String> velocidad;
     public String nombre;
     public String uid;
-    public String image;
+    public String imagen;
     public String descripcion;
 
-    public MiMaraton(ArrayList<String> tiempo, ArrayList<String> velocidad, String nombre, String uid, String image, String descripcion) {
+    public MiMaraton(ArrayList<String> tiempo, ArrayList<String> velocidad, String nombre, String uid, String imagen, String descripcion) {
         this.tiempo = tiempo;
         this.velocidad = velocidad;
         this.nombre = nombre;
         this.uid = uid;
-        this.image = image;
+        this.imagen = imagen;
         this.descripcion = descripcion;
     }
 
@@ -55,12 +55,12 @@ public class MiMaraton {
         this.uid = uid;
     }
 
-    public String getImage() {
-        return image;
+    public String getImagen() {
+        return imagen;
     }
 
-    public void setImage(String image) {
-        this.image = image;
+    public void setImagen(String imagen) {
+        this.imagen = imagen;
     }
 
     public String getDescripcion() {

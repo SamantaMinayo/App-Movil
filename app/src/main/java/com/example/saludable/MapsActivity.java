@@ -246,6 +246,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             actualizarUbicacion ( location );
             if (iniciar == false) {
                 locationManager.requestLocationUpdates ( LocationManager.NETWORK_PROVIDER, 20000, 0, locListener );
+            } else {
+                SavingInformation ( location );
             }
             String error = "ERROR";
 

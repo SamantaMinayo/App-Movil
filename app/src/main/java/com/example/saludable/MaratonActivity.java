@@ -19,11 +19,8 @@ import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 public class MaratonActivity extends AppCompatActivity {
@@ -33,7 +30,7 @@ public class MaratonActivity extends AppCompatActivity {
     private Toolbar mToolbar;
 
     private FirebaseAuth mAuth;
-    private DatabaseReference UsersRef, MaratonRef;
+    private DatabaseReference MaratonRef;
     private FirebaseRecyclerAdapter firebaseRecyclerAdapter;
 
     private String current_user_id;
@@ -46,7 +43,6 @@ public class MaratonActivity extends AppCompatActivity {
 
             mAuth = FirebaseAuth.getInstance ();
 
-            UsersRef = FirebaseDatabase.getInstance ().getReference ().child ( "Users" );
             MaratonRef = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" );
 
             mToolbar = findViewById ( R.id.maraton_toolbar );
@@ -76,44 +72,9 @@ public class MaratonActivity extends AppCompatActivity {
         if (currentUser == null) {
             SendUserTologinActivity ();
         } else {
-            CheckUserExistence ();
-            firebaseRecyclerAdapter.startListening ();
-        }
-    }
-
-
-    private void CheckUserExistence() {
-        try {
             current_user_id = mAuth.getCurrentUser ().getUid ();
-
-            UsersRef.addValueEventListener ( new ValueEventListener () {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if (!dataSnapshot.hasChild ( current_user_id )) {
-                        SendUserToSetupActivity ();
-                    } else {
-                        if (!dataSnapshot.child ( current_user_id ).hasChild ( "username" )) {
-                            SendUserToSetupActivity ();
-                        }
-                    }
-                }
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            } );
             DisplayAllMaraton ();
-        } catch (Exception e) {
-        }
-    }
-
-    private void SendUserToSetupActivity() {
-        try {
-            Intent setupIntent = new Intent ( MaratonActivity.this, SetupActivity.class );
-            setupIntent.addFlags ( Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK );
-            startActivity ( setupIntent );
-            finish ();
-        } catch (Exception e) {
+            firebaseRecyclerAdapter.startListening ();
         }
     }
 

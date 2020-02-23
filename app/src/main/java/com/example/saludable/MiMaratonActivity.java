@@ -18,11 +18,8 @@ import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -75,44 +72,9 @@ public class MiMaratonActivity extends AppCompatActivity {
         if (currentUser == null) {
             SendUserTologinActivity ();
         } else {
-            CheckUserExistence ();
-            firebaseRecyclerAdapter.startListening ();
-        }
-    }
-
-    private void CheckUserExistence() {
-        try {
             current_user_id = mAuth.getCurrentUser ().getUid ();
-
-            UsersRef.addValueEventListener ( new ValueEventListener () {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if (!dataSnapshot.hasChild ( current_user_id )) {
-                        SendUserToSetupActivity ();
-                    } else {
-                        if (!dataSnapshot.child ( current_user_id ).hasChild ( "username" )) {
-                            SendUserToSetupActivity ();
-                        }
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            } );
             DisplayAllMiMaraton ();
-        } catch (Exception e) {
-        }
-    }
-
-    private void SendUserToSetupActivity() {
-        try {
-            Intent setupIntent = new Intent ( MiMaratonActivity.this, SetupActivity.class );
-            setupIntent.addFlags ( Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK );
-            startActivity ( setupIntent );
-            finish ();
-        } catch (Exception e) {
+            firebaseRecyclerAdapter.startListening ();
         }
     }
 
@@ -147,13 +109,13 @@ public class MiMaratonActivity extends AppCompatActivity {
 
                             final String PostKey = getRef ( position ).getKey ();
                             maratonViewHolder.setNamecarrera ( maraton.nombre );
-                            maratonViewHolder.setMaratonimage ( getApplication (), maraton.image );
+                            maratonViewHolder.setMaratonimage ( getApplication (), maraton.imagen );
                             maratonViewHolder.setDescription ( maraton.descripcion );
 
                             maratonViewHolder.mView.setOnClickListener ( new View.OnClickListener () {
                                 @Override
                                 public void onClick(View v) {
-                                    Intent clickPostIntent = new Intent ( MiMaratonActivity.this, ClickMaratonActivity.class );
+                                    Intent clickPostIntent = new Intent ( MiMaratonActivity.this, ClickMiMaratonActivity.class );
                                     clickPostIntent.putExtra ( "PostKey", PostKey );
                                     startActivity ( clickPostIntent );
                                 }

@@ -1,2 +1,2 @@
-include ':app', ':jplot1.1'
+include ':app', ':jplot1.1', ':hellocharts-library-1.5.8'
 rootProject.name='Saludable'
