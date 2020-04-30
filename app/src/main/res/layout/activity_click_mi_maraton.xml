@@ -8,29 +8,61 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/mi_perfil_toolbar"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true">
+        android:layout_below="@+id/mi_carrera_toolbar"
+        android:layout_alignParentStart="true">
 
         <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
-
             <TextView
                 android:id="@+id/mi_maraton_name"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="40dp"
                 android:layout_alignParentStart="true"
                 android:layout_marginBottom="10dp"
+                android:text="Nombre Carrera"
                 android:textAlignment="center" />
 
+            <TextView
+                android:id="@+id/graf_tiempo"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_below="@id/mi_maraton_name"
+                android:layout_alignParentStart="true"
+                android:layout_marginBottom="10dp"
+                android:text="Grafica distancia-tiempo"
+                android:textAlignment="center" />
+
+            <TextView
+                android:id="@+id/graf_velocidad"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_alignParentStart="true"
+                android:layout_marginBottom="10dp"
+                android:layout_below="@id/charttime"
+                android:text="Grafica distancia-velocidad"
+                android:textAlignment="center" />
             <lecho.lib.hellocharts.view.LineChartView
-                android:id="@+id/chart"
+                android:id="@+id/charttime"
                 android:layout_width="match_parent"
                 android:layout_height="300dp"
-                android:layout_below="@+id/mi_maraton_name"
+                android:layout_below="@+id/graf_tiempo"
+                android:layout_margin="10dp"
+                android:padding="20dp"
+                android:verticalScrollbarPosition="defaultPosition" />
+
+            <lecho.lib.hellocharts.view.LineChartView
+                android:id="@+id/chartvel"
+                android:layout_below="@+id/graf_velocidad"
+                android:layout_margin="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:padding="20dp"
                 android:verticalScrollbarPosition="defaultPosition" />
         </RelativeLayout>
     </ScrollView>
 
+    <include
+        android:id="@+id/mi_carrera_toolbar"
+        layout="@layout/app_bar_layout"></include>
 </RelativeLayout>

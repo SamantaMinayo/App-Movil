@@ -108,18 +108,21 @@ public class MiMaratonActivity extends AppCompatActivity {
                         protected void onBindViewHolder(MiMaratonActivity.CarreraViewHolder maratonViewHolder, int position, @NonNull MiMaraton maraton) {
 
                             final String PostKey = getRef ( position ).getKey ();
-                            maratonViewHolder.setNamecarrera ( maraton.nombre );
-                            maratonViewHolder.setMaratonimage ( getApplication (), maraton.imagen );
-                            maratonViewHolder.setDescription ( maraton.descripcion );
-
-                            maratonViewHolder.mView.setOnClickListener ( new View.OnClickListener () {
-                                @Override
-                                public void onClick(View v) {
-                                    Intent clickPostIntent = new Intent ( MiMaratonActivity.this, ClickMiMaratonActivity.class );
-                                    clickPostIntent.putExtra ( "PostKey", PostKey );
-                                    startActivity ( clickPostIntent );
+                            if (maraton != null) {
+                                if (!maraton.nombre.isEmpty () && !maraton.imagen.isEmpty () && !maraton.descripcion.isEmpty ()) {
+                                    maratonViewHolder.setNamecarrera ( maraton.nombre );
+                                    maratonViewHolder.setMaratonimage ( getApplication (), maraton.imagen );
+                                    maratonViewHolder.setDescription ( maraton.descripcion );
+                                    maratonViewHolder.mView.setOnClickListener ( new View.OnClickListener () {
+                                        @Override
+                                        public void onClick(View v) {
+                                            Intent clickPostIntent = new Intent ( MiMaratonActivity.this, ClickMiMaratonActivity.class );
+                                            clickPostIntent.putExtra ( "PostKey", PostKey );
+                                            startActivity ( clickPostIntent );
+                                        }
+                                    } );
                                 }
-                            } );
+                            }
                         }
                     };
             postList.setAdapter ( firebaseRecyclerAdapter );

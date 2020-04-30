@@ -8,6 +8,9 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -40,11 +43,13 @@ public class SetupActivity extends AppCompatActivity {
 
     private Button SaveInformation;
     private CircleImageView ProfileImage;
-    private EditText UserName, FullName, Country, Altura, Peso, Edad, Genero;
+    private EditText UserName, FullName, Country, Altura, Peso, Edad;
+    private RadioButton radioButton;
+    private RadioGroup radioGroup;
     private FirebaseAuth mAuth;
     private DatabaseReference UserRef;
     private StorageReference UserProfileImageRef;
-
+    private TextView Genero;
     private ProgressDialog loadingBar;
 
     final static int Gallery_Pick = 1;
@@ -59,9 +64,8 @@ public class SetupActivity extends AppCompatActivity {
 
             mAuth = FirebaseAuth.getInstance ();
             currentUserID = mAuth.getCurrentUser ().getUid ();
-            UserRef = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( currentUserID );
+            UserRef = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( currentUserID ).child ( "Informacion" );
             UserProfileImageRef = FirebaseStorage.getInstance ().getReference ().child ( "ProfileImages" );
-
 
             loadingBar = new ProgressDialog ( this );
 
@@ -71,7 +75,10 @@ public class SetupActivity extends AppCompatActivity {
             Altura = findViewById ( R.id.setup_estatura );
             Peso = findViewById ( R.id.setup_peso );
             Edad = findViewById ( R.id.setup_edad );
+
             Genero = findViewById ( R.id.setup_genero );
+            radioGroup = findViewById ( R.id.radGroup );
+
             SaveInformation = findViewById ( R.id.setup_button );
             ProfileImage = findViewById ( R.id.setup_profile_image );
 
@@ -111,8 +118,17 @@ public class SetupActivity extends AppCompatActivity {
 
                 }
             } );
+
+
         } catch (Exception e) {
         }
+    }
+
+    public void checkButton(View v) {
+        int radioId = radioGroup.getCheckedRadioButtonId ();
+
+        radioButton = findViewById ( radioId );
+        Genero.setText ( radioButton.getText ().toString () );
     }
 
     @Override
@@ -190,6 +206,7 @@ public class SetupActivity extends AppCompatActivity {
         String peso = Peso.getText ().toString ();
         String edad = Edad.getText ().toString ();
         String genero = Genero.getText ().toString ();
+
         if (TextUtils.isEmpty ( username ) || TextUtils.isEmpty ( country ) || TextUtils.isEmpty ( altura ) || TextUtils.isEmpty ( fullname ) || TextUtils.isEmpty ( peso ) || TextUtils.isEmpty ( edad ) || TextUtils.isEmpty ( genero )) {
             Toast.makeText ( this, "Porfavor verifique que todos los campos se encuentren llenos", Toast.LENGTH_SHORT ).show ();
         } else {
@@ -216,22 +233,6 @@ public class SetupActivity extends AppCompatActivity {
             userMap.put ( "imc", imc );
             userMap.put ( "genero", genero );
             userMap.put ( "status", "Here Saludable" );
-            userMap.put ( "gender", "none" );
-            userMap.put ( "dob", "none" );
-            userMap.put ( "relationship", "none" );
-
-            //datos maratones
-            userMap.put ( "tiempopromtotal", "0" );
-            userMap.put ( "tiempopromultimo", "0" );
-            userMap.put ( "velocidadpromtotal", "0" );
-            userMap.put ( "velocidadpromedioultima", "0" );
-            userMap.put ( "distanciatotal", "0" );
-            userMap.put ( "distanciaultima", "0" );
-            //Avance por carrera
-            userMap.put ( "graficavelocidad", "-" );
-            userMap.put ( "graficatiempo", "-" );
-            userMap.put ( "graficapeso", "-" );
-            userMap.put ( "graficacalorias", "-" );
 
             UserRef.updateChildren ( userMap ).addOnCompleteListener ( new OnCompleteListener () {
                 @Override

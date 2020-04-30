@@ -43,7 +43,7 @@
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:textAlignment="center"
-        android:layout_below="@+id/settings_toolbar"
+        android:layout_below="@+id/map_toolbar"
         android:layout_marginTop="20dp"
         android:textColor="@color/colorPrimaryDark"
         android:layout_marginBottom="20dp"
@@ -53,8 +53,12 @@
         android:id="@+id/map"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
-        android:layout_height="350dp"
+        android:layout_height="300dp"
         android:layout_below="@+id/cronometro"
         android:layout_margin="5px" />
+
+    <include
+        android:id="@+id/map_toolbar"
+        layout="@layout/app_bar_layout"></include>
 
 </RelativeLayout>

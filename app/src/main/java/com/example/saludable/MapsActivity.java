@@ -4,10 +4,12 @@ import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import android.view.View;
 import android.widget.Button;
@@ -16,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
@@ -27,6 +30,8 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -63,6 +68,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private int kilometro = 0;
     private boolean iniciar = false;
     private String imagencarrera, nombrecarrera, uid, descripcion, estado;
+    PowerManager powerManager;
+    PowerManager.WakeLock wakelock;
+    private Toolbar mToolbar;
 
     LocationListener locListener = new LocationListener () {
         @Override
@@ -105,6 +113,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             fin = findViewById ( R.id.fin_button );
             cronometro = findViewById ( R.id.cronometro );
             mensaje = findViewById ( R.id.monitor_message );
+            mToolbar = findViewById ( R.id.map_toolbar );
+            mToolbar.setTitle ( "Carrera" );
 
             mAuth = FirebaseAuth.getInstance ();
             current_user_id = mAuth.getCurrentUser ().getUid ();
@@ -115,6 +125,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             CarreraRef = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( PostKey );
             RegistrarUsuario = FirebaseDatabase.getInstance ().getReference ().child ( "UsuariosCarreras" ).child ( current_user_id ).child ( PostKey );
 
+            powerManager = (PowerManager) getSystemService ( POWER_SERVICE );
+            wakelock = powerManager.newWakeLock ( PowerManager.PARTIAL_WAKE_LOCK,
+                    "MyApp::MyWakelockTag" );
+
             loadingBar = new ProgressDialog ( this );
 
             inicio.setEnabled ( true );
@@ -123,6 +137,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             inicio.setOnClickListener ( new View.OnClickListener () {
                 @Override
                 public void onClick(View v) {
+                    wakelock.acquire ();
                     iniciar = true;
                     Monitorear ( true );
                 }
@@ -130,6 +145,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             fin.setOnClickListener ( new View.OnClickListener () {
                 @Override
                 public void onClick(View v) {
+                    wakelock.release ();
                     iniciar = false;
                     Monitorear ( false );
 
@@ -245,7 +261,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             location = locationManager.getLastKnownLocation ( LocationManager.NETWORK_PROVIDER );
             actualizarUbicacion ( location );
             if (iniciar == false) {
-                locationManager.requestLocationUpdates ( LocationManager.NETWORK_PROVIDER, 20000, 0, locListener );
+                locationManager.requestLocationUpdates ( LocationManager.NETWORK_PROVIDER, 10000, 0, locListener );
             } else {
                 SavingInformation ( location );
             }
@@ -278,6 +294,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             if (dataSnapshot.child ( PostKey + cont ).hasChild ( "velocidadtotal" )) {
                                 velocidadt = dataSnapshot.child ( PostKey + cont ).child ( "velocidadtotal" ).getValue ().toString ();
                             }
+
                         }
                     }
                 }
@@ -316,6 +333,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             locationA.setLatitude ( Double.parseDouble ( latitudA ) );
             locationA.setLongitude ( Double.parseDouble ( longitudA ) );
 
+            if ((latitudA == "0.0") && (longitudA == "0.0")) {
+
+            } else {
+                Polyline line = mMap.addPolyline ( new PolylineOptions ()
+                        .add ( new LatLng ( locationA.getLatitude (), locationA.getLongitude () ), new LatLng ( location.getLatitude (), location.getLongitude () ) )
+                        .width ( 5 )
+                        .color ( Color.RED ) );
+            }
+
+
+
             float dist = (float) Double.parseDouble ( distanciatA );
             float distance = locationA.distanceTo ( location ) + dist;
 
@@ -337,6 +365,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             if (distance > 10) {
                 kilometro = kilometro + 1;
                 contguardada = countPost - contguardada;
+                if (contguardada == 0) {
+                    contguardada = 1;
+                }
                 float velocidadkilometro = velocidadtotal / contguardada;
                 GuardarInformacionKilometro ( kilometro, velocidadkilometro, tiempo, saveCurrenTime );
                 distance = distance - 10;

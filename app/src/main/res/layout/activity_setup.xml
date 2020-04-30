@@ -17,118 +17,175 @@
             android:layout_height="match_parent">
 
             <Button
-        android:id="@+id/setup_button"
-        android:layout_width="200dp"
-        android:layout_height="40dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="550dp"
-        android:background="@drawable/button"
-        android:padding="10dp"
-        android:text="SAVE" />
+                android:id="@+id/setup_button"
+                android:layout_width="200dp"
+                android:layout_height="40dp"
+                android:layout_below="@+id/radGroup"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="15dp"
+                android:background="@drawable/button"
+                android:padding="10dp"
+                android:text="SAVE" />
 
-    <EditText
-        android:id="@+id/setup_username"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="200dp"
-        android:background="@drawable/inputs"
-        android:drawableLeft="@drawable/username"
-        android:ems="10"
-        android:hint="Username"
-        android:padding="10dp" />
+            <EditText
+                android:id="@+id/setup_username"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_below="@+id/setup_profile_image"
+                android:layout_centerHorizontal="true"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginRight="20dp"
+                android:background="@drawable/inputs"
+                android:drawableLeft="@drawable/username"
+                android:ems="10"
+                android:hint="Username"
+                android:padding="10dp" />
 
-    <EditText
+            <EditText
+                android:id="@+id/setup_fullname"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_below="@+id/setup_username"
+                android:layout_centerHorizontal="true"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginRight="20dp"
+                android:background="@drawable/inputs"
+                android:drawableLeft="@drawable/name"
+                android:ems="10"
+                android:hint="Full Name"
+                android:padding="10dp" />
 
-        android:id="@+id/setup_fullname"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="250dp"
-        android:background="@drawable/inputs"
-        android:drawableLeft="@drawable/name"
-        android:ems="10"
-        android:hint="Full Name"
-        android:padding="10dp" />
+            <EditText
 
-    <EditText
+                android:id="@+id/setup_country"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_below="@+id/setup_fullname"
+                android:layout_centerHorizontal="true"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginRight="20dp"
+                android:background="@drawable/inputs"
+                android:drawableLeft="@drawable/username"
+                android:ems="10"
+                android:hint="Country"
+                android:padding="10dp" />
 
-        android:id="@+id/setup_edad"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="350dp"
-        android:background="@drawable/inputs"
-        android:drawableLeft="@drawable/name"
-        android:ems="10"
-        android:hint="Edad"
-        android:inputType="number"
-        android:padding="10dp" />
+            <EditText
 
-    <EditText
+                android:id="@+id/setup_edad"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_below="@+id/setup_country"
+                android:layout_centerHorizontal="true"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginRight="20dp"
+                android:background="@drawable/inputs"
+                android:drawableLeft="@drawable/name"
+                android:ems="10"
+                android:hint="Edad"
+                android:inputType="number"
+                android:padding="10dp" />
 
-        android:id="@+id/setup_country"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="300dp"
-        android:background="@drawable/inputs"
-        android:drawableLeft="@drawable/username"
-        android:ems="10"
-        android:hint="Country"
-        android:padding="10dp" />
+            <EditText
 
-    <EditText
+                android:id="@+id/setup_estatura"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_below="@+id/setup_edad"
+                android:layout_centerHorizontal="true"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginRight="20dp"
+                android:background="@drawable/inputs"
+                android:drawableLeft="@drawable/name"
+                android:ems="10"
+                android:hint="Estatura(cm)"
+                android:inputType="number"
+                android:padding="10dp" />
 
-        android:id="@+id/setup_genero"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="400dp"
-        android:background="@drawable/inputs"
-        android:drawableLeft="@drawable/name"
-        android:ems="10"
-        android:hint="Genero (Femenino/Masculino)"
-        android:maxLength="10"
-        android:padding="10dp" />
+            <EditText
+                android:id="@+id/setup_peso"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:layout_below="@+id/setup_estatura"
+                android:layout_centerHorizontal="true"
+                android:layout_marginLeft="20dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginRight="20dp"
+                android:background="@drawable/inputs"
+                android:drawableLeft="@drawable/name"
+                android:ems="10"
+                android:hint="Peso (Kg)"
+                android:inputType="number"
+                android:padding="10dp" />
 
-    <EditText
+            <LinearLayout
+                android:id="@+id/setuplinegenero"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/setup_peso">
 
-        android:id="@+id/setup_estatura"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="450dp"
-        android:background="@drawable/inputs"
-        android:drawableLeft="@drawable/name"
-        android:ems="10"
-        android:hint="Estatura(cm)"
-        android:inputType="number"
-        android:padding="10dp" />
+                <TextView
+                    android:id="@+id/titlegroup"
+                    android:layout_width="130dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="15dp"
+                    android:ems="10"
+                    android:paddingLeft="30dp"
+                    android:paddingRight="10dp"
+                    android:text="Genero: "
+                    android:textSize="20dp" />
 
-    <EditText
+                <TextView
+                    android:id="@+id/setup_genero"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="15dp"
+                    android:ems="10"
+                    android:paddingRight="10dp"
+                    android:text=""
+                    android:textSize="20dp" />
+            </LinearLayout>
 
-        android:id="@+id/setup_peso"
-        android:layout_width="match_parent"
-        android:layout_height="40dp"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="500dp"
-        android:background="@drawable/inputs"
-        android:drawableLeft="@drawable/name"
-        android:ems="10"
-        android:hint="Peso (Kg)"
-        android:inputType="number"
-        android:padding="10dp" />
+            <RadioGroup
+                android:id="@+id/radGroup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/setuplinegenero"
+                android:layout_centerHorizontal="true">
 
-    <de.hdodenhof.circleimageview.CircleImageView
-        android:id="@+id/setup_profile_image"
-        android:layout_width="150dp"
-        android:layout_height="150dp"
-        android:layout_marginLeft="100dp"
-        android:layout_marginTop="30dp"
-        android:src="@drawable/profile">
+                <RadioButton
+                    android:id="@+id/radMale"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="5dp"
+                    android:onClick="checkButton"
+                    android:text="Masculino" />
 
-    </de.hdodenhof.circleimageview.CircleImageView>
+                <RadioButton
+                    android:id="@+id/radFeMale"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="5dp"
+                    android:onClick="checkButton"
+                    android:text="Femenino" />
+            </RadioGroup>
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/setup_profile_image"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_alignParentTop="true"
+                android:layout_centerInParent="true"
+                android:layout_marginTop="20dp"
+                android:src="@drawable/profile">
+
+            </de.hdodenhof.circleimageview.CircleImageView>
+
         </RelativeLayout>
     </ScrollView>
 

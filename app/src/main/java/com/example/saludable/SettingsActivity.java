@@ -8,6 +8,9 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -42,7 +45,8 @@ public class SettingsActivity extends AppCompatActivity {
 
     final static int Gallery_pick = 1;
     private Toolbar mToolbar;
-    private EditText userName, userProfName, userStatus, userCountry, userGenero, userAltura, userPeso, userEdad;
+    private EditText userName, userProfName, userStatus, userCountry, userAltura, userPeso, userEdad;
+    private TextView userGenero;
     private Button UpdateAccountSettingsButton;
     private CircleImageView userProfileImage;
     private ProgressDialog loadingBar;
@@ -52,6 +56,8 @@ public class SettingsActivity extends AppCompatActivity {
     private StorageReference UserProfileImageRef;
     private FirebaseRecyclerAdapter firebaseRecyclerAdapter;
     private String currentUserId, updateprofilename, updateprofileimage;
+    private RadioButton radioButton;
+    private RadioGroup radioGroup;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,10 +82,11 @@ public class SettingsActivity extends AppCompatActivity {
             userProfName = findViewById ( R.id.settings_profile_full_name );
             userStatus = findViewById ( R.id.settings_status );
             userCountry = findViewById ( R.id.settings_country );
-            userGenero = findViewById ( R.id.settings_genero );
             userEdad = findViewById ( R.id.settings_edad );
             userAltura = findViewById ( R.id.settings_estatura );
             userPeso = findViewById ( R.id.settings_peso );
+            userGenero = findViewById ( R.id.setting_genero );
+            radioGroup = findViewById ( R.id.setradGroup );
             userProfileImage = findViewById ( R.id.settings_profile_image );
             UpdateAccountSettingsButton = findViewById ( R.id.update_account_settings_button );
             loadingBar = new ProgressDialog ( this );
@@ -160,6 +167,12 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
+    public void checkButton(View v) {
+        int radioId = radioGroup.getCheckedRadioButtonId ();
+
+        radioButton = findViewById ( radioId );
+        userGenero.setText ( radioButton.getText ().toString () );
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {

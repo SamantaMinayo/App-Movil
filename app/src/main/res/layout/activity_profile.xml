@@ -226,39 +226,25 @@
                             <TextView
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:background="@color/colortable"
                                 android:paddingLeft="5dp"
                                 android:paddingTop="2dp"
                                 android:paddingRight="2dp"
                                 android:paddingBottom="2dp"
-                                android:text="Tiempo (H:m:s)"
-                                android:textAlignment="center"
-                                android:textColor="@android:color/background_light"
-                                android:textSize="12sp" />
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:paddingLeft="5dp"
-                                android:paddingTop="2dp"
-                                android:paddingRight="2dp"
-                                android:paddingBottom="2dp"
-                                android:text="Distancia (m)"
-                                android:textAlignment="center"
-                                android:textColor="@android:color/background_light"
-                                android:textSize="12sp" />
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
                                 android:background="@color/colortable"
+                                android:textAlignment="center"
+                                android:text="Tiempo (min)"
+                                android:textColor="@android:color/background_light"
+                                android:textSize="12sp" />
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
                                 android:paddingLeft="5dp"
                                 android:paddingTop="2dp"
                                 android:paddingRight="2dp"
                                 android:paddingBottom="2dp"
                                 android:text="Peso (kg)"
-                                android:textAlignment="center"
                                 android:textColor="@android:color/background_light"
+                                android:textAlignment="center"
                                 android:textSize="12sp" />
 
                             <TextView
@@ -268,7 +254,21 @@
                                 android:paddingTop="2dp"
                                 android:paddingRight="2dp"
                                 android:paddingBottom="2dp"
-                                android:text="Calorias (KCal)"
+                                android:textColor="@android:color/background_light"
+                                android:background="@color/colortable"
+                                android:text="Distancia Total (km)"
+                                android:textAlignment="center"
+                                android:textSize="12sp" />
+
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:paddingLeft="5dp"
+                                android:paddingTop="2dp"
+                                android:paddingRight="2dp"
+                                android:paddingBottom="2dp"
+                                android:text="Calorias Total (KCal)"
                                 android:textAlignment="center"
                                 android:textColor="@android:color/background_light"
                                 android:textSize="12sp" />
@@ -281,7 +281,7 @@
                                 android:paddingTop="2dp"
                                 android:paddingRight="2dp"
                                 android:paddingBottom="2dp"
-                                android:text="Pasos"
+                                android:text="Pasos Totales"
                                 android:textAlignment="center"
                                 android:textColor="@android:color/background_light"
                                 android:textSize="12sp" />
@@ -305,7 +305,6 @@
                                 android:textAlignment="center"
                                 android:textColor="@android:color/background_light"
                                 android:textSize="14sp"
-
                                 />
 
                             <TextView
@@ -328,20 +327,19 @@
                                 android:textAlignment="center"
                                 android:textColor="@android:color/background_light"
                                 android:textSize="12sp" />
-
                             <TextView
-                                android:id="@+id/profile_distanciatotal"
+                                android:id="@+id/profile_peso_total"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:background="@color/colortable"
                                 android:padding="2dp"
                                 android:text="0"
                                 android:textAlignment="center"
+                                android:background="@color/colortable"
                                 android:textColor="@android:color/background_light"
                                 android:textSize="12sp" />
 
                             <TextView
-                                android:id="@+id/profile_peso_total"
+                                android:id="@+id/profile_distanciatotal"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:padding="2dp"
@@ -411,27 +409,27 @@
                                 android:textAlignment="center"
                                 android:textColor="@android:color/background_light"
                                 android:textSize="12sp" />
+                            <TextView
+                                android:id="@+id/profile_peso_ultimo"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:padding="2dp"
+                                android:text="0"
+                                android:textAlignment="center"
+                                android:textColor="@android:color/background_light"
+                                android:textSize="12sp" />
 
                             <TextView
                                 android:id="@+id/profile_distanciafinal"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:padding="2dp"
+                                android:background="@color/colortable"
                                 android:text="0"
                                 android:textAlignment="center"
                                 android:textColor="@android:color/background_light"
                                 android:textSize="12sp" />
 
-                            <TextView
-                                android:id="@+id/profile_peso_ultimo"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:background="@color/colortable"
-                                android:padding="2dp"
-                                android:text="0"
-                                android:textAlignment="center"
-                                android:textColor="@android:color/background_light"
-                                android:textSize="12sp" />
 
                             <TextView
                                 android:id="@+id/profile_calorias_ultimo"
@@ -494,6 +492,14 @@
                             android:textAllCaps="false"
                             android:textColor="@android:color/background_light"
                             android:textSize="18sp" />
+
+                        <lecho.lib.hellocharts.view.LineChartView
+                            android:id="@+id/charttimeprof"
+                            android:layout_width="match_parent"
+                            android:layout_height="300dp"
+                            android:layout_margin="10dp"
+                            android:padding="20dp"
+                            android:verticalScrollbarPosition="defaultPosition" />
                     </LinearLayout>
                     <LinearLayout
                         android:id="@+id/profile_avance_carreras_velocidad"
@@ -512,6 +518,14 @@
                             android:textAllCaps="false"
                             android:textColor="@android:color/background_light"
                             android:textSize="18sp" />
+
+                        <lecho.lib.hellocharts.view.LineChartView
+                            android:id="@+id/chartvelprof"
+                            android:layout_width="match_parent"
+                            android:layout_height="300dp"
+                            android:layout_below="@+id/graf_velocidad"
+                            android:layout_margin="10dp"
+                            android:verticalScrollbarPosition="defaultPosition" />
 
                     </LinearLayout>
 
@@ -532,6 +546,14 @@
                             android:textAllCaps="false"
                             android:textColor="@android:color/background_light"
                             android:textSize="18sp" />
+
+                        <lecho.lib.hellocharts.view.LineChartView
+                            android:id="@+id/chartcalprof"
+                            android:layout_width="match_parent"
+                            android:layout_height="300dp"
+                            android:layout_margin="10dp"
+                            android:padding="20dp"
+                            android:verticalScrollbarPosition="defaultPosition" />
                     </LinearLayout>
                 </LinearLayout>
             </LinearLayout>

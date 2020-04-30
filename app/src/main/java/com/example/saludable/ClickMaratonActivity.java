@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -38,6 +39,8 @@ public class ClickMaratonActivity extends AppCompatActivity {
     private String PostKey, current_user_id;
 
     private ProgressDialog loadingBar;
+    private Toolbar mToolbar;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,15 +67,19 @@ public class ClickMaratonActivity extends AppCompatActivity {
             monitorearmaratonButton = findViewById ( R.id.monitorear_maraton_button );
             mensaje = findViewById ( R.id.Mensaje );
 
+            mToolbar = findViewById ( R.id.carrera_toolbar );
+            setSupportActionBar ( mToolbar );
+            getSupportActionBar ().setTitle ( "Carrera" );
+            getSupportActionBar ().setDisplayHomeAsUpEnabled ( true );
 
             loadingBar = new ProgressDialog ( this );
 
             registermaratonButton = findViewById ( R.id.register_maraton_button );
             cancelregistermaratonButton = findViewById ( R.id.cancel_register_maraton_button );
 
-            registermaratonButton.setVisibility ( View.INVISIBLE );
-            cancelregistermaratonButton.setVisibility ( View.INVISIBLE );
-            monitorearmaratonButton.setVisibility ( View.INVISIBLE );
+            registermaratonButton.setVisibility ( View.VISIBLE );
+            cancelregistermaratonButton.setVisibility ( View.VISIBLE );
+            monitorearmaratonButton.setVisibility ( View.VISIBLE );
 
             ClickMaratonRef.addValueEventListener ( new ValueEventListener () {
                 @Override
@@ -138,9 +145,9 @@ public class ClickMaratonActivity extends AppCompatActivity {
                                                         @Override
                                                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                                             if (dataSnapshot.exists ()) {
-                                                                registermaratonButton.setVisibility ( View.INVISIBLE );
-                                                                cancelregistermaratonButton.setVisibility ( View.INVISIBLE );
-                                                                monitorearmaratonButton.setVisibility ( View.INVISIBLE );
+                                                                //registermaratonButton.setVisibility ( View.INVISIBLE );
+                                                                //cancelregistermaratonButton.setVisibility ( View.INVISIBLE );
+                                                                //monitorearmaratonButton.setVisibility ( View.INVISIBLE );
                                                                 mensaje.setText ( "USTED YA REGISTRO DATOS EN ESTA CARRERA." );
                                                             } else {
                                                                 registermaratonButton.setVisibility ( View.VISIBLE );
@@ -168,9 +175,9 @@ public class ClickMaratonActivity extends AppCompatActivity {
                                                 @Override
                                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                                     if (dataSnapshot.exists ()) {
-                                                        registermaratonButton.setVisibility ( View.INVISIBLE );
-                                                        cancelregistermaratonButton.setVisibility ( View.INVISIBLE );
-                                                        monitorearmaratonButton.setVisibility ( View.INVISIBLE );
+//                                                        registermaratonButton.setVisibility ( View.INVISIBLE );
+                                                        //                                                      cancelregistermaratonButton.setVisibility ( View.INVISIBLE );
+                                                        //                                                    monitorearmaratonButton.setVisibility ( View.INVISIBLE );
                                                         mensaje.setText ( "USTED YA REGISTRO DATOS EN ESTA CARRERA." );
                                                     } else {
                                                         registermaratonButton.setVisibility ( View.VISIBLE );
@@ -224,7 +231,7 @@ public class ClickMaratonActivity extends AppCompatActivity {
             monitorearmaratonButton.setOnClickListener ( new View.OnClickListener () {
                 @Override
                 public void onClick(View v) {
-                    SendUserToMonitorActivity ();
+                    SendUserToMaratonActivity ();
                 }
             } );
 
@@ -291,7 +298,7 @@ public class ClickMaratonActivity extends AppCompatActivity {
         }
     }
 
-    private void SendUserToMonitorActivity() {
+    private void SendUserToMaratonActivity() {
         try {
             Intent ClickMaratonIntent = new Intent ( ClickMaratonActivity.this, MapsActivity.class );
             ClickMaratonIntent.putExtra ( "PostKey", PostKey );

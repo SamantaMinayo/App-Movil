@@ -1,39 +1,50 @@
 package com.example.saludable;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.saludable.Interfaces.IFirebaseLoadDone;
+import com.example.saludable.Interfaces.IRecyclerItemClickListener;
+import com.example.saludable.Model.Maraton;
+import com.example.saludable.ViewHolder.MaratonViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+import com.mancj.materialsearchbar.MaterialSearchBar;
 import com.squareup.picasso.Picasso;
 
-public class MaratonActivity extends AppCompatActivity {
+import java.util.ArrayList;
+import java.util.List;
+
+public class MaratonActivity extends AppCompatActivity implements IFirebaseLoadDone {
 
 
-    private RecyclerView postList;
+    FirebaseRecyclerAdapter<Maraton, MaratonViewHolder> adapter, searchAdapter;
+    RecyclerView recycler_all_maraton;
+    IFirebaseLoadDone firebaseLoadDone;
+    MaterialSearchBar searchBar;
+    List<String> suggestList = new ArrayList<> ();
+
     private Toolbar mToolbar;
 
-    private FirebaseAuth mAuth;
-    private DatabaseReference MaratonRef;
-    private FirebaseRecyclerAdapter firebaseRecyclerAdapter;
-
-    private String current_user_id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,161 +52,221 @@ public class MaratonActivity extends AppCompatActivity {
             super.onCreate ( savedInstanceState );
             setContentView ( R.layout.activity_maraton );
 
-            mAuth = FirebaseAuth.getInstance ();
-
-            MaratonRef = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" );
-
-            mToolbar = findViewById ( R.id.maraton_toolbar );
+            mToolbar = findViewById ( R.id.marathon_page_toolbar );
             setSupportActionBar ( mToolbar );
-            getSupportActionBar ().setTitle ( "Carreras" );
+            getSupportActionBar ().setTitle ( "Buscar Carreras" );
             getSupportActionBar ().setDisplayHomeAsUpEnabled ( true );
 
-            postList = findViewById ( R.id.all_maraton_list );
-            postList.setHasFixedSize ( true );
+            searchBar = findViewById ( R.id.material_search_bar );
+            searchBar.setCardViewElevation ( 10 );
+            searchBar.addTextChangeListener ( new TextWatcher () {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-            LinearLayoutManager linearLayoutManager = new LinearLayoutManager ( this );
-            linearLayoutManager.setReverseLayout ( true );
-            linearLayoutManager.setStackFromEnd ( true );
+                }
 
-            postList.setLayoutManager ( linearLayoutManager );
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    List<String> suggest = new ArrayList<> ();
+                    for (String search : suggestList) {
+                        if (search.toLowerCase ().contains ( searchBar.getText ().toLowerCase () ))
+                            suggest.add ( search );
+                    }
+                    searchBar.setLastSuggestions ( suggest );
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+
+                }
+            } );
+
+            searchBar.setOnSearchActionListener ( new MaterialSearchBar.OnSearchActionListener () {
+                @Override
+                public void onSearchStateChanged(boolean enabled) {
+                    if (!enabled) {
+                        if (adapter != null) {
+                            recycler_all_maraton.setAdapter ( adapter );
+                        }
+                    }
+                }
+
+                @Override
+                public void onSearchConfirmed(CharSequence text) {
+
+                    startSearch ( text.toString () );
+                }
+
+                @Override
+                public void onButtonClicked(int buttonCode) {
+
+                }
+            } );
+
+            recycler_all_maraton = findViewById ( R.id.all_maratons_post_list );
+            recycler_all_maraton.setHasFixedSize ( true );
+            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager ( this );
+            recycler_all_maraton.setLayoutManager ( layoutManager );
+            recycler_all_maraton.addItemDecoration ( new DividerItemDecoration ( this, ((LinearLayoutManager) layoutManager).getOrientation () ) );
+
+
+            firebaseLoadDone = this;
+
+            loadUserList ();
+            loadSearchData ();
+
         } catch (Exception e) {
         }
+    }
+
+    private void loadSearchData() {
+
+        final List<String> lstMaratonName = new ArrayList<> ();
+        DatabaseReference MaratonList = FirebaseDatabase.getInstance ()
+                .getReference ( "Carreras" );
+        MaratonList.addListenerForSingleValueEvent ( new ValueEventListener () {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot MaratonSnapshot : dataSnapshot.getChildren ()) {
+                    Maraton maraton = MaratonSnapshot.getValue ( Maraton.class );
+                    lstMaratonName.add ( maraton.maratonname );
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                firebaseLoadDone.onFirebaseLoadFaile ( databaseError.getMessage () );
+            }
+        } );
+    }
+
+    private void loadUserList() {
+        Query query = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" );
+
+        FirebaseRecyclerOptions<Maraton> options = new FirebaseRecyclerOptions.Builder<Maraton> ()
+                .setQuery ( query, Maraton.class )
+                .build ();
+
+        adapter = new FirebaseRecyclerAdapter<Maraton, MaratonViewHolder> ( options ) {
+            @Override
+            protected void onBindViewHolder(@NonNull MaratonViewHolder maratonViewHolder, int position, @NonNull Maraton maraton) {
+
+                maratonViewHolder.maratonname.setText ( maraton.maratonname );
+                maratonViewHolder.admindate.setText ( maraton.date );
+                maratonViewHolder.admintime.setText ( maraton.time );
+                Picasso.with ( getApplication () ).load ( maraton.maratonimage ).into ( maratonViewHolder.maratonimage );
+                maratonViewHolder.maratondescription.setText ( maraton.description );
+                maratonViewHolder.maratonplace.setText ( maraton.place );
+                maratonViewHolder.maratondate.setText ( maraton.maratondate );
+                maratonViewHolder.maratontime.setText ( maraton.maratontime );
+                maratonViewHolder.contactname.setText ( maraton.contactname );
+                maratonViewHolder.contactnumber.setText ( maraton.contactnumber );
+                final String PostKey = getRef ( position ).getKey ();
+                maratonViewHolder.setiRecyclerItemClickListener ( new IRecyclerItemClickListener () {
+                    @Override
+                    public void onItemClickListener(View view, int position) {
+                        Intent clickPostIntent = new Intent ( MaratonActivity.this, ClickMaratonActivity.class );
+                        clickPostIntent.putExtra ( "PostKey", PostKey );
+                        startActivity ( clickPostIntent );
+                    }
+                } );
+
+            }
+
+            @NonNull
+            @Override
+            public MaratonViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                View itemView = LayoutInflater.from ( parent.getContext () )
+                        .inflate ( R.layout.all_carreras_layout, parent, false );
+                return new MaratonViewHolder ( itemView );
+            }
+        };
+
+        adapter.startListening ();
+        recycler_all_maraton.setAdapter ( adapter );
+    }
+
+    private void startSearch(String text_search) {
+        Query query = FirebaseDatabase.getInstance ()
+                .getReference ()
+                .child ( "Carreras" )
+                .orderByChild ( "maratonname" )
+                .startAt ( text_search );
+
+        FirebaseRecyclerOptions<Maraton> options = new FirebaseRecyclerOptions.Builder<Maraton> ()
+                .setQuery ( query, Maraton.class )
+                .build ();
+
+        searchAdapter = new FirebaseRecyclerAdapter<Maraton, MaratonViewHolder> ( options ) {
+            @Override
+            protected void onBindViewHolder(@NonNull MaratonViewHolder maratonViewHolder, int position, @NonNull Maraton maraton) {
+
+                maratonViewHolder.maratonname.setText ( maraton.maratonname );
+                maratonViewHolder.admindate.setText ( maraton.date );
+                maratonViewHolder.admintime.setText ( maraton.time );
+                maratonViewHolder.maratondescription.setText ( maraton.description );
+                Picasso.with ( getApplication () ).load ( maraton.maratonimage ).into ( maratonViewHolder.maratonimage );
+                maratonViewHolder.maratonplace.setText ( maraton.place );
+                maratonViewHolder.maratondate.setText ( maraton.maratondate );
+                maratonViewHolder.maratontime.setText ( maraton.maratontime );
+                maratonViewHolder.contactname.setText ( maraton.contactname );
+                maratonViewHolder.contactnumber.setText ( maraton.contactnumber );
+                final String PostKey = getRef ( position ).getKey ();
+                maratonViewHolder.setiRecyclerItemClickListener ( new IRecyclerItemClickListener () {
+                    @Override
+                    public void onItemClickListener(View view, int position) {
+                        Intent clickPostIntent = new Intent ( MaratonActivity.this, ClickMaratonActivity.class );
+                        clickPostIntent.putExtra ( "PostKey", PostKey );
+                        startActivity ( clickPostIntent );
+                    }
+                } );
+
+            }
+
+            @NonNull
+            @Override
+            public MaratonViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                View itemView = LayoutInflater.from ( parent.getContext () )
+                        .inflate ( R.layout.all_carreras_layout, parent, false );
+                return new MaratonViewHolder ( itemView );
+            }
+        };
+
+
+        searchAdapter.startListening ();
+        recycler_all_maraton.setAdapter ( searchAdapter );
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop ();
+        adapter.stopListening ();
+        super.onStop ();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume ();
+        if (adapter != null) {
+            adapter.startListening ();
+        }
+
+        if (searchAdapter != null) {
+            searchAdapter.startListening ();
+        }
+    }
+
+    @Override
+    public void onFirebaseLoadMaratonDone(List<String> lstMaraton) {
+        searchBar.setLastSuggestions ( lstMaraton );
 
     }
 
     @Override
-    protected void onStart() {
-        super.onStart ();
+    public void onFirebaseLoadFaile(String message) {
+        Toast.makeText ( this, message, Toast.LENGTH_SHORT ).show ();
 
-        FirebaseUser currentUser = mAuth.getCurrentUser ();
-
-        if (currentUser == null) {
-            SendUserTologinActivity ();
-        } else {
-            current_user_id = mAuth.getCurrentUser ().getUid ();
-            DisplayAllMaraton ();
-            firebaseRecyclerAdapter.startListening ();
-        }
-    }
-
-    private void SendUserTologinActivity() {
-        try {
-            Intent loginIntent = new Intent ( MaratonActivity.this, LoginActivity.class );
-            loginIntent.addFlags ( Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK );
-            startActivity ( loginIntent );
-            finish ();
-        } catch (Exception e) {
-        }
-    }
-
-
-    protected void DisplayAllMaraton() {
-        try {
-
-            FirebaseRecyclerOptions<Maraton> options = new FirebaseRecyclerOptions.Builder<Maraton> ()
-                    .setQuery ( MaratonRef, Maraton.class ).build ();
-            firebaseRecyclerAdapter =
-                    new FirebaseRecyclerAdapter<Maraton, MaratonActivity.CarreraViewHolder> ( options ) {
-                        @Override
-                        public MaratonActivity.CarreraViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-                            View view = LayoutInflater.from ( parent.getContext () )
-                                    .inflate ( R.layout.all_carreras_layout, parent, false );
-                            return new MaratonActivity.CarreraViewHolder ( view );
-                        }
-
-                        @Override
-                        protected void onBindViewHolder(MaratonActivity.CarreraViewHolder maratonViewHolder, int position, @NonNull Maraton maraton) {
-
-                            final String PostKey = getRef ( position ).getKey ();
-
-                            maratonViewHolder.setNamecarrera ( maraton.maratonname );
-                            maratonViewHolder.setDate ( maraton.date );
-                            maratonViewHolder.setTime ( maraton.time );
-                            maratonViewHolder.setMaratonimage ( getApplication (), maraton.maratonimage );
-                            maratonViewHolder.setDescription ( maraton.description );
-                            maratonViewHolder.setLugar ( maraton.place );
-                            maratonViewHolder.setDate_maraton ( maraton.maratondate );
-                            maratonViewHolder.setTime_maraton ( maraton.maratontime );
-                            maratonViewHolder.setContactname ( maraton.contactname );
-                            maratonViewHolder.setContactnumber ( maraton.contactnumber );
-
-                            maratonViewHolder.mView.setOnClickListener ( new View.OnClickListener () {
-                                @Override
-                                public void onClick(View v) {
-                                    Intent clickPostIntent = new Intent ( MaratonActivity.this, ClickMaratonActivity.class );
-                                    clickPostIntent.putExtra ( "PostKey", PostKey );
-                                    startActivity ( clickPostIntent );
-                                }
-                            } );
-                        }
-                    };
-            postList.setAdapter ( firebaseRecyclerAdapter );
-
-        } catch (Exception e) {
-        }
-    }
-
-    public class CarreraViewHolder extends RecyclerView.ViewHolder {
-        View mView;
-        Context mContext;
-
-        public CarreraViewHolder(View itemView) {
-            super ( itemView );
-            mView = itemView;
-            mContext = itemView.getContext ();
-        }
-
-        public void setDescription(String description) {
-            if (!description.isEmpty ()) {
-                TextView username = mView.findViewById ( R.id.maraton_description );
-                username.setText ( description );
-            }
-        }
-
-        public void setContactname(String contactname) {
-            TextView username = mView.findViewById ( R.id.contact_name );
-            username.setText ( "Contacto: " + contactname );
-        }
-
-        public void setContactnumber(String contactnumber) {
-            TextView username = mView.findViewById ( R.id.contact_number );
-            username.setText ( "    cel: " + contactnumber );
-        }
-
-        public void setTime_maraton(String time_maraton) {
-            TextView username = mView.findViewById ( R.id.maraton_time );
-            username.setText ( "Hora: " + time_maraton );
-        }
-
-        public void setDate_maraton(String date_maraton) {
-            TextView username = mView.findViewById ( R.id.maraton_date );
-            username.setText ( "Fecha: " + date_maraton );
-        }
-
-        public void setLugar(String lugar) {
-            TextView username = mView.findViewById ( R.id.maraton_place );
-            username.setText ( "Direccion: " + lugar );
-        }
-
-        public void setNamecarrera(String namecarrera) {
-            TextView username = mView.findViewById ( R.id.maraton_name );
-            username.setText ( namecarrera );
-        }
-
-        public void setMaratonimage(Context ctx, String maratonimage) {
-            ImageView image = mView.findViewById ( R.id.click_maraton_image );
-            Picasso.with ( ctx ).load ( maratonimage ).into ( image );
-        }
-
-        public void setTime(String time) {
-            TextView postTime = mView.findViewById ( R.id.post_admin_time );
-            postTime.setText ( "  " + time );
-        }
-
-        public void setDate(String date) {
-            TextView postDate = mView.findViewById ( R.id.post_admin_date );
-            postDate.setText ( "  " + date );
-        }
     }
 
 }
