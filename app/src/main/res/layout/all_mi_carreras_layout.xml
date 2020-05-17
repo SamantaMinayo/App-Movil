@@ -12,7 +12,6 @@
         android:layout_marginTop="10dp"
         android:layout_marginRight="10dp"
         android:layout_marginBottom="4dp"
-        android:background="@drawable/post_border"
         android:orientation="vertical">
 
 
@@ -35,13 +34,31 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
                     android:orientation="horizontal"
-                    android:padding="2dp"></LinearLayout>
+                    android:layout_marginLeft="5dp"
+                    android:padding="2dp">
+
+                    <TextView
+                        android:id="@+id/text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Fecha de la Carrera : "
+                        android:textColor="@android:color/darker_gray"
+                        android:textSize="10sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/my_maraton_date"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Date"
+                        android:textColor="@android:color/black"
+                        android:textSize="11sp" />
+
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/my_maraton_name"
@@ -61,7 +78,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="5dp"
                     android:layout_marginTop="5dp"
-                    android:text="user name"
+                    android:text="Descripcion"
                     android:textAlignment="center"
                     android:textColor="@android:color/black"
                     android:textSize="12sp" />

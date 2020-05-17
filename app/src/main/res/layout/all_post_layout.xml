@@ -85,8 +85,16 @@
             </LinearLayout>
         </LinearLayout>
 
+        <ImageView
+            android:id="@+id/post_img"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:adjustViewBounds="true"
+            android:padding="3dp"
+            android:scaleType="centerCrop" />
+
         <TextView
-            android:id="@+id/click_post_description"
+            android:id="@+id/post_descrpt"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="3dp"
@@ -95,14 +103,6 @@
             android:text="Pst Description.."
             android:textColor="@android:color/black"
             android:textSize="14sp" />
-
-        <ImageView
-            android:id="@+id/click_post_image"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:adjustViewBounds="true"
-            android:padding="3dp"
-            android:scaleType="centerCrop" />
     </LinearLayout>
 
 </RelativeLayout>

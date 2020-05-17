@@ -3,27 +3,34 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".MiMaratonActivity">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_below="@id/mi_maratons_toolbar"
+        android:orientation="vertical"
+        android:padding="10dp">
 
-        <FrameLayout
-            android:id="@+id/mi_maraton_conteiner"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/all_my_maratons_post_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_below="@+id/mi_maraton_toolbar"
-            android:layout_alignParentStart="true">
+            android:layout_marginTop="-1dp" />
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/all_mi_maraton_list"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" />
-        </FrameLayout>
+        <com.mancj.materialsearchbar.MaterialSearchBar
+            android:id="@+id/my_material_search_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/all_my_maratons_post_list"
+            android:layout_marginBottom="8dp"
+            app:mt_hint="Enter Maraton Name"
+            app:mt_maxSuggestionsCount="50" />
+    </LinearLayout>
 
-        <include
-            android:id="@+id/mi_maraton_toolbar"
+
+    <include
+        android:id="@+id/mi_maratons_toolbar"
             layout="@layout/app_bar_layout"></include>
     </RelativeLayout>
-</RelativeLayout>

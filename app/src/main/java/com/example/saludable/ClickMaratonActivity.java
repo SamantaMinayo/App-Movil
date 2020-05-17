@@ -55,11 +55,12 @@ public class ClickMaratonActivity extends AppCompatActivity {
             ClickMaratonRef = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( PostKey );
             CarreraUserInf = FirebaseDatabase.getInstance ().getReference ().child ( "CarrerasRealizadas" ).child ( "Usuarios" ).child ( current_user_id ).child ( PostKey );
             UsuarioInscrito = FirebaseDatabase.getInstance ().getReference ().child ( "UsuariosCarreras" ).child ( current_user_id );
-            RegistrarUsuario = FirebaseDatabase.getInstance ().getReference ().child ( "UsuariosCarreras" ).child ( current_user_id ).child ( PostKey );
+            RegistrarUsuario = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( current_user_id ).child ( "Inscripcion" ).child ( PostKey );
             maratonImage = findViewById ( R.id.maraton_image_principal );
             maratonName = findViewById ( R.id.maraton_name_principal );
             maratondescription = findViewById ( R.id.maraton_description_principal );
             maratonPlace = findViewById ( R.id.maraton_place_principal );
+
             maratondate = findViewById ( R.id.maraton_date );
             maratontime = findViewById ( R.id.maraton_time );
             maratoncontactname = findViewById ( R.id.maraton_contact_name_principal );
@@ -275,7 +276,10 @@ public class ClickMaratonActivity extends AppCompatActivity {
                 loadingBar.show ();
 
                 HashMap crear = new HashMap ();
-                crear.put ( "inscrito", "true" );
+                crear.put ( "maratonname", smaratonName );
+                crear.put ( "date", smaratondate + " : " + smaratontime );
+                crear.put ( "maratonimagen", smaratonImage );
+                crear.put ( "maratondescription", smaratondescription );
                 RegistrarUsuario.updateChildren ( crear ).addOnCompleteListener ( new OnCompleteListener () {
                     @Override
                     public void onComplete(@NonNull Task task) {

@@ -1,162 +1,269 @@
 package com.example.saludable;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.saludable.Interfaces.IFirebaseLoadDone;
+import com.example.saludable.Interfaces.IRecyclerItemClickListener;
+import com.example.saludable.Model.MiMaraton;
+import com.example.saludable.ViewHolder.MiMaratonViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+import com.mancj.materialsearchbar.MaterialSearchBar;
 import com.squareup.picasso.Picasso;
 
-import de.hdodenhof.circleimageview.CircleImageView;
+import java.util.ArrayList;
+import java.util.List;
 
 
-public class MiMaratonActivity extends AppCompatActivity {
+public class MiMaratonActivity extends AppCompatActivity implements IFirebaseLoadDone {
 
-    private RecyclerView postList;
+
+    FirebaseRecyclerAdapter<MiMaraton, MiMaratonViewHolder> adapter, searchAdapter;
+    RecyclerView recycler_all_mi_maraton;
+    IFirebaseLoadDone firebaseLoadDone;
+    MaterialSearchBar searchBar;
+    List<String> suggestList = new ArrayList<> ();
+    private FirebaseAuth mAuth;
+    private String current_user_id;
+
     private Toolbar mToolbar;
 
-    private FirebaseAuth mAuth;
-    private DatabaseReference UsersRef, MaratonRef;
-    private FirebaseRecyclerAdapter firebaseRecyclerAdapter;
-
-    private String current_user_id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         try {
             super.onCreate ( savedInstanceState );
             setContentView ( R.layout.activity_mi_maraton );
+
             mAuth = FirebaseAuth.getInstance ();
+            current_user_id = mAuth.getCurrentUser ().getUid ();
 
-            UsersRef = FirebaseDatabase.getInstance ().getReference ().child ( "Users" );
-
-            postList = findViewById ( R.id.all_mi_maraton_list );
-            postList.setHasFixedSize ( true );
-
-            mToolbar = findViewById ( R.id.mi_maraton_toolbar );
+            mToolbar = findViewById ( R.id.mi_maratons_toolbar );
             setSupportActionBar ( mToolbar );
-            getSupportActionBar ().setTitle ( "Mis carreras" );
+            getSupportActionBar ().setTitle ( "Mis Carreras" );
             getSupportActionBar ().setDisplayHomeAsUpEnabled ( true );
 
+            searchBar = findViewById ( R.id.my_material_search_bar );
+            searchBar.setCardViewElevation ( 10 );
+            searchBar.addTextChangeListener ( new TextWatcher () {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
-            LinearLayoutManager linearLayoutManager = new LinearLayoutManager ( this );
-            linearLayoutManager.setReverseLayout ( true );
-            linearLayoutManager.setStackFromEnd ( true );
+                }
 
-            postList.setLayoutManager ( linearLayoutManager );
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+                    List<String> suggest = new ArrayList<> ();
+                    for (String search : suggestList) {
+                        if (search.toLowerCase ().contains ( searchBar.getText ().toLowerCase () ))
+                            suggest.add ( search );
+                    }
+                    searchBar.setLastSuggestions ( suggest );
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+
+                }
+            } );
+
+            searchBar.setOnSearchActionListener ( new MaterialSearchBar.OnSearchActionListener () {
+                @Override
+                public void onSearchStateChanged(boolean enabled) {
+                    if (!enabled) {
+                        if (adapter != null) {
+                            recycler_all_mi_maraton.setAdapter ( adapter );
+                        }
+                    }
+                }
+
+                @Override
+                public void onSearchConfirmed(CharSequence text) {
+
+                    startSearch ( text.toString () );
+                }
+
+                @Override
+                public void onButtonClicked(int buttonCode) {
+
+                }
+            } );
+
+            recycler_all_mi_maraton = findViewById ( R.id.all_my_maratons_post_list );
+            recycler_all_mi_maraton.setHasFixedSize ( true );
+            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager ( this );
+            recycler_all_mi_maraton.setLayoutManager ( layoutManager );
+            recycler_all_mi_maraton.addItemDecoration ( new DividerItemDecoration ( this, ((LinearLayoutManager) layoutManager).getOrientation () ) );
+
+
+            firebaseLoadDone = this;
+
+            loadUserList ();
+            loadSearchData ();
+
         } catch (Exception e) {
+        }
+    }
+
+    private void loadSearchData() {
+
+        final List<String> lstMiMaratonName = new ArrayList<> ();
+        DatabaseReference MiMaratonList = FirebaseDatabase.getInstance ()
+                .getReference ( "Users" ).child ( current_user_id ).child ( "Inscripcion" );
+        MiMaratonList.addListenerForSingleValueEvent ( new ValueEventListener () {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot MaratonSnapshot : dataSnapshot.getChildren ()) {
+                    MiMaraton mimaraton = MaratonSnapshot.getValue ( MiMaraton.class );
+                    lstMiMaratonName.add ( mimaraton.maratonname );
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                firebaseLoadDone.onFirebaseLoadFaile ( databaseError.getMessage () );
+            }
+        } );
+    }
+
+    private void loadUserList() {
+        Query query = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( current_user_id ).child ( "Inscripcion" );
+
+        FirebaseRecyclerOptions<MiMaraton> options = new FirebaseRecyclerOptions.Builder<MiMaraton> ()
+                .setQuery ( query, MiMaraton.class )
+                .build ();
+
+        adapter = new FirebaseRecyclerAdapter<MiMaraton, MiMaratonViewHolder> ( options ) {
+            @Override
+            protected void onBindViewHolder(@NonNull MiMaratonViewHolder maratonViewHolder, int position, @NonNull MiMaraton maraton) {
+
+                maratonViewHolder.maratonname.setText ( maraton.maratonname );
+                maratonViewHolder.maratondate.setText ( maraton.date );
+                Picasso.with ( getApplication () ).load ( maraton.maratonimagen ).into ( maratonViewHolder.maratonimage );
+                maratonViewHolder.maratondescription.setText ( maraton.maratondescription );
+                final String PostKey = getRef ( position ).getKey ();
+                maratonViewHolder.setiRecyclerItemClickListener ( new IRecyclerItemClickListener () {
+                    @Override
+                    public void onItemClickListener(View view, int position) {
+                        Intent clickPostIntent = new Intent ( MiMaratonActivity.this, ClickMiMaratonActivity.class );
+                        clickPostIntent.putExtra ( "PostKey", PostKey );
+                        startActivity ( clickPostIntent );
+                    }
+                } );
+
+            }
+
+            @NonNull
+            @Override
+            public MiMaratonViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                View itemView = LayoutInflater.from ( parent.getContext () )
+                        .inflate ( R.layout.all_mi_carreras_layout, parent, false );
+                return new MiMaratonViewHolder ( itemView );
+            }
+        };
+
+        adapter.startListening ();
+        recycler_all_mi_maraton.setAdapter ( adapter );
+    }
+
+    private void startSearch(String text_search) {
+        Query query = FirebaseDatabase.getInstance ()
+                .getReference ()
+                .child ( "Users" )
+                .child ( current_user_id )
+                .child ( "Inscripcion" )
+                .orderByChild ( "maratonname" )
+                .startAt ( text_search );
+
+        FirebaseRecyclerOptions<MiMaraton> options = new FirebaseRecyclerOptions.Builder<MiMaraton> ()
+                .setQuery ( query, MiMaraton.class )
+                .build ();
+
+        searchAdapter = new FirebaseRecyclerAdapter<MiMaraton, MiMaratonViewHolder> ( options ) {
+            @Override
+            protected void onBindViewHolder(@NonNull MiMaratonViewHolder maratonViewHolder, int position, @NonNull MiMaraton maraton) {
+
+                maratonViewHolder.maratonname.setText ( maraton.maratonname );
+                maratonViewHolder.maratondate.setText ( maraton.date );
+                maratonViewHolder.maratondescription.setText ( maraton.maratondescription );
+                Picasso.with ( getApplication () ).load ( maraton.maratonimagen ).into ( maratonViewHolder.maratonimage );
+                final String PostKey = getRef ( position ).getKey ();
+                maratonViewHolder.setiRecyclerItemClickListener ( new IRecyclerItemClickListener () {
+                    @Override
+                    public void onItemClickListener(View view, int position) {
+                        Intent clickPostIntent = new Intent ( MiMaratonActivity.this, ClickMiMaratonActivity.class );
+                        clickPostIntent.putExtra ( "PostKey", PostKey );
+                        startActivity ( clickPostIntent );
+                    }
+                } );
+
+            }
+
+            @NonNull
+            @Override
+            public MiMaratonViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                View itemView = LayoutInflater.from ( parent.getContext () )
+                        .inflate ( R.layout.all_mi_carreras_layout, parent, false );
+                return new MiMaratonViewHolder ( itemView );
+            }
+        };
+
+
+        searchAdapter.startListening ();
+        recycler_all_mi_maraton.setAdapter ( searchAdapter );
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop ();
+        adapter.stopListening ();
+        super.onStop ();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume ();
+        if (adapter != null) {
+            adapter.startListening ();
+        }
+
+        if (searchAdapter != null) {
+            searchAdapter.startListening ();
         }
     }
 
     @Override
-    protected void onStart() {
-        super.onStart ();
+    public void onFirebaseLoadMaratonDone(List<String> lstMaraton) {
+        searchBar.setLastSuggestions ( lstMaraton );
 
-        FirebaseUser currentUser = mAuth.getCurrentUser ();
-
-        if (currentUser == null) {
-            SendUserTologinActivity ();
-        } else {
-            current_user_id = mAuth.getCurrentUser ().getUid ();
-            DisplayAllMiMaraton ();
-            firebaseRecyclerAdapter.startListening ();
-        }
     }
 
-    private void SendUserTologinActivity() {
-        try {
-            Intent loginIntent = new Intent ( MiMaratonActivity.this, LoginActivity.class );
-            loginIntent.addFlags ( Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK );
-            startActivity ( loginIntent );
-            finish ();
-        } catch (Exception e) {
-        }
-    }
+    @Override
+    public void onFirebaseLoadFaile(String message) {
+        Toast.makeText ( this, message, Toast.LENGTH_SHORT ).show ();
 
-    protected void DisplayAllMiMaraton() {
-        try {
-
-            MaratonRef = FirebaseDatabase.getInstance ().getReference ().child ( "CarrerasRealizadas" ).child ( "Usuarios" ).child ( current_user_id );
-
-            FirebaseRecyclerOptions<MiMaraton> options = new FirebaseRecyclerOptions.Builder<MiMaraton> ()
-                    .setQuery ( MaratonRef, MiMaraton.class ).build ();
-            firebaseRecyclerAdapter =
-                    new FirebaseRecyclerAdapter<MiMaraton, MiMaratonActivity.CarreraViewHolder> ( options ) {
-                        @Override
-                        public MiMaratonActivity.CarreraViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-                            View view = LayoutInflater.from ( parent.getContext () )
-                                    .inflate ( R.layout.all_mi_carreras_layout, parent, false );
-                            return new MiMaratonActivity.CarreraViewHolder ( view );
-                        }
-
-                        @Override
-                        protected void onBindViewHolder(MiMaratonActivity.CarreraViewHolder maratonViewHolder, int position, @NonNull MiMaraton maraton) {
-
-                            final String PostKey = getRef ( position ).getKey ();
-                            if (maraton != null) {
-                                if (!maraton.nombre.isEmpty () && !maraton.imagen.isEmpty () && !maraton.descripcion.isEmpty ()) {
-                                    maratonViewHolder.setNamecarrera ( maraton.nombre );
-                                    maratonViewHolder.setMaratonimage ( getApplication (), maraton.imagen );
-                                    maratonViewHolder.setDescription ( maraton.descripcion );
-                                    maratonViewHolder.mView.setOnClickListener ( new View.OnClickListener () {
-                                        @Override
-                                        public void onClick(View v) {
-                                            Intent clickPostIntent = new Intent ( MiMaratonActivity.this, ClickMiMaratonActivity.class );
-                                            clickPostIntent.putExtra ( "PostKey", PostKey );
-                                            startActivity ( clickPostIntent );
-                                        }
-                                    } );
-                                }
-                            }
-                        }
-                    };
-            postList.setAdapter ( firebaseRecyclerAdapter );
-
-        } catch (Exception e) {
-        }
-    }
-
-    public class CarreraViewHolder extends RecyclerView.ViewHolder {
-        View mView;
-        Context mContext;
-
-        public CarreraViewHolder(View itemView) {
-            super ( itemView );
-            mView = itemView;
-            mContext = itemView.getContext ();
-        }
-
-        public void setDescription(String description) {
-            if (!description.isEmpty ()) {
-                TextView username = mView.findViewById ( R.id.my_maraton_description );
-                username.setText ( description );
-            }
-        }
-
-        public void setNamecarrera(String namecarrera) {
-            TextView username = mView.findViewById ( R.id.my_maraton_name );
-            username.setText ( namecarrera );
-        }
-
-        public void setMaratonimage(Context ctx, String maratonimage) {
-            CircleImageView image = mView.findViewById ( R.id.my_maraton_image );
-            Picasso.with ( ctx ).load ( maratonimage ).into ( image );
-        }
     }
 
 }

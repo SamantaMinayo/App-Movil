@@ -1,4 +1,4 @@
-package com.example.saludable;
+package com.example.saludable.Model;
 
 public class Post {
 

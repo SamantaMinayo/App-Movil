@@ -14,12 +14,6 @@
         android:orientation="vertical"
         android:padding="10dp">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/all_maratons_post_list"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="-1dp" />
-
         <com.mancj.materialsearchbar.MaterialSearchBar
             android:id="@+id/material_search_bar"
             android:layout_width="match_parent"
@@ -28,6 +22,12 @@
             android:layout_marginBottom="8dp"
             app:mt_hint="Enter Maraton Name"
             app:mt_maxSuggestionsCount="50" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/all_maratons_post_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginTop="-1dp" />
     </LinearLayout>
 
     <include

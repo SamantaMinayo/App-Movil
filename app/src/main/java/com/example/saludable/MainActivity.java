@@ -1,13 +1,11 @@
 package com.example.saludable;
 
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,6 +17,10 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.saludable.Model.Post;
+import com.example.saludable.Model.User;
+import com.example.saludable.Utils.Common;
+import com.example.saludable.ViewHolder.PostViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.material.navigation.NavigationView;
@@ -47,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private DatabaseReference UsersRef, PostRef;
     private FirebaseRecyclerAdapter firebaseRecyclerAdapter;
-    private String current_user_id, fullname, newfullname, imageprof, newimageprof;
+    private String current_user_id;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +64,6 @@ public class MainActivity extends AppCompatActivity {
             mToolbar = findViewById ( R.id.main_page_toolbar );
             setSupportActionBar ( mToolbar );
             getSupportActionBar ().setTitle ( "Home" );
-
 
             drawerLayout = findViewById ( R.id.drawable_layout );
             actionBarDrawerToggle = new ActionBarDrawerToggle ( MainActivity.this, drawerLayout, R.string.drawer_open, R.string.drawer_open );
@@ -119,36 +120,34 @@ public class MainActivity extends AppCompatActivity {
 
             current_user_id = mAuth.getCurrentUser ().getUid ();
 
-            UsersRef.addValueEventListener ( new ValueEventListener () {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if (!dataSnapshot.hasChild ( current_user_id )) {
-                        SendUserToSetupActivity ();
-                    } else {
-                        if (!dataSnapshot.child ( current_user_id ).hasChild ( "username" )) {
+            if (Common.loggedUser != null) {
+                NavProfileusername.setText ( Common.loggedUser.getFullname () );
+                Picasso.with ( MainActivity.this ).load ( Common.loggedUser.getProfileimage () ).placeholder ( R.drawable.profile ).into ( NavProfileImage );
+            } else {
+                UsersRef.addValueEventListener ( new ValueEventListener () {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (!dataSnapshot.hasChild ( current_user_id )) {
                             SendUserToSetupActivity ();
                         } else {
-                            if (dataSnapshot.child ( current_user_id ).hasChild ( "fullname" )) {
-                                fullname = dataSnapshot.child ( current_user_id ).child ( "fullname" ).getValue ().toString ();
-                                NavProfileusername.setText ( fullname );
-                            }
-                            if (dataSnapshot.child ( current_user_id ).hasChild ( "profileimage" )) {
-                                imageprof = dataSnapshot.child ( current_user_id ).child ( "profileimage" ).getValue ().toString ();
-                                Picasso.with ( MainActivity.this ).load ( imageprof ).placeholder ( R.drawable.profile ).into ( NavProfileImage );
+                            if (!dataSnapshot.child ( current_user_id ).child ( "Informacion" ).hasChild ( "username" )) {
+                                SendUserToSetupActivity ();
                             } else {
-                                Toast.makeText ( MainActivity.this, "El usuario no tiene foto de perfil", Toast.LENGTH_SHORT ).show ();
+                                Common.loggedUser = dataSnapshot.child ( current_user_id ).child ( "Informacion" ).getValue ( User.class );
+                                NavProfileusername.setText ( Common.loggedUser.getFullname () );
+                                Picasso.with ( MainActivity.this ).load ( Common.loggedUser.getProfileimage () ).placeholder ( R.drawable.profile ).into ( NavProfileImage );
                             }
                         }
                     }
-                }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                }
-            } );
-
+                    }
+                } );
+            }
             DisplayAllUsersPosts ();
+
         } catch (Exception e) {
         }
     }
@@ -172,23 +171,12 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         protected void onBindViewHolder(PostViewHolder postViewHolder, int position, @NonNull Post post) {
 
-                            final String PostKey = getRef ( position ).getKey ();
-
-                            postViewHolder.setFullname ( post.fullname );
-                            postViewHolder.setTime ( post.getTime () );
-                            postViewHolder.setDate ( post.getDate () );
-                            postViewHolder.setDescription ( post.getDescription () );
-                            postViewHolder.setProfileimage ( getApplicationContext (), post.profileimage );
-                            postViewHolder.setPostImage ( getApplicationContext (), post.getPostimage () );
-
-                            postViewHolder.mView.setOnClickListener ( new View.OnClickListener () {
-                                @Override
-                                public void onClick(View v) {
-                                    Intent clickPostIntent = new Intent ( MainActivity.this, ClickPostActivity.class );
-                                    clickPostIntent.putExtra ( "PostKey", PostKey );
-                                    startActivity ( clickPostIntent );
-                                }
-                            } );
+                            postViewHolder.postadname.setText ( post.fullname );
+                            postViewHolder.posttime.setText ( post.time );
+                            postViewHolder.postdate.setText ( post.date );
+                            postViewHolder.postdescript.setText ( post.description );
+                            Picasso.with ( getApplication () ).load ( post.profileimage ).into ( postViewHolder.postimgprof );
+                            Picasso.with ( getApplication () ).load ( post.postimage ).into ( postViewHolder.postimage );
                         }
                     };
             postList.setAdapter ( firebaseRecyclerAdapter );
@@ -218,14 +206,18 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.nav_home:
                     Toast.makeText ( this, "Home", Toast.LENGTH_SHORT ).show ();
                     break;
-                case R.id.nav_marathon:
-                    SendUserToMiMaratonActivity ();
+                case R.id.nav_mi_inscripcion:
+                    //SendUserToMiInscripcionActivity ();
                     break;
                 case R.id.nav_find_marathon:
                     SendUserToMaratonActivity ();
                     break;
-                case R.id.nav_settings:
-                    SendUserToSettingsActivity ();
+                case R.id.nav_mi_marathon:
+                    SendUserToMiMaratonActivity ();
+                    Toast.makeText ( this, "Inscripciones", Toast.LENGTH_SHORT ).show ();
+                    break;
+                case R.id.nav_ayuda:
+                    Toast.makeText ( this, "Ayuda", Toast.LENGTH_SHORT ).show ();
                     break;
                 case R.id.nav_Logout:
                     mAuth.signOut ();
@@ -248,6 +240,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void SendUserTologinActivity() {
         try {
+            Common.loggedUser = null;
             Intent loginIntent = new Intent ( MainActivity.this, LoginActivity.class );
             loginIntent.addFlags ( Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK );
             startActivity ( loginIntent );
@@ -259,14 +252,6 @@ public class MainActivity extends AppCompatActivity {
     private void SendUsertoProfileActivity() {
         try {
             Intent loginIntent = new Intent ( MainActivity.this, ProfileActivity.class );
-            startActivity ( loginIntent );
-        } catch (Exception e) {
-        }
-    }
-
-    private void SendUserToSettingsActivity() {
-        try {
-            Intent loginIntent = new Intent ( MainActivity.this, SettingsActivity.class );
             startActivity ( loginIntent );
         } catch (Exception e) {
         }
@@ -288,57 +273,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public class PostViewHolder extends RecyclerView.ViewHolder {
-        View mView;
-        Context mContext;
 
-        public PostViewHolder(View itemView) {
-            super ( itemView );
-            mView = itemView;
-            mContext = itemView.getContext ();
+    private void SendUserToMiInscripcionActivity() {
+        try {
+            //Intent addNewPostIntent = new Intent ( MainActivity.this, MiInscripcionActivity.class );
+            //startActivity ( addNewPostIntent );
+        } catch (Exception e) {
         }
-
-        public void setFullname(String fullname) {
-            if (!fullname.isEmpty ()) {
-                TextView username = mView.findViewById ( R.id.post_profile_name );
-                username.setText ( fullname );
-            }
-        }
-
-        public void setProfileimage(Context ctx, String profileimage) {
-            if (!profileimage.isEmpty ()) {
-                CircleImageView image = mView.findViewById ( R.id.post_profile_image );
-                Picasso.with ( ctx ).load ( profileimage ).into ( image );
-            }
-        }
-
-        public void setTime(String time) {
-            if (!time.isEmpty ()) {
-                TextView postTime = mView.findViewById ( R.id.post_time );
-                postTime.setText ( "   " + time );
-            }
-        }
-
-        public void setDate(String date) {
-            if (!date.isEmpty ()) {
-                TextView postDate = mView.findViewById ( R.id.post_date );
-                postDate.setText ( "   " + date );
-            }
-        }
-
-        public void setDescription(String description) {
-            if (description.isEmpty ()) {
-                TextView postDescription = mView.findViewById ( R.id.click_post_description );
-                postDescription.setText ( description );
-            }
-        }
-
-        public void setPostImage(Context ctx, String postImage) {
-            if (postImage.isEmpty ()) {
-                ImageView image = mView.findViewById ( R.id.click_post_image );
-                Picasso.with ( ctx ).load ( postImage ).into ( image );
-            }
-        }
-
     }
+
 }
