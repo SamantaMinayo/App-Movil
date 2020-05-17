@@ -1,7 +1,10 @@
 package com.example.saludable;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -35,6 +38,7 @@ public class ProfileActivity extends AppCompatActivity {
     private TextView userName, userStatus, userFullname, userCountry, userEdad, userPeso, userAltura, userGenero, velpromtot, velpromult, tiempromtot, tiempromult, disttot, distult, userimc, caltot, calult, pastot, pasult, pesotot, pesoult;
     private CircleImageView userProfileImage;
     private Toolbar mToolbar;
+    private Button settings;
 
     private DatabaseReference profileuserRef;
     private FirebaseAuth mAuth;
@@ -61,6 +65,7 @@ public class ProfileActivity extends AppCompatActivity {
             getSupportActionBar ().setTitle ( "Mi Perfil" );
             getSupportActionBar ().setDisplayHomeAsUpEnabled ( true );
 
+            settings = findViewById ( R.id.profile_settings );
             userName = findViewById ( R.id.my_profile_username );
             userimc = findViewById ( R.id.my_profile_IMC );
             userStatus = findViewById ( R.id.my_profile_state );
@@ -99,64 +104,26 @@ public class ProfileActivity extends AppCompatActivity {
             userAltura.setText ( "Altura: " + Common.loggedUser.getAltura () );
             userEdad.setText ( "Edad: " + Common.loggedUser.getEdad () );
             userimc.setText ( "IMC: " + Common.loggedUser.getImc () );
-            /*
-            profileuserRef.addValueEventListener ( new ValueEventListener () {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.exists ()) {
-                        if (dataSnapshot.hasChild ( "profileimage" )) {
-                            String myProfileImage = dataSnapshot.child ( "profileimage" ).getValue ().toString ();
-                            Picasso.with ( ProfileActivity.this ).load ( myProfileImage ).placeholder ( R.drawable.profile ).into ( userProfileImage );
-                        }
-                        if (dataSnapshot.hasChild ( "username" )) {
-                            String myUsername = dataSnapshot.child ( "username" ).getValue ().toString ();
-                            userName.setText ( "@" + myUsername );
-                        }
-                        if (dataSnapshot.hasChild ( "fullname" )) {
-                            String myProfileName = dataSnapshot.child ( "fullname" ).getValue ().toString ();
-                            userFullname.setText ( myProfileName );
-                        }
-                        if (dataSnapshot.hasChild ( "status" )) {
-                            String myProfileStatus = dataSnapshot.child ( "status" ).getValue ().toString ();
-                            userStatus.setText ( myProfileStatus );
-                        }
-                        if (dataSnapshot.hasChild ( "country" )) {
-                            String myCountry = dataSnapshot.child ( "country" ).getValue ().toString ();
-                            userCountry.setText ( "Country: " + myCountry );
-                        }
-                        if (dataSnapshot.hasChild ( "genero" )) {
-                            String myGenero = dataSnapshot.child ( "genero" ).getValue ().toString ();
-                            userGenero.setText ( "Genero: " + myGenero );
-                        }
-                        if (dataSnapshot.hasChild ( "peso" )) {
-                            String myPeso = dataSnapshot.child ( "peso" ).getValue ().toString ();
-                            userPeso.setText ( "Peso: " + myPeso );
-                        }
-                        if (dataSnapshot.hasChild ( "altura" )) {
-                            String myAltura = dataSnapshot.child ( "altura" ).getValue ().toString ();
-                            userAltura.setText ( "Altura: " + myAltura );
-                        }
-                        if (dataSnapshot.hasChild ( "edad" )) {
-                            String myEdad = dataSnapshot.child ( "edad" ).getValue ().toString ();
-                            userEdad.setText ( "Edad: " + myEdad );
-                        }
-                        if (dataSnapshot.hasChild ( "imc" )) {
-                            String myimc = dataSnapshot.child ( "imc" ).getValue ().toString ();
-                            userimc.setText ( "IMC: " + myimc );
-                        }
-                    }
-                }
 
+            settings.setOnClickListener ( new View.OnClickListener () {
                 @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                public void onClick(View v) {
+                    SendUserToSettingsActivity ();
                 }
             } );
-            */
 
-            profileuserRef.child ( "carreras" ).child ( "velocidad" ).addValueEventListener ( new ValueEventListener () {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            CargarDatos ();
+
+        } catch (Exception e) {
+        }
+    }
+
+    private void CargarDatos() {
+
+        profileuserRef.child ( "carreras" ).child ( "velocidad" ).addValueEventListener ( new ValueEventListener () {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists ()) {
                     float vltotal = 0;
                     float carreras = dataSnapshot.getChildrenCount ();
                     xDato = new ArrayList ();
@@ -181,14 +148,17 @@ public class ProfileActivity extends AppCompatActivity {
                     }
                 }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
 
-                }
-            } );
-            profileuserRef.child ( "carreras" ).child ( "tiempo" ).addValueEventListener ( new ValueEventListener () {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        } );
+        profileuserRef.child ( "carreras" ).child ( "tiempo" ).addValueEventListener ( new ValueEventListener () {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists ()) {
                     xDato = new ArrayList ();
                     yDato = new ArrayList ();
                     xDato.add ( "0" );
@@ -220,14 +190,17 @@ public class ProfileActivity extends AppCompatActivity {
                     Graficar ( xDato, yDato, charttime, "Carrera", "Tiempo [min]" );
                 }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
 
-                }
-            } );
-            profileuserRef.child ( "carreras" ).child ( "calorias" ).addValueEventListener ( new ValueEventListener () {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        } );
+        profileuserRef.child ( "carreras" ).child ( "calorias" ).addValueEventListener ( new ValueEventListener () {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists ()) {
                     xDato = new ArrayList ();
                     yDato = new ArrayList ();
                     xDato.add ( "0" );
@@ -249,14 +222,17 @@ public class ProfileActivity extends AppCompatActivity {
                     Graficar ( xDato, yDato, chartcalorias, "Carrera", "Calorias [cal]" );
                 }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
 
-                }
-            } );
-            profileuserRef.child ( "carreras" ).child ( "distancia" ).addValueEventListener ( new ValueEventListener () {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        } );
+        profileuserRef.child ( "carreras" ).child ( "distancia" ).addValueEventListener ( new ValueEventListener () {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists ()) {
                     String dis = "";
                     float distotal = 0;
                     for (DataSnapshot childDataSnapshot : dataSnapshot.getChildren ()) {
@@ -267,14 +243,17 @@ public class ProfileActivity extends AppCompatActivity {
                     distult.setText ( dis );
                 }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
 
-                }
-            } );
-            profileuserRef.child ( "carreras" ).child ( "pasos" ).addValueEventListener ( new ValueEventListener () {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        } );
+        profileuserRef.child ( "carreras" ).child ( "pasos" ).addValueEventListener ( new ValueEventListener () {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists ()) {
                     String pas = "";
                     float pastotal = 0;
                     for (DataSnapshot childDataSnapshot : dataSnapshot.getChildren ()) {
@@ -285,14 +264,17 @@ public class ProfileActivity extends AppCompatActivity {
                     pasult.setText ( pas );
                 }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
 
-                }
-            } );
-            profileuserRef.child ( "carreras" ).child ( "peso" ).addValueEventListener ( new ValueEventListener () {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        } );
+        profileuserRef.child ( "carreras" ).child ( "peso" ).addValueEventListener ( new ValueEventListener () {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists ()) {
                     String peso = "";
                     float pesototal = 0;
                     float carreras = dataSnapshot.getChildrenCount ();
@@ -305,25 +287,24 @@ public class ProfileActivity extends AppCompatActivity {
                         pesotot.setText ( String.valueOf ( pesototal / carreras ) );
                         pesoult.setText ( peso );
                     }
-
                 }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                }
-            } );
+            }
 
-            ArrayList axisData = new ArrayList ();
-            ArrayList yAxisData = new ArrayList ();
-            axisData.add ( "0" );
-            yAxisData.add ( (float) 0.0 );
-            Graficar ( axisData, yAxisData, charttime, "Carrera", "Tiempo [min]" );
-            Graficar ( axisData, yAxisData, chartcalorias, "Carrera", "Calorias [cal]" );
-            Graficar ( axisData, yAxisData, chartvelocidad, "Carrera", "Velocidad [m/s]" );
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
 
-        } catch (Exception e) {
-        }
+            }
+        } );
+
+        ArrayList axisData = new ArrayList ();
+        ArrayList yAxisData = new ArrayList ();
+        axisData.add ( "0" );
+        yAxisData.add ( (float) 0.0 );
+        Graficar ( axisData, yAxisData, charttime, "Carrera", "Tiempo [min]" );
+        Graficar ( axisData, yAxisData, chartcalorias, "Carrera", "Calorias [cal]" );
+        Graficar ( axisData, yAxisData, chartvelocidad, "Carrera", "Velocidad [m/s]" );
     }
 
     private void Graficar(ArrayList axisData, ArrayList yAxisData, LineChartView chart, String ejex, String ejey) {
@@ -367,4 +348,13 @@ public class ProfileActivity extends AppCompatActivity {
         chart.setCurrentViewport ( viewport );
         chart.animate ();
     }
+
+    private void SendUserToSettingsActivity() {
+        try {
+            Intent loginIntent = new Intent ( ProfileActivity.this, SettingsActivity.class );
+            startActivity ( loginIntent );
+        } catch (Exception e) {
+        }
+    }
+
 }

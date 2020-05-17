@@ -19,6 +19,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.saludable.Utils.Common;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -35,6 +36,8 @@ import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.util.HashMap;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -56,7 +59,7 @@ public class SettingsActivity extends AppCompatActivity {
     private StorageReference UserProfileImageRef;
     private FirebaseRecyclerAdapter firebaseRecyclerAdapter;
     private String currentUserId, updateprofilename, updateprofileimage;
-    private RadioButton radioButton;
+    private RadioButton radioButton, fem, mas;
     private RadioGroup radioGroup;
 
     @Override
@@ -68,7 +71,7 @@ public class SettingsActivity extends AppCompatActivity {
 
             mAuth = FirebaseAuth.getInstance ();
             currentUserId = mAuth.getCurrentUser ().getUid ();
-            SettingsUserRef = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( currentUserId );
+            SettingsUserRef = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( currentUserId ).child ( "Informacion" );
             UserProfileImageRef = FirebaseStorage.getInstance ().getReference ().child ( "ProfileImages" );
             PostRef = FirebaseDatabase.getInstance ().getReference ().child ( "Posts" );
 
@@ -77,7 +80,8 @@ public class SettingsActivity extends AppCompatActivity {
             getSupportActionBar ().setTitle ( "Account Settings" );
             getSupportActionBar ().setDisplayHomeAsUpEnabled ( true );
 
-
+            fem = findViewById ( R.id.setradFeMale );
+            mas = findViewById ( R.id.setradMale );
             userName = findViewById ( R.id.settings_username );
             userProfName = findViewById ( R.id.settings_profile_full_name );
             userStatus = findViewById ( R.id.settings_status );
@@ -91,60 +95,86 @@ public class SettingsActivity extends AppCompatActivity {
             UpdateAccountSettingsButton = findViewById ( R.id.update_account_settings_button );
             loadingBar = new ProgressDialog ( this );
 
-            SettingsUserRef.addValueEventListener ( new ValueEventListener () {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+            if (Common.loggedUser != null) {
+                Picasso.with ( SettingsActivity.this ).load ( Common.loggedUser.getProfileimage () ).placeholder ( R.drawable.profile ).into ( userProfileImage );
+                userName.setText ( Common.loggedUser.getUsername () );
+                userProfName.setText ( Common.loggedUser.getFullname () );
+                userStatus.setText ( Common.loggedUser.getStatus () );
+                userCountry.setText ( Common.loggedUser.getCountry () );
+                userGenero.setText ( Common.loggedUser.getGenero () );
+                String gen = Common.loggedUser.getGenero ();
+                if (gen.equals ( "Femenino" )) {
+                    fem.setChecked ( true );
+                } else {
+                    mas.setChecked ( true );
+                }
 
-                    if (dataSnapshot.exists ()) {
+                userPeso.setText ( Common.loggedUser.getPeso () );
+                userAltura.setText ( Common.loggedUser.getAltura () );
+                userEdad.setText ( Common.loggedUser.getEdad () );
 
-                        if (dataSnapshot.hasChild ( "profileimage" )) {
-                            String myProfileImage = dataSnapshot.child ( "profileimage" ).getValue ().toString ();
-                            updateprofileimage = myProfileImage;
-                            Picasso.with ( SettingsActivity.this ).load ( myProfileImage ).placeholder ( R.drawable.profile ).into ( userProfileImage );
-                        }
-                        if (dataSnapshot.hasChild ( "username" )) {
-                            String myUsername = dataSnapshot.child ( "username" ).getValue ().toString ();
-                            userName.setText ( myUsername );
-                        }
+            } else {
+                SettingsUserRef.addValueEventListener ( new ValueEventListener () {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-                        if (dataSnapshot.hasChild ( "fullname" )) {
-                            String myProfileName = dataSnapshot.child ( "fullname" ).getValue ().toString ();
-                            updateprofilename = myProfileName;
-                            userProfName.setText ( myProfileName );
+                        if (dataSnapshot.exists ()) {
+
+                            if (dataSnapshot.hasChild ( "profileimage" )) {
+                                String myProfileImage = dataSnapshot.child ( "profileimage" ).getValue ().toString ();
+                                updateprofileimage = myProfileImage;
+                                Picasso.with ( SettingsActivity.this ).load ( myProfileImage ).placeholder ( R.drawable.profile ).into ( userProfileImage );
+                            }
+                            if (dataSnapshot.hasChild ( "username" )) {
+                                String myUsername = dataSnapshot.child ( "username" ).getValue ().toString ();
+                                userName.setText ( myUsername );
+                            }
+
+                            if (dataSnapshot.hasChild ( "fullname" )) {
+                                String myProfileName = dataSnapshot.child ( "fullname" ).getValue ().toString ();
+                                updateprofilename = myProfileName;
+                                userProfName.setText ( myProfileName );
+                            }
+                            if (dataSnapshot.hasChild ( "status" )) {
+                                String myProfileStatus = dataSnapshot.child ( "status" ).getValue ().toString ();
+                                userStatus.setText ( myProfileStatus );
+                            }
+                            if (dataSnapshot.hasChild ( "country" )) {
+                                String myCountry = dataSnapshot.child ( "country" ).getValue ().toString ();
+                                userCountry.setText ( myCountry );
+                            }
+                            if (dataSnapshot.hasChild ( "genero" )) {
+                                String myGenero = dataSnapshot.child ( "genero" ).getValue ().toString ();
+                                userGenero.setText ( myGenero );
+                                if (myGenero.equals ( "Femenino" )) {
+                                    fem.setChecked ( true );
+                                } else {
+                                    mas.setChecked ( true );
+                                }
+                            }
+                            if (dataSnapshot.hasChild ( "peso" )) {
+                                String myPeso = dataSnapshot.child ( "peso" ).getValue ().toString ();
+                                userPeso.setText ( myPeso );
+                            }
+                            if (dataSnapshot.hasChild ( "altura" )) {
+                                String myAltura = dataSnapshot.child ( "altura" ).getValue ().toString ();
+                                userAltura.setText ( myAltura );
+                            }
+                            if (dataSnapshot.hasChild ( "edad" )) {
+                                String myEdad = dataSnapshot.child ( "edad" ).getValue ().toString ();
+                                userEdad.setText ( myEdad );
+                            }
+
                         }
-                        if (dataSnapshot.hasChild ( "status" )) {
-                            String myProfileStatus = dataSnapshot.child ( "status" ).getValue ().toString ();
-                            userStatus.setText ( myProfileStatus );
-                        }
-                        if (dataSnapshot.hasChild ( "country" )) {
-                            String myCountry = dataSnapshot.child ( "country" ).getValue ().toString ();
-                            userCountry.setText ( myCountry );
-                        }
-                        if (dataSnapshot.hasChild ( "genero" )) {
-                            String myGenero = dataSnapshot.child ( "genero" ).getValue ().toString ();
-                            userGenero.setText ( myGenero );
-                        }
-                        if (dataSnapshot.hasChild ( "peso" )) {
-                            String myPeso = dataSnapshot.child ( "peso" ).getValue ().toString ();
-                            userPeso.setText ( myPeso );
-                        }
-                        if (dataSnapshot.hasChild ( "altura" )) {
-                            String myAltura = dataSnapshot.child ( "altura" ).getValue ().toString ();
-                            userAltura.setText ( myAltura );
-                        }
-                        if (dataSnapshot.hasChild ( "edad" )) {
-                            String myEdad = dataSnapshot.child ( "edad" ).getValue ().toString ();
-                            userEdad.setText ( myEdad );
-                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
 
                     }
-                }
+                } );
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            } );
+            }
 
             UpdateAccountSettingsButton.setOnClickListener ( new View.OnClickListener () {
                 @Override
@@ -172,6 +202,7 @@ public class SettingsActivity extends AppCompatActivity {
 
         radioButton = findViewById ( radioId );
         userGenero.setText ( radioButton.getText ().toString () );
+
     }
 
     @Override
@@ -278,6 +309,12 @@ public class SettingsActivity extends AppCompatActivity {
     private void UpdateAccountInfo(String username, final String profilename, String status, String country, String genero, String edad, String altura, String peso) {
         try {
             HashMap userMap = new HashMap ();
+            double h = Integer.parseInt ( altura );
+            double p = Integer.parseInt ( peso );
+            double cal = (p / (h * h)) * 10000;
+            MathContext m = new MathContext ( 4 );
+            BigDecimal imcnum = new BigDecimal ( cal );
+            String imc = String.valueOf ( imcnum.round ( m ) );
 
             userMap.put ( "username", username );
             userMap.put ( "fullname", profilename );
@@ -287,6 +324,7 @@ public class SettingsActivity extends AppCompatActivity {
             userMap.put ( "edad", edad );
             userMap.put ( "altura", altura );
             userMap.put ( "peso", peso );
+            userMap.put ( "imc", imc );
 
             SettingsUserRef.updateChildren ( userMap ).addOnCompleteListener ( new OnCompleteListener () {
                 @Override
