@@ -12,7 +12,7 @@ import com.example.saludable.R;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class PostViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+public class PostViewHolder extends RecyclerView.ViewHolder {
 
     public TextView postdate, posttime, postdescript, postadname;
 
@@ -30,16 +30,9 @@ public class PostViewHolder extends RecyclerView.ViewHolder implements View.OnCl
         postimage = itemView.findViewById ( R.id.post_img );
         postdescript = itemView.findViewById ( R.id.post_descrpt );
         postimgprof = itemView.findViewById ( R.id.post_profile_image );
-        itemView.setOnClickListener ( this );
     }
 
     public void setiRecyclerItemClickListener(IRecyclerItemClickListener iRecyclerItemClickListener) {
         this.iRecyclerItemClickListener = iRecyclerItemClickListener;
     }
-
-    @Override
-    public void onClick(View view) {
-        iRecyclerItemClickListener.onItemClickListener ( view, getAdapterPosition () );
-    }
-
 }

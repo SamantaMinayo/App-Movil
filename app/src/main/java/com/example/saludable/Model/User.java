@@ -3,7 +3,18 @@ package com.example.saludable.Model;
 
 public class User {
 
-    private String uid, email, altura, edad, peso, genero, fullname, username, country, imc, profileimage, status;
+    public String uid;
+    public String email;
+    public String altura;
+    public String edad;
+    public String peso;
+    public String genero;
+    public String fullname;
+    public String username;
+    public String country;
+    public String imc;
+    public String profileimage;
+    public String status;
 
     public User() {
     }

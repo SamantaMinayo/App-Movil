@@ -1,38 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".MiMaratonActivity">
+    tools:context=".MiInscripcionActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/mi_maratons_toolbar"
+        android:layout_below="@id/mi_inscripcion_toolbar"
         android:orientation="vertical"
         android:padding="10dp">
 
-
-        <com.mancj.materialsearchbar.MaterialSearchBar
-            android:id="@+id/my_material_search_bar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_above="@+id/all_my_maratons_post_list"
-            android:layout_marginBottom="8dp"
-            app:mt_hint="Enter Maraton Name"
-            app:mt_maxSuggestionsCount="50" />
-
         <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/all_my_maratons_post_list"
+            android:id="@+id/all_my_inscripcion_post_list"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="-1dp" />
 
+        <com.mancj.materialsearchbar.MaterialSearchBar
+            android:id="@+id/my_inscripcion_search_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/all_my_inscripcion_post_list"
+            android:layout_marginBottom="8dp"
+            app:mt_hint="Enter Maraton Name"
+            app:mt_maxSuggestionsCount="50" />
     </LinearLayout>
 
 
     <include
-        android:id="@+id/mi_maratons_toolbar"
-            layout="@layout/app_bar_layout"></include>
-    </RelativeLayout>
+        android:id="@+id/mi_inscripcion_toolbar"
+        layout="@layout/app_bar_layout"></include>
+</RelativeLayout>

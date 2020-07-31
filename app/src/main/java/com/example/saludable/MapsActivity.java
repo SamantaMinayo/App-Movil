@@ -151,8 +151,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 }
             } );
-            inicio.setVisibility ( View.INVISIBLE );
-            fin.setVisibility ( View.INVISIBLE );
+            inicio.setVisibility ( View.VISIBLE );
+            fin.setVisibility ( View.VISIBLE );
             mensaje.setVisibility ( View.INVISIBLE );
 
             CarreraRef.addValueEventListener ( new ValueEventListener () {

@@ -12,25 +12,8 @@ public class Maraton {
     public String maratondate;
     public String place;
     public String maratonname;
-    public String estado;
 
-    public Maraton() {
-    }
-
-    public Maraton(String uid, String time, String date, String maratonimage, String description, String contactname, String contactnumber, String maratontime, String maratondate, String place, String maratonname, String estado) {
-        this.uid = uid;
-        this.time = time;
-        this.date = date;
-        this.maratonimage = maratonimage;
-        this.description = description;
-        this.contactname = contactname;
-        this.contactnumber = contactnumber;
-        this.maratontime = maratontime;
-        this.maratondate = maratondate;
-        this.place = place;
-        this.maratonname = maratonname;
-        this.estado = estado;
-    }
+    public String codigo;
 
 
 
@@ -123,11 +106,29 @@ public class Maraton {
         this.maratonname = maratonname;
     }
 
-    public String getEstado() {
-        return estado;
+    public Maraton(String uid, String time, String date, String maratonimage, String description, String contactname, String contactnumber, String maratontime, String maratondate, String place, String maratonname, String codigo) {
+        this.uid = uid;
+        this.time = time;
+        this.date = date;
+        this.maratonimage = maratonimage;
+        this.description = description;
+        this.contactname = contactname;
+        this.contactnumber = contactnumber;
+        this.maratontime = maratontime;
+        this.maratondate = maratondate;
+        this.place = place;
+        this.maratonname = maratonname;
+        this.codigo = codigo;
     }
 
-    public void setEstado(String estado) {
-        this.estado = estado;
+    public Maraton() {
+    }
+
+    public String getCodigo() {
+        return codigo;
+    }
+
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
     }
 }

@@ -1,7 +1,9 @@
 package com.example.saludable;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -16,6 +18,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -29,8 +32,6 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
-import com.theartofdev.edmodo.cropper.CropImage;
-import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -51,8 +52,8 @@ public class SetupActivity extends AppCompatActivity {
     private StorageReference UserProfileImageRef;
     private TextView Genero;
     private ProgressDialog loadingBar;
-
-    final static int Gallery_Pick = 1;
+    final static int Gallery_pick = 1;
+    private final int REQUEST_STORAGE = 0;
     String currentUserID;
 
     @Override
@@ -61,6 +62,10 @@ public class SetupActivity extends AppCompatActivity {
 
             super.onCreate ( savedInstanceState );
             setContentView ( R.layout.activity_setup );
+
+            if (ActivityCompat.checkSelfPermission ( this, Manifest.permission.READ_EXTERNAL_STORAGE ) != PackageManager.PERMISSION_GRANTED)
+                ActivityCompat.requestPermissions ( this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_STORAGE );
+
 
             mAuth = FirebaseAuth.getInstance ();
             currentUserID = mAuth.getCurrentUser ().getUid ();
@@ -93,10 +98,7 @@ public class SetupActivity extends AppCompatActivity {
             ProfileImage.setOnClickListener ( new View.OnClickListener () {
                 @Override
                 public void onClick(View view) {
-                    Intent galleryIntent = new Intent ();
-                    galleryIntent.setAction ( Intent.ACTION_GET_CONTENT );
-                    galleryIntent.setType ( "image/*" );
-                    startActivityForResult ( galleryIntent, Gallery_Pick );
+                    openGallery ();
                 }
             } );
 
@@ -124,9 +126,16 @@ public class SetupActivity extends AppCompatActivity {
         }
     }
 
+    private void openGallery() {
+
+        Intent galleryIntent = new Intent ();
+        galleryIntent.setAction ( Intent.ACTION_GET_CONTENT );
+        galleryIntent.setType ( "image/" );
+        galleryIntent.putExtra ( "crop", "true" );
+        startActivityForResult ( galleryIntent, Gallery_pick );
+    }
     public void checkButton(View v) {
         int radioId = radioGroup.getCheckedRadioButtonId ();
-
         radioButton = findViewById ( radioId );
         Genero.setText ( radioButton.getText ().toString () );
     }
@@ -135,68 +144,58 @@ public class SetupActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult ( requestCode, resultCode, data );
 
-        if (requestCode == Gallery_Pick && resultCode == RESULT_OK && data != null) {
-            Uri ImageUri = data.getData ();
-            CropImage.activity ()
-                    .setGuidelines ( CropImageView.Guidelines.ON )
-                    .setAspectRatio ( 1, 1 )
-                    .start ( this );
-        }
-        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+        if (requestCode == Gallery_pick && resultCode == RESULT_OK && data != null) {
 
-            CropImage.ActivityResult result = CropImage.getActivityResult ( data );
+            loadingBar.setTitle ( "Imagen de Perfil" );
+            loadingBar.setMessage ( "Espere mientras cargamos su imagen de perfil" );
+            loadingBar.setCanceledOnTouchOutside ( true );
+            loadingBar.show ();
+            Uri resultUri = data.getData ();
 
-            if (resultCode == RESULT_OK) {
+            final StorageReference filePath = UserProfileImageRef.child ( currentUserID + ".jpg" );
 
-                loadingBar.setTitle ( "Imagen de Perfil" );
-                loadingBar.setMessage ( "Espere mientras cargamos su imagen de perfil" );
-                loadingBar.setCanceledOnTouchOutside ( true );
-                loadingBar.show ();
-                Uri resultUri = result.getUri ();
+            filePath.putFile ( resultUri ).addOnCompleteListener ( new OnCompleteListener<UploadTask.TaskSnapshot> () {
+                @Override
+                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                    if (task.isSuccessful ()) {
 
-                final StorageReference filePath = UserProfileImageRef.child ( currentUserID + ".jpg" );
+                        filePath.getDownloadUrl ().addOnCompleteListener ( new OnCompleteListener<Uri> () {
+                            @Override
+                            public void onComplete(@NonNull Task<Uri> task) {
+                                final String downloadUri = task.getResult ().toString ();
+                                UserRef.child ( "profileimage" ).setValue ( downloadUri )
+                                        .addOnCompleteListener ( new OnCompleteListener<Void> () {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
 
-                filePath.putFile ( resultUri ).addOnCompleteListener ( new OnCompleteListener<UploadTask.TaskSnapshot> () {
-                    @Override
-                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                        if (task.isSuccessful ()) {
-                            Toast.makeText ( SetupActivity.this, "Su foto de perfil se ha cargado correctamente", Toast.LENGTH_SHORT ).show ();
-
-                            filePath.getDownloadUrl ().addOnCompleteListener ( new OnCompleteListener<Uri> () {
-                                @Override
-                                public void onComplete(@NonNull Task<Uri> task) {
-                                    final String downloadUri = task.getResult ().toString ();
-                                    UserRef.child ( "profileimage" ).setValue ( downloadUri )
-                                            .addOnCompleteListener ( new OnCompleteListener<Void> () {
-                                                @Override
-                                                public void onComplete(@NonNull Task<Void> task) {
-
-                                                    if (task.isSuccessful ()) {
-                                                        Intent selfIntent = new Intent ( SetupActivity.this, SetupActivity.class );
-                                                        startActivity ( selfIntent );
-
-                                                        Toast.makeText ( SetupActivity.this, "Su imagen de perfil cargada correctamente", Toast.LENGTH_SHORT ).show ();
-                                                        loadingBar.dismiss ();
-                                                    } else {
-                                                        String message = task.getException ().getMessage ();
-                                                        Toast.makeText ( SetupActivity.this, "A ocurrido un error: " + message, Toast.LENGTH_SHORT ).show ();
-                                                        loadingBar.dismiss ();
-                                                    }
+                                                if (task.isSuccessful ()) {
+                                                    Toast.makeText ( SetupActivity.this, "Su imagen de perfil cargada correctamente", Toast.LENGTH_SHORT ).show ();
+                                                    loadingBar.dismiss ();
+                                                } else {
+                                                    String message = task.getException ().getMessage ();
+                                                    Toast.makeText ( SetupActivity.this, "A ocurrido un error: " + message, Toast.LENGTH_SHORT ).show ();
+                                                    loadingBar.dismiss ();
                                                 }
-                                            } );
-                                }
-                            } );
+                                            }
+                                        } );
+                            }
+                        } );
 
-                        }
+                    } else {
+                        String message = task.getException ().getMessage ();
+                        Toast.makeText ( SetupActivity.this, "Error Occured: " + message, Toast.LENGTH_SHORT ).show ();
+                        loadingBar.dismiss ();
                     }
-                } );
-            } else {
+                }
+            } );
+        } else {
 
-                Toast.makeText ( this, "A ocurrido un error. Intentelo nuevamente", Toast.LENGTH_SHORT ).show ();
-                loadingBar.dismiss ();
-            }
+            Toast.makeText ( this, "A ocurrido un error. Intentelo nuevamente", Toast.LENGTH_SHORT ).show ();
+            loadingBar.dismiss ();
         }
     }
+
+
 
     private void SaveAccountSetupInformation() {
         String username = UserName.getText ().toString ();
@@ -258,5 +257,19 @@ public class SetupActivity extends AppCompatActivity {
         setupIntent.addFlags ( Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK );
         startActivity ( setupIntent );
         finish ();
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResult) {
+        super.onRequestPermissionsResult ( requestCode, permissions, grantResult );
+
+        if (requestCode == REQUEST_STORAGE) {
+            if (grantResult.length > 0 && grantResult[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText ( this, "Permission granted", Toast.LENGTH_SHORT ).show ();
+            } else {
+                Toast.makeText ( this, "Permission denied", Toast.LENGTH_SHORT ).show ();
+            }
+        }
     }
 }

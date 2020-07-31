@@ -9,11 +9,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
+        <activity
+            android:name=".MiInscripcionActivity"
+            android:parentActivityName=".MainActivity"></activity>
         <activity
             android:name=".ClickInMiMaratonActivity"
             android:parentActivityName=".MaratonActivity" />
-
         <activity
             android:name=".ClickMiMaratonActivity"
             android:parentActivityName=".MiMaratonActivity" />
@@ -34,7 +35,7 @@
         -->
         <activity
             android:name=".ClickMaratonActivity"
-            android:parentActivityName=".MaratonActivity" />
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".MaratonActivity"
             android:parentActivityName=".MainActivity" />
@@ -60,20 +61,21 @@
         <activity
             android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
             android:theme="@style/Base.Theme.AppCompat" />
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
         <service android:name=".Service.MyService" />
     </application>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
 </manifest>

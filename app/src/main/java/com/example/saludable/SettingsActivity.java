@@ -1,7 +1,9 @@
 package com.example.saludable;
 
+import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -17,6 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.saludable.Utils.Common;
@@ -33,8 +36,6 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
-import com.theartofdev.edmodo.cropper.CropImage;
-import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -61,6 +62,8 @@ public class SettingsActivity extends AppCompatActivity {
     private String currentUserId, updateprofilename, updateprofileimage;
     private RadioButton radioButton, fem, mas;
     private RadioGroup radioGroup;
+    private final int REQUEST_STORAGE = 0;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +71,9 @@ public class SettingsActivity extends AppCompatActivity {
             super.onCreate ( savedInstanceState );
             setContentView ( R.layout.activity_settings );
 
+
+            if (ActivityCompat.checkSelfPermission ( this, Manifest.permission.READ_EXTERNAL_STORAGE ) != PackageManager.PERMISSION_GRANTED)
+                ActivityCompat.requestPermissions ( this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_STORAGE );
 
             mAuth = FirebaseAuth.getInstance ();
             currentUserId = mAuth.getCurrentUser ().getUid ();
@@ -186,17 +192,22 @@ public class SettingsActivity extends AppCompatActivity {
             userProfileImage.setOnClickListener ( new View.OnClickListener () {
                 @Override
                 public void onClick(View v) {
-                    Intent galleryIntent = new Intent ();
-                    galleryIntent.setAction ( Intent.ACTION_GET_CONTENT );
-                    galleryIntent.setType ( "image/" );
-                    startActivityForResult ( galleryIntent, Gallery_pick );
-                }
 
+                    openGallery ();
+                }
             } );
         } catch (Exception e) {
         }
     }
 
+    private void openGallery() {
+
+        Intent galleryIntent = new Intent ();
+        galleryIntent.setAction ( Intent.ACTION_GET_CONTENT );
+        galleryIntent.setType ( "image/*" );
+        galleryIntent.putExtra ( "crop", "true" );
+        startActivityForResult ( galleryIntent, Gallery_pick );
+    }
     public void checkButton(View v) {
         int radioId = radioGroup.getCheckedRadioButtonId ();
 
@@ -212,17 +223,7 @@ public class SettingsActivity extends AppCompatActivity {
             super.onActivityResult ( requestCode, resultCode, data );
 
             if (requestCode == Gallery_pick && resultCode == RESULT_OK && data != null) {
-                Uri ImageUri = data.getData ();
-                CropImage.activity ()
-                        .setGuidelines ( CropImageView.Guidelines.ON )
-                        .setAspectRatio ( 1, 1 )
-                        .start ( this );
-            }
-            if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
 
-                CropImage.ActivityResult result = CropImage.getActivityResult ( data );
-
-                if (resultCode == RESULT_OK) {
 
                     loadingBar.setTitle ( "Imagen de Perfil" );
                     loadingBar.setMessage ( "Espere mientras actualizamos su imagen de perfil" );
@@ -230,7 +231,7 @@ public class SettingsActivity extends AppCompatActivity {
                     loadingBar.show ();
 
 
-                    Uri resultUri = result.getUri ();
+                Uri resultUri = data.getData ();
 
                     final StorageReference filePath = UserProfileImageRef.child ( currentUserId + ".jpg" );
 
@@ -250,8 +251,6 @@ public class SettingsActivity extends AppCompatActivity {
                                                     public void onComplete(@NonNull Task<Void> task) {
 
                                                         if (task.isSuccessful ()) {
-                                                            Intent selfIntent = new Intent ( SettingsActivity.this, SettingsActivity.class );
-                                                            startActivity ( selfIntent );
 
                                                             Toast.makeText ( SettingsActivity.this, "Imagen almacenada correctamente", Toast.LENGTH_SHORT ).show ();
                                                             loadingBar.dismiss ();
@@ -265,6 +264,10 @@ public class SettingsActivity extends AppCompatActivity {
                                     }
                                 } );
 
+                            } else {
+                                String message = task.getException ().getMessage ();
+                                Toast.makeText ( SettingsActivity.this, "Error Occured: " + message, Toast.LENGTH_SHORT ).show ();
+                                loadingBar.dismiss ();
                             }
                         }
                     } );
@@ -273,7 +276,7 @@ public class SettingsActivity extends AppCompatActivity {
                     Toast.makeText ( this, "A ocurrido un error", Toast.LENGTH_SHORT ).show ();
                     loadingBar.dismiss ();
                 }
-            }
+
 
         } catch (Exception e) {
 
@@ -355,4 +358,16 @@ public class SettingsActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResult) {
+        super.onRequestPermissionsResult ( requestCode, permissions, grantResult );
+
+        if (requestCode == REQUEST_STORAGE) {
+            if (grantResult.length > 0 && grantResult[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText ( this, "Permission granted", Toast.LENGTH_SHORT ).show ();
+            } else {
+                Toast.makeText ( this, "Permission denied", Toast.LENGTH_SHORT ).show ();
+            }
+        }
+    }
 }

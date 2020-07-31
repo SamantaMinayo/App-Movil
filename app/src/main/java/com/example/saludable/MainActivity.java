@@ -207,14 +207,13 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText ( this, "Home", Toast.LENGTH_SHORT ).show ();
                     break;
                 case R.id.nav_mi_inscripcion:
-                    //SendUserToMiInscripcionActivity ();
+                    SendUserToMiInscripcionActivity ();
                     break;
                 case R.id.nav_find_marathon:
                     SendUserToMaratonActivity ();
                     break;
                 case R.id.nav_mi_marathon:
                     SendUserToMiMaratonActivity ();
-                    Toast.makeText ( this, "Inscripciones", Toast.LENGTH_SHORT ).show ();
                     break;
                 case R.id.nav_ayuda:
                     Toast.makeText ( this, "Ayuda", Toast.LENGTH_SHORT ).show ();
@@ -273,11 +272,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     private void SendUserToMiInscripcionActivity() {
         try {
-            //Intent addNewPostIntent = new Intent ( MainActivity.this, MiInscripcionActivity.class );
-            //startActivity ( addNewPostIntent );
+            Intent addNewPostIntent = new Intent ( MainActivity.this, MiInscripcionActivity.class );
+            startActivity ( addNewPostIntent );
         } catch (Exception e) {
         }
     }

@@ -23,6 +23,7 @@
                 android:text="Nombre Carrera"
                 android:textAlignment="center" />
 
+
             <TextView
                 android:id="@+id/graf_tiempo"
                 android:layout_width="match_parent"
