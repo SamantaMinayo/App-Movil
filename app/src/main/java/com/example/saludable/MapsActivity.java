@@ -1,8 +1,11 @@
 package com.example.saludable;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -17,6 +20,7 @@ import android.widget.Chronometer;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
@@ -72,6 +76,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     PowerManager.WakeLock wakelock;
     private Toolbar mToolbar;
 
+    private final int REQUEST_ACCESS_FINE = 0;
+
     LocationListener locListener = new LocationListener () {
         @Override
         public void onLocationChanged(Location location) {
@@ -104,6 +110,30 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             super.onCreate ( savedInstanceState );
             setContentView ( R.layout.activity_maps );
+
+
+            OnBackPressedCallback callback = new OnBackPressedCallback ( true ) {
+                @Override
+                public void handleOnBackPressed() {
+                    new AlertDialog.Builder ( MapsActivity.this )
+                            .setTitle ( "Salir" )
+                            .setMessage ( "Estas Seguro" )
+                            .setNegativeButton ( android.R.string.cancel, null )
+                            .setPositiveButton ( android.R.string.ok, new DialogInterface.OnClickListener () {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Intent loginIntent = new Intent ( MapsActivity.this, ClickInMiMaratonActivity.class );
+                                    loginIntent.addFlags ( Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK );
+                                    loginIntent.putExtra ( "PostKey", PostKey );
+                                    startActivity ( loginIntent );
+                                    finish ();
+                                }
+                            } );
+                }
+            };
+            if (ActivityCompat.checkSelfPermission ( this, Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED)
+                ActivityCompat.requestPermissions ( this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_ACCESS_FINE );
+
             // Obtain the SupportMapFragment and get notified when the map is ready to be used.
             SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager ()
                     .findFragmentById ( R.id.map );
@@ -531,5 +561,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         loadingBar.show ();
         RegistrarUsuario.removeValue ();
     }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResult) {
+        super.onRequestPermissionsResult ( requestCode, permissions, grantResult );
+
+        if (requestCode == REQUEST_ACCESS_FINE) {
+            if (grantResult.length > 0 && grantResult[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText ( this, "Permission granted", Toast.LENGTH_SHORT ).show ();
+            } else {
+                Toast.makeText ( this, "Permission denied", Toast.LENGTH_SHORT ).show ();
+            }
+        }
+    }
+
 }
 

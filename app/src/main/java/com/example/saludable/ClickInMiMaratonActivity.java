@@ -38,6 +38,7 @@ public class ClickInMiMaratonActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate ( savedInstanceState );
         setContentView ( R.layout.activity_click_in_mi_maraton );
+
         PostKey = getIntent ().getExtras ().get ( "PostKey" ).toString ();
         monitorear = findViewById ( R.id.in_monitorear_maraton_button );
         codigo = findViewById ( R.id.in_codigo_carrera );

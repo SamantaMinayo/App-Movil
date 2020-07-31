@@ -32,6 +32,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -128,11 +130,11 @@ public class SetupActivity extends AppCompatActivity {
 
     private void openGallery() {
 
-        Intent galleryIntent = new Intent ();
-        galleryIntent.setAction ( Intent.ACTION_GET_CONTENT );
-        galleryIntent.setType ( "image/" );
-        galleryIntent.putExtra ( "crop", "true" );
-        startActivityForResult ( galleryIntent, Gallery_pick );
+        CropImage.activity ()
+                .setGuidelines ( CropImageView.Guidelines.ON )
+                .setAspectRatio ( 1, 1 )
+                .start ( this );
+
     }
     public void checkButton(View v) {
         int radioId = radioGroup.getCheckedRadioButtonId ();
@@ -144,13 +146,18 @@ public class SetupActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult ( requestCode, resultCode, data );
 
-        if (requestCode == Gallery_pick && resultCode == RESULT_OK && data != null) {
+        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+
+            CropImage.ActivityResult result = CropImage.getActivityResult ( data );
+
+            if (resultCode == RESULT_OK) {
 
             loadingBar.setTitle ( "Imagen de Perfil" );
             loadingBar.setMessage ( "Espere mientras cargamos su imagen de perfil" );
             loadingBar.setCanceledOnTouchOutside ( true );
             loadingBar.show ();
-            Uri resultUri = data.getData ();
+
+                Uri resultUri = result.getUri ();
 
             final StorageReference filePath = UserProfileImageRef.child ( currentUserID + ".jpg" );
 
@@ -188,10 +195,11 @@ public class SetupActivity extends AppCompatActivity {
                     }
                 }
             } );
-        } else {
+            } else {
 
-            Toast.makeText ( this, "A ocurrido un error. Intentelo nuevamente", Toast.LENGTH_SHORT ).show ();
-            loadingBar.dismiss ();
+                Toast.makeText ( this, "A ocurrido un error. Intentelo nuevamente", Toast.LENGTH_SHORT ).show ();
+                loadingBar.dismiss ();
+            }
         }
     }
 
