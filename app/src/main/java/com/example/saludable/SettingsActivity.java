@@ -36,6 +36,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
+import com.theartofdev.edmodo.cropper.CropImage;
+import com.theartofdev.edmodo.cropper.CropImageView;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -202,11 +204,10 @@ public class SettingsActivity extends AppCompatActivity {
 
     private void openGallery() {
 
-        Intent galleryIntent = new Intent ();
-        galleryIntent.setAction ( Intent.ACTION_GET_CONTENT );
-        galleryIntent.setType ( "image/*" );
-        galleryIntent.putExtra ( "crop", "true" );
-        startActivityForResult ( galleryIntent, Gallery_pick );
+        CropImage.activity ()
+                .setGuidelines ( CropImageView.Guidelines.ON )
+                .setAspectRatio ( 1, 1 )
+                .start ( this );
     }
     public void checkButton(View v) {
         int radioId = radioGroup.getCheckedRadioButtonId ();
@@ -222,8 +223,11 @@ public class SettingsActivity extends AppCompatActivity {
 
             super.onActivityResult ( requestCode, resultCode, data );
 
-            if (requestCode == Gallery_pick && resultCode == RESULT_OK && data != null) {
+            if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
 
+                CropImage.ActivityResult result = CropImage.getActivityResult ( data );
+
+                if (resultCode == RESULT_OK) {
 
                     loadingBar.setTitle ( "Imagen de Perfil" );
                     loadingBar.setMessage ( "Espere mientras actualizamos su imagen de perfil" );
@@ -231,7 +235,7 @@ public class SettingsActivity extends AppCompatActivity {
                     loadingBar.show ();
 
 
-                Uri resultUri = data.getData ();
+                    Uri resultUri = result.getUri ();
 
                     final StorageReference filePath = UserProfileImageRef.child ( currentUserId + ".jpg" );
 
@@ -251,7 +255,6 @@ public class SettingsActivity extends AppCompatActivity {
                                                     public void onComplete(@NonNull Task<Void> task) {
 
                                                         if (task.isSuccessful ()) {
-
                                                             Toast.makeText ( SettingsActivity.this, "Imagen almacenada correctamente", Toast.LENGTH_SHORT ).show ();
                                                             loadingBar.dismiss ();
                                                         } else {
@@ -264,10 +267,6 @@ public class SettingsActivity extends AppCompatActivity {
                                     }
                                 } );
 
-                            } else {
-                                String message = task.getException ().getMessage ();
-                                Toast.makeText ( SettingsActivity.this, "Error Occured: " + message, Toast.LENGTH_SHORT ).show ();
-                                loadingBar.dismiss ();
                             }
                         }
                     } );
@@ -276,13 +275,12 @@ public class SettingsActivity extends AppCompatActivity {
                     Toast.makeText ( this, "A ocurrido un error", Toast.LENGTH_SHORT ).show ();
                     loadingBar.dismiss ();
                 }
-
+            }
 
         } catch (Exception e) {
 
         }
     }
-
 
     private void ValidateAccountInfo() {
         String username = userName.getText ().toString ();
