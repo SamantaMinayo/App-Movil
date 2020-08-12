@@ -1,31 +1,39 @@
 package com.example.saludable;
 
 import android.Manifest;
-import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
-import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.PowerManager;
-import android.os.SystemClock;
+import android.preference.PreferenceManager;
+import android.provider.Settings;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
-import androidx.fragment.app.FragmentActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.example.saludable.Service.MyService;
+import com.example.saludable.Service.Utils;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -38,6 +46,7 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -49,7 +58,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback,
+        SharedPreferences.OnSharedPreferenceChangeListener {
 
     double vel = 2.0;
     private String latitudinicial = "0.0";
@@ -78,227 +88,148 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private final int REQUEST_ACCESS_FINE = 0;
 
-    LocationListener locListener = new LocationListener () {
+    private static final String TAG = MainActivity.class.getSimpleName ();
+
+    // Used in checking for runtime permissions.
+    private static final int REQUEST_PERMISSIONS_REQUEST_CODE = 34;
+
+    // The BroadcastReceiver used to listen from broadcasts from the service.
+    private MyReceiver myReceiver;
+
+    // A reference to the service used to get location updates.
+    private MyService mService = null;
+
+    // Tracks the bound state of the service.
+    private boolean mBound = false;
+    private final ServiceConnection mServiceConnection = new ServiceConnection () {
+
         @Override
-        public void onLocationChanged(Location location) {
-            actualizarUbicacion ( location );
-            if (iniciar == true) {
-                SavingInformation ( location );
-            }
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            MyService.LocalBinder binder = (MyService.LocalBinder) service;
+            mService = binder.getService ();
+            mBound = true;
         }
 
         @Override
-        public void onStatusChanged(String provider, int status, Bundle extras) {
-
-        }
-
-        @Override
-        public void onProviderEnabled(String provider) {
-
-        }
-
-        @Override
-        public void onProviderDisabled(String provider) {
-
+        public void onServiceDisconnected(ComponentName name) {
+            mService = null;
+            mBound = false;
         }
     };
+    // UI elements.
+    private Button mRequestLocationUpdatesButton;
+    private Button mRemoveLocationUpdatesButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        try {
+        super.onCreate ( savedInstanceState );
 
-            super.onCreate ( savedInstanceState );
-            setContentView ( R.layout.activity_maps );
+        myReceiver = new MyReceiver ();
+
+        setContentView ( R.layout.activity_maps );
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager ()
+                .findFragmentById ( R.id.map );
+        mapFragment.getMapAsync ( this );
 
 
-            OnBackPressedCallback callback = new OnBackPressedCallback ( true ) {
-                @Override
-                public void handleOnBackPressed() {
-                    new AlertDialog.Builder ( MapsActivity.this )
-                            .setTitle ( "Salir" )
-                            .setMessage ( "Estas Seguro" )
-                            .setNegativeButton ( android.R.string.cancel, null )
-                            .setPositiveButton ( android.R.string.ok, new DialogInterface.OnClickListener () {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    Intent loginIntent = new Intent ( MapsActivity.this, ClickInMiMaratonActivity.class );
-                                    loginIntent.addFlags ( Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK );
-                                    loginIntent.putExtra ( "PostKey", PostKey );
-                                    startActivity ( loginIntent );
-                                    finish ();
-                                }
-                            } );
-                }
-            };
-            if (ActivityCompat.checkSelfPermission ( this, Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED)
-                ActivityCompat.requestPermissions ( this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_ACCESS_FINE );
-
-            // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager ()
-                    .findFragmentById ( R.id.map );
-            mapFragment.getMapAsync ( this );
-
-            inicio = findViewById ( R.id.inicio_button );
-            fin = findViewById ( R.id.fin_button );
-            cronometro = findViewById ( R.id.cronometro );
-            mensaje = findViewById ( R.id.monitor_message );
-            mToolbar = findViewById ( R.id.map_toolbar );
-            mToolbar.setTitle ( "Carrera" );
-
-            mAuth = FirebaseAuth.getInstance ();
-            current_user_id = mAuth.getCurrentUser ().getUid ();
-            PostKey = getIntent ().getExtras ().get ( "PostKey" ).toString ();
-            UsuarioCarreraRef = FirebaseDatabase.getInstance ().getReference ().child ( "UsuariosCarreras" ).child ( current_user_id ).child ( PostKey );
-            UsCarrInformationRef = FirebaseDatabase.getInstance ().getReference ().child ( "UsuariosCarreras" ).child ( current_user_id ).child ( PostKey );
-            CarreraUserInf = FirebaseDatabase.getInstance ().getReference ().child ( "CarrerasRealizadas" );
-            CarreraRef = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( PostKey );
-            RegistrarUsuario = FirebaseDatabase.getInstance ().getReference ().child ( "UsuariosCarreras" ).child ( current_user_id ).child ( PostKey );
-
-            powerManager = (PowerManager) getSystemService ( POWER_SERVICE );
-            wakelock = powerManager.newWakeLock ( PowerManager.PARTIAL_WAKE_LOCK,
-                    "MyApp::MyWakelockTag" );
-
-            loadingBar = new ProgressDialog ( this );
-
-            inicio.setEnabled ( true );
-            fin.setEnabled ( false );
-
-            inicio.setOnClickListener ( new View.OnClickListener () {
-                @Override
-                public void onClick(View v) {
-                    wakelock.acquire ();
-                    iniciar = true;
-                    Monitorear ( true );
-                }
-            } );
-            fin.setOnClickListener ( new View.OnClickListener () {
-                @Override
-                public void onClick(View v) {
-                    wakelock.release ();
-                    iniciar = false;
-                    Monitorear ( false );
+        mAuth = FirebaseAuth.getInstance ();
+        current_user_id = mAuth.getCurrentUser ().getUid ();
+        PostKey = getIntent ().getExtras ().get ( "PostKey" ).toString ();
+        UsuarioCarreraRef = FirebaseDatabase.getInstance ().getReference ().child ( "UsuariosCarreras" ).child ( current_user_id ).child ( PostKey );
+        UsCarrInformationRef = FirebaseDatabase.getInstance ().getReference ().child ( "UsuariosCarreras" ).child ( current_user_id ).child ( PostKey );
+        CarreraUserInf = FirebaseDatabase.getInstance ().getReference ().child ( "CarrerasRealizadas" );
+        CarreraRef = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( PostKey );
+        RegistrarUsuario = FirebaseDatabase.getInstance ().getReference ().child ( "UsuariosCarreras" ).child ( current_user_id ).child ( PostKey );
+        CarreraRef.addValueEventListener ( new ValueEventListener () {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists ()) {
+                    nombrecarrera = dataSnapshot.child ( "maratonname" ).getValue ().toString ();
+                    imagencarrera = dataSnapshot.child ( "maratonimage" ).getValue ().toString ();
+                    descripcion = dataSnapshot.child ( "description" ).getValue ().toString ();
+                    uid = dataSnapshot.child ( "uid" ).getValue ().toString ();
+                    estado = dataSnapshot.child ( "estado" ).getValue ().toString ();
 
                 }
-            } );
-            inicio.setVisibility ( View.VISIBLE );
-            fin.setVisibility ( View.VISIBLE );
-            mensaje.setVisibility ( View.INVISIBLE );
+            }
 
-            CarreraRef.addValueEventListener ( new ValueEventListener () {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.exists ()) {
-                        nombrecarrera = dataSnapshot.child ( "maratonname" ).getValue ().toString ();
-                        imagencarrera = dataSnapshot.child ( "maratonimage" ).getValue ().toString ();
-                        descripcion = dataSnapshot.child ( "description" ).getValue ().toString ();
-                        uid = dataSnapshot.child ( "uid" ).getValue ().toString ();
-                        estado = dataSnapshot.child ( "estado" ).getValue ().toString ();
-                        if (estado.equals ( "true" )) {
-                            Monitorear ( false );
-                            if (location != null) SavingInformation ( location );
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                            inicio.setVisibility ( View.INVISIBLE );
-                            fin.setVisibility ( View.INVISIBLE );
-                            mensaje.setVisibility ( View.VISIBLE );
-                            mensaje.setText ( "La carrera a terminado. Mire sus datos en sus carreras realizadas" );
+            }
+        } );
 
-                        } else {
-                            inicio.setVisibility ( View.VISIBLE );
-                            fin.setVisibility ( View.VISIBLE );
-                            mensaje.setText ( "" );
 
-                        }
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            } );
-        } catch (Exception e) {
+        // Check that the user hasn't revoked permissions by going to Settings.
+        if (Utils.requestingLocationUpdates ( this )) {
+            if (!checkPermissions ()) {
+                requestPermissions ();
+            }
         }
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap) {
-        try {
+    protected void onStart() {
+        super.onStart ();
+        PreferenceManager.getDefaultSharedPreferences ( this )
+                .registerOnSharedPreferenceChangeListener ( this );
 
-            mMap = googleMap;
-            location = null;
-            miUbicacion ();
-        } catch (Exception e) {
-        }
+        mRequestLocationUpdatesButton = findViewById ( R.id.inicio_button );
+        mRemoveLocationUpdatesButton = findViewById ( R.id.fin_button );
 
+        mRequestLocationUpdatesButton.setOnClickListener ( new View.OnClickListener () {
+            @Override
+            public void onClick(View view) {
+                if (!checkPermissions ()) {
+                    requestPermissions ();
+                } else {
+                    mService.requestLocationUpdates ();
+                }
+            }
+        } );
+
+        mRemoveLocationUpdatesButton.setOnClickListener ( new View.OnClickListener () {
+            @Override
+            public void onClick(View view) {
+                mService.removeLocationUpdates ();
+            }
+        } );
+
+        // Restore the state of the buttons when the activity (re)launches.
+        setButtonsState ( Utils.requestingLocationUpdates ( this ) );
+
+        // Bind to the service. If the service is in foreground mode, this signals to the service
+        // that since this activity is in the foreground, the service can exit foreground mode.
+        bindService ( new Intent ( this, MyService.class ), mServiceConnection,
+                Context.BIND_AUTO_CREATE );
     }
 
-    private void Monitorear(boolean b) {
-        try {
-
-            if (b == true) {
-                cronometro.setBase ( SystemClock.elapsedRealtime () );
-                cronometro.start ();
-                inicio.setEnabled ( false );
-                fin.setEnabled ( true );
-                miUbicacion ();
-                mensaje.setText ( "" );
-            } else {
-                locationManager.removeUpdates ( locListener );
-                inicio.setEnabled ( true );
-                fin.setEnabled ( false );
-                if (location != null) SavingInformation ( location );
-                GuardarInformacionFinal ();
-            }
-        } catch (Exception e) {
-        }
+    @Override
+    protected void onResume() {
+        super.onResume ();
+        LocalBroadcastManager.getInstance ( this ).registerReceiver ( myReceiver,
+                new IntentFilter ( MyService.ACTION_BROADCAST ) );
     }
 
-    private void agrerarMarcador(double lat, double log) {
-        try {
-            LatLng coordenada = new LatLng ( lat, log );
-            CameraUpdate miUbicacion = CameraUpdateFactory.newLatLngZoom ( coordenada, 17 );
-
-            if (marcador != null) marcador.remove ();
-            marcador = mMap.addMarker ( new MarkerOptions ()
-                    .position ( coordenada )
-                    .title ( "Mi posision actual" )
-            );
-            mMap.animateCamera ( miUbicacion );
-        } catch (Exception e) {
-            String error = "ERROR";
-        }
-
+    @Override
+    protected void onPause() {
+        LocalBroadcastManager.getInstance ( this ).unregisterReceiver ( myReceiver );
+        super.onPause ();
     }
 
-    private void actualizarUbicacion(Location location) {
-        try {
-            if (location != null) {
-                lat = location.getLatitude ();
-                log = location.getLongitude ();
-                agrerarMarcador ( lat, log );
-            }
-        } catch (Exception e) {
+    @Override
+    protected void onStop() {
+        if (mBound) {
+            // Unbind from the service. This signals to the service that this activity is no longer
+            // in the foreground, and the service can respond by promoting itself to a foreground
+            // service.
+            unbindService ( mServiceConnection );
+            mBound = false;
         }
-    }
-
-    private void miUbicacion() {
-        try {
-            if (ActivityCompat.checkSelfPermission ( this, Manifest.permission.ACCESS_FINE_LOCATION ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission ( this, Manifest.permission.ACCESS_COARSE_LOCATION ) != PackageManager.PERMISSION_GRANTED) {
-                return;
-            }
-            locationManager = (LocationManager) getSystemService ( Context.LOCATION_SERVICE );
-            location = locationManager.getLastKnownLocation ( LocationManager.NETWORK_PROVIDER );
-            actualizarUbicacion ( location );
-            if (iniciar == false) {
-                locationManager.requestLocationUpdates ( LocationManager.NETWORK_PROVIDER, 10000, 0, locListener );
-            } else {
-                SavingInformation ( location );
-            }
-            String error = "ERROR";
-
-        } catch (Exception e) {
-        }
+        PreferenceManager.getDefaultSharedPreferences ( this )
+                .unregisterOnSharedPreferenceChangeListener ( this );
+        super.onStop ();
     }
 
     private void SavingInformation(final Location locations) {
@@ -562,18 +493,149 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         RegistrarUsuario.removeValue ();
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResult) {
-        super.onRequestPermissionsResult ( requestCode, permissions, grantResult );
+    private boolean checkPermissions() {
+        return PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission ( this,
+                Manifest.permission.ACCESS_FINE_LOCATION );
+    }
 
-        if (requestCode == REQUEST_ACCESS_FINE) {
-            if (grantResult.length > 0 && grantResult[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText ( this, "Permission granted", Toast.LENGTH_SHORT ).show ();
+    private void requestPermissions() {
+        boolean shouldProvideRationale =
+                ActivityCompat.shouldShowRequestPermissionRationale ( this,
+                        Manifest.permission.ACCESS_FINE_LOCATION );
+
+        // Provide an additional rationale to the user. This would happen if the user denied the
+        // request previously, but didn't check the "Don't ask again" checkbox.
+        if (shouldProvideRationale) {
+            Log.i ( TAG, "Displaying permission rationale to provide additional context." );
+            Snackbar.make (
+                    findViewById ( R.id.activity_maps ),
+                    R.string.permission_rationale,
+                    Snackbar.LENGTH_INDEFINITE )
+                    .setAction ( R.string.ok, new View.OnClickListener () {
+                        @Override
+                        public void onClick(View view) {
+                            // Request permission
+                            ActivityCompat.requestPermissions ( MapsActivity.this,
+                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                    REQUEST_PERMISSIONS_REQUEST_CODE );
+                        }
+                    } )
+                    .show ();
+        } else {
+            Log.i ( TAG, "Requesting permission" );
+            // Request permission. It's possible this can be auto answered if device policy
+            // sets the permission in a given state or the user denied the permission
+            // previously and checked "Never ask again".
+            ActivityCompat.requestPermissions ( MapsActivity.this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    REQUEST_PERMISSIONS_REQUEST_CODE );
+        }
+    }
+
+    /**
+     * Callback received when a permissions request has been completed.
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        Log.i ( TAG, "onRequestPermissionResult" );
+        if (requestCode == REQUEST_PERMISSIONS_REQUEST_CODE) {
+            if (grantResults.length <= 0) {
+                // If user interaction was interrupted, the permission request is cancelled and you
+                // receive empty arrays.
+                Log.i ( TAG, "User interaction was cancelled." );
+            } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission was granted.
+                mService.requestLocationUpdates ();
             } else {
-                Toast.makeText ( this, "Permission denied", Toast.LENGTH_SHORT ).show ();
+                // Permission denied.
+                setButtonsState ( false );
+                Snackbar.make (
+                        findViewById ( R.id.activity_maps ),
+                        R.string.permission_denied_explanation,
+                        Snackbar.LENGTH_INDEFINITE )
+                        .setAction ( R.string.settings, new View.OnClickListener () {
+                            @Override
+                            public void onClick(View view) {
+                                // Build intent that displays the App settings screen.
+                                Intent intent = new Intent ();
+                                intent.setAction (
+                                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS );
+                                Uri uri = Uri.fromParts ( "package",
+                                        BuildConfig.APPLICATION_ID, null );
+                                intent.setData ( uri );
+                                intent.setFlags ( Intent.FLAG_ACTIVITY_NEW_TASK );
+                                startActivity ( intent );
+                            }
+                        } )
+                        .show ();
             }
         }
     }
 
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+    }
+
+    public void agrerarMarcador(double lat, double log) {
+        try {
+            Location locationA = new Location ( "punto A" );
+            locationA.setLatitude ( Double.parseDouble ( "-0.338574" ) );
+            locationA.setLongitude ( Double.parseDouble ( "-78.450000" ) );
+
+            Polyline line = mMap.addPolyline ( new PolylineOptions ()
+                    .add ( new LatLng ( locationA.getLatitude (), locationA.getLongitude () ), new LatLng ( lat, log ) )
+                    .width ( 5 )
+                    .color ( Color.RED ) );
+
+            LatLng coordenada = new LatLng ( lat, log );
+            CameraUpdate miUbicacion = CameraUpdateFactory.newLatLngZoom ( coordenada, 17 );
+
+            if (marcador != null) marcador.remove ();
+            marcador = mMap.addMarker ( new MarkerOptions ()
+                    .position ( coordenada )
+                    .title ( "Mi posision actual" )
+            );
+            mMap.animateCamera ( miUbicacion );
+        } catch (Exception e) {
+            String error = "ERROR";
+        }
+
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+        // Update the buttons state depending on whether location updates are being requested.
+        if (s.equals ( Utils.KEY_REQUESTING_LOCATION_UPDATES )) {
+            setButtonsState ( sharedPreferences.getBoolean ( Utils.KEY_REQUESTING_LOCATION_UPDATES,
+                    false ) );
+        }
+    }
+
+    private void setButtonsState(boolean requestingLocationUpdates) {
+        if (requestingLocationUpdates) {
+            mRequestLocationUpdatesButton.setEnabled ( false );
+            mRemoveLocationUpdatesButton.setEnabled ( true );
+        } else {
+            mRequestLocationUpdatesButton.setEnabled ( true );
+            mRemoveLocationUpdatesButton.setEnabled ( false );
+        }
+    }
+
+    /**
+     * Receiver for broadcasts sent by {@link MyService}.
+     */
+    private class MyReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Location location = intent.getParcelableExtra ( MyService.EXTRA_LOCATION );
+            if (location != null) {
+                Toast.makeText ( MapsActivity.this, Utils.getLocationText ( location ),
+                        Toast.LENGTH_SHORT ).show ();
+                agrerarMarcador ( location.getLatitude (), location.getLongitude () );
+            }
+        }
+    }
 }
 

@@ -255,6 +255,10 @@ public class SettingsActivity extends AppCompatActivity {
                                                     public void onComplete(@NonNull Task<Void> task) {
 
                                                         if (task.isSuccessful ()) {
+
+
+                                                            Picasso.with ( SettingsActivity.this ).load ( downloadUri ).placeholder ( R.drawable.profile ).into ( userProfileImage );
+                                                            Common.loggedUser.setProfileimage ( downloadUri );
                                                             Toast.makeText ( SettingsActivity.this, "Imagen almacenada correctamente", Toast.LENGTH_SHORT ).show ();
                                                             loadingBar.dismiss ();
                                                         } else {
