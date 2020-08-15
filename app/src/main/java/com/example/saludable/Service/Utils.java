@@ -1,19 +1,12 @@
 package com.example.saludable.Service;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.location.Location;
 import android.preference.PreferenceManager;
 
 import com.example.saludable.R;
-import com.google.android.gms.maps.CameraUpdate;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -68,29 +61,4 @@ public class Utils {
                 DateFormat.getDateTimeInstance ().format ( new Date () ) );
     }
 
-    public void agregarMarcador(double lat, double log) {
-        try {
-            Location locationA = new Location ( "punto A" );
-            locationA.setLatitude ( Double.parseDouble ( "-0.338574" ) );
-            locationA.setLongitude ( Double.parseDouble ( "-78.450000" ) );
-
-            Polyline line = mMap.addPolyline ( new PolylineOptions ()
-                    .add ( new LatLng ( locationA.getLatitude (), locationA.getLongitude () ), new LatLng ( lat, log ) )
-                    .width ( 5 )
-                    .color ( Color.RED ) );
-
-            LatLng coordenada = new LatLng ( lat, log );
-            CameraUpdate miUbicacion = CameraUpdateFactory.newLatLngZoom ( coordenada, 17 );
-
-            if (marcador != null) marcador.remove ();
-            marcador = mMap.addMarker ( new MarkerOptions ()
-                    .position ( coordenada )
-                    .title ( "Mi posision actual" )
-            );
-            mMap.animateCamera ( miUbicacion );
-        } catch (Exception e) {
-            String error = "ERROR";
-        }
-
-    }
 }

@@ -321,6 +321,13 @@ public class SettingsActivity extends AppCompatActivity {
             BigDecimal imcnum = new BigDecimal ( cal );
             String imc = String.valueOf ( imcnum.round ( m ) );
 
+            double rango = Double.valueOf ( edad ) / 5;
+            double decimal = rango % 1;
+            double entero = rango - decimal;
+            String rangos = String.valueOf ( (int) entero );
+            double paso = Double.valueOf ( altura ) * 0.41;
+            String factorpaso = String.valueOf ( paso );
+
             userMap.put ( "username", username );
             userMap.put ( "fullname", profilename );
             userMap.put ( "status", status );
@@ -330,6 +337,8 @@ public class SettingsActivity extends AppCompatActivity {
             userMap.put ( "altura", altura );
             userMap.put ( "peso", peso );
             userMap.put ( "imc", imc );
+            userMap.put ( "rango", rangos );
+            userMap.put ( "paso", factorpaso );
 
             SettingsUserRef.updateChildren ( userMap ).addOnCompleteListener ( new OnCompleteListener () {
                 @Override

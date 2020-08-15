@@ -10,6 +10,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.location.Location;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -49,7 +51,7 @@ public class MyService extends Service {
     /**
      * The desired interval for location updates. Inexact. Updates may be more or less frequent.
      */
-    private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
+    private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 12000;
     /**
      * The fastest rate for active location updates. Updates will never be more frequent
      * than this value.
@@ -244,19 +246,22 @@ public class MyService extends Service {
         PendingIntent activityPendingIntent = PendingIntent.getActivity ( this, 0,
                 new Intent ( this, MapsActivity.class ), 0 );
 
+        Uri soundUri = RingtoneManager.getDefaultUri ( RingtoneManager.TYPE_ALL );
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder ( this )
-                .addAction ( R.drawable.ic_launch, getString ( R.string.launch_activity ),
-                        activityPendingIntent )
-                .addAction ( R.drawable.ic_cancel, getString ( R.string.remove_location_updates ),
-                        servicePendingIntent )
+                //.addAction ( R.drawable.ic_launch, getString ( R.string.launch_activity ),
+                //      activityPendingIntent )
+                //.addAction ( R.drawable.ic_cancel, getString ( R.string.remove_location_updates ),
+                //      servicePendingIntent )
                 .setContentText ( text )
                 .setContentTitle ( Utils.getLocationTitle ( this ) )
                 .setOngoing ( true )
                 .setPriority ( Notification.PRIORITY_HIGH )
                 .setSmallIcon ( R.mipmap.ic_launcher )
                 .setTicker ( text )
+                .setSound ( Uri.parse ( "android.resource://" + getPackageName () + "/" + R.raw.vacio ) )
                 .setWhen ( System.currentTimeMillis () );
+
 
         // Set the Channel ID for Android O.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -266,7 +271,7 @@ public class MyService extends Service {
         return builder.build ();
     }
 
-    private void getLastLocation() {
+    public void getLastLocation() {
         try {
             mFusedLocationClient.getLastLocation ()
                     .addOnCompleteListener ( new OnCompleteListener<Location> () {
@@ -274,6 +279,9 @@ public class MyService extends Service {
                         public void onComplete(@NonNull Task<Location> task) {
                             if (task.isSuccessful () && task.getResult () != null) {
                                 mLocation = task.getResult ();
+                                Intent intent = new Intent ( ACTION_BROADCAST );
+                                intent.putExtra ( EXTRA_LOCATION, mLocation );
+                                LocalBroadcastManager.getInstance ( getApplicationContext () ).sendBroadcast ( intent );
                             } else {
                                 Log.w ( TAG, "Failed to get location." );
                             }
@@ -284,7 +292,7 @@ public class MyService extends Service {
         }
     }
 
-    private void onNewLocation(Location location) {
+    public void onNewLocation(Location location) {
         Log.i ( TAG, "New location: " + location );
 
         mLocation = location;
@@ -292,16 +300,13 @@ public class MyService extends Service {
         // Notify anyone listening for broadcasts about the new location.
         Intent intent = new Intent ( ACTION_BROADCAST );
         intent.putExtra ( EXTRA_LOCATION, location );
+        LocalBroadcastManager.getInstance ( getApplicationContext () ).sendBroadcast ( intent );
 
 
         // Update notification content if running as a foreground service.
         if (serviceIsRunningInForeground ( this )) {
             mNotificationManager.notify ( NOTIFICATION_ID, getNotification () );
-            intent.setAction ( Intent.ACTION_BOOT_COMPLETED );
-            LocalBroadcastManager.getInstance ( getApplicationContext () ).sendBroadcast ( intent );
 
-        } else {
-            LocalBroadcastManager.getInstance ( getApplicationContext () ).sendBroadcast ( intent );
         }
     }
 

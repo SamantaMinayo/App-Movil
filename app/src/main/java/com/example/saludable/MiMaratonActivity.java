@@ -149,7 +149,7 @@ public class MiMaratonActivity extends AppCompatActivity implements IFirebaseLoa
     }
 
     private void loadUserList() {
-        Query query = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( current_user_id ).child ( "Inscripcion" );
+        Query query = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( current_user_id ).child ( "Resultados" ).child ( "Lista" );
 
         FirebaseRecyclerOptions<MiMaraton> options = new FirebaseRecyclerOptions.Builder<MiMaraton> ()
                 .setQuery ( query, MiMaraton.class )
@@ -193,7 +193,8 @@ public class MiMaratonActivity extends AppCompatActivity implements IFirebaseLoa
                 .getReference ()
                 .child ( "Users" )
                 .child ( current_user_id )
-                .child ( "Inscripcion" )
+                .child ( "Resultados" )
+                .child ( "Lista" )
                 .orderByChild ( "maratonname" )
                 .startAt ( text_search );
 

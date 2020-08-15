@@ -1,10 +1,12 @@
 package com.example.saludable;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -12,28 +14,28 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
-import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import com.example.saludable.Service.MyService;
 import com.example.saludable.Service.Utils;
+import com.example.saludable.Utils.Common;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -44,16 +46,12 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -61,32 +59,27 @@ import java.util.HashMap;
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback,
         SharedPreferences.OnSharedPreferenceChangeListener {
 
-    double vel = 2.0;
-    private String latitudinicial = "0.0";
-    double lat = 0.0;
-    double log = 0.0;
-    private String longitudinicial = "0.0", distanciat = "0.0", velocidadt = "0.0";
     private GoogleMap mMap;
     private Marker marcador;
-    private DatabaseReference UsuarioCarreraRef, UsCarrInformationRef, CarreraUserInf, CarreraRef, RegistrarUsuario;
+    double velocidadtotalkil = 0.0;
     private FirebaseAuth mAuth;
-    private String PostKey, current_user_id, saveCurrenTime;
-    private long countPost = 1;
-    private long contguardada = 0;
+    private DatabaseReference CarreraUserInf, CarreraUserMon, CarreraUserInfkil, RegistrarUsuario, RegistrarResUsuario, CarreraUserInfRes;
     private ProgressDialog loadingBar;
-    private Location location;
-    private LocationManager locationManager;
-    private Button inicio, fin;
-    private TextView mensaje;
+    private String PostKey, current_user_id;
     private Chronometer cronometro;
-    private int kilometro = 0;
-    private boolean iniciar = false;
-    private String imagencarrera, nombrecarrera, uid, descripcion, estado;
     PowerManager powerManager;
-    PowerManager.WakeLock wakelock;
-    private Toolbar mToolbar;
+    private TextView velocidad, distancia, pasos;
+    private Location locationA;
+    private boolean transmision = false;
+    private boolean fin = false;
+    private double distanciatotal = 0.0;
+    private double kilometro = 0.0;
+    private double velocidadtotal = 0.0;
+    private int contkil = 0;
+    private int contregistor = 0;
+    private int contregistorkil = 0;
 
-    private final int REQUEST_ACCESS_FINE = 0;
+    private PowerManager.WakeLock wakelock;
 
     private static final String TAG = MainActivity.class.getSimpleName ();
 
@@ -98,6 +91,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     // A reference to the service used to get location updates.
     private MyService mService = null;
+    private DecimalFormat formato1;
 
     // Tracks the bound state of the service.
     private boolean mBound = false;
@@ -132,34 +126,28 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById ( R.id.map );
         mapFragment.getMapAsync ( this );
 
+        powerManager = (PowerManager) getSystemService ( POWER_SERVICE );
+        wakelock = powerManager.newWakeLock ( PowerManager.PARTIAL_WAKE_LOCK,
+                "MyApp::MyWakelockTag" );
+
 
         mAuth = FirebaseAuth.getInstance ();
         current_user_id = mAuth.getCurrentUser ().getUid ();
         PostKey = getIntent ().getExtras ().get ( "PostKey" ).toString ();
-        UsuarioCarreraRef = FirebaseDatabase.getInstance ().getReference ().child ( "UsuariosCarreras" ).child ( current_user_id ).child ( PostKey );
-        UsCarrInformationRef = FirebaseDatabase.getInstance ().getReference ().child ( "UsuariosCarreras" ).child ( current_user_id ).child ( PostKey );
-        CarreraUserInf = FirebaseDatabase.getInstance ().getReference ().child ( "CarrerasRealizadas" );
-        CarreraRef = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( PostKey );
-        RegistrarUsuario = FirebaseDatabase.getInstance ().getReference ().child ( "UsuariosCarreras" ).child ( current_user_id ).child ( PostKey );
-        CarreraRef.addValueEventListener ( new ValueEventListener () {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists ()) {
-                    nombrecarrera = dataSnapshot.child ( "maratonname" ).getValue ().toString ();
-                    imagencarrera = dataSnapshot.child ( "maratonimage" ).getValue ().toString ();
-                    descripcion = dataSnapshot.child ( "description" ).getValue ().toString ();
-                    uid = dataSnapshot.child ( "uid" ).getValue ().toString ();
-                    estado = dataSnapshot.child ( "estado" ).getValue ().toString ();
+        CarreraUserInf = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( "Resultados" )
+                .child ( PostKey ).child ( Common.loggedUser.getGenero () )
+                .child ( Common.loggedUser.getRango () ).child ( current_user_id );
 
-                }
-            }
+        CarreraUserInfkil = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" )
+                .child ( "Kilometro" ).child ( PostKey ).child ( Common.loggedUser.getGenero () )
+                .child ( Common.loggedUser.getRango () );
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+        CarreraUserMon = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).
+                child ( "Monitoreo" ).child ( PostKey );
 
-            }
-        } );
-
+        RegistrarUsuario = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( current_user_id ).child ( "Inscripcion" ).child ( PostKey );
+        RegistrarResUsuario = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( current_user_id ).child ( "Resultados" ).child ( "Lista" ).child ( PostKey );
+        CarreraUserInfRes = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( current_user_id ).child ( "Resultados" ).child ( "Resultado" ).child ( PostKey );
 
         // Check that the user hasn't revoked permissions by going to Settings.
         if (Utils.requestingLocationUpdates ( this )) {
@@ -177,6 +165,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mRequestLocationUpdatesButton = findViewById ( R.id.inicio_button );
         mRemoveLocationUpdatesButton = findViewById ( R.id.fin_button );
+        velocidad = findViewById ( R.id.velocidadmap );
+        distancia = findViewById ( R.id.distancemap );
+        pasos = findViewById ( R.id.pasosmap );
+        formato1 = new DecimalFormat ( "#.00" );
+        cronometro = findViewById ( R.id.cronometro );
+        loadingBar = new ProgressDialog ( this );
 
         mRequestLocationUpdatesButton.setOnClickListener ( new View.OnClickListener () {
             @Override
@@ -184,6 +178,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 if (!checkPermissions ()) {
                     requestPermissions ();
                 } else {
+                    // LocalBroadcastManager.getInstance ( getApplicationContext () ).registerReceiver ( myReceiver,
+                    //new IntentFilter ( MyService.ACTION_BROADCAST ) );
+                    transmision = true;
+                    if (!wakelock.isHeld ()) {
+                        wakelock.acquire ();
+                    }
+                    cronometro.setBase ( SystemClock.elapsedRealtime () );
+                    cronometro.start ();
+                    distanciatotal = 0.0;
+                    velocidadtotal = 0.0;
+                    velocidadtotalkil = 0.0;
+                    contregistor = 0;
+                    contregistorkil = 0;
                     mService.requestLocationUpdates ();
                 }
             }
@@ -192,7 +199,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         mRemoveLocationUpdatesButton.setOnClickListener ( new View.OnClickListener () {
             @Override
             public void onClick(View view) {
-                mService.removeLocationUpdates ();
+                mService.getLastLocation ();
+                fin = true;
+                transmision = false;
             }
         } );
 
@@ -214,7 +223,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     protected void onPause() {
-        LocalBroadcastManager.getInstance ( this ).unregisterReceiver ( myReceiver );
+        //LocalBroadcastManager.getInstance ( this ).unregisterReceiver ( myReceiver );
         super.onPause ();
     }
 
@@ -225,272 +234,80 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             // in the foreground, and the service can respond by promoting itself to a foreground
             // service.
             unbindService ( mServiceConnection );
+
             mBound = false;
         }
+        //LocalBroadcastManager.getInstance ( this ).unregisterReceiver ( myReceiver );
         PreferenceManager.getDefaultSharedPreferences ( this )
                 .unregisterOnSharedPreferenceChangeListener ( this );
         super.onStop ();
     }
 
-    private void SavingInformation(final Location locations) {
-        try {
 
-            UsuarioCarreraRef.addValueEventListener ( new ValueEventListener () {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                    if (dataSnapshot.exists ()) {
-                        countPost = dataSnapshot.getChildrenCount ();
-                        if (countPost > 1) {
-                            String cont = String.valueOf ( countPost - 1 );
-                            if (dataSnapshot.child ( PostKey + cont ).hasChild ( "latitud" )) {
-                                latitudinicial = dataSnapshot.child ( PostKey + cont ).child ( "latitud" ).getValue ().toString ();
-                            }
-                            if (dataSnapshot.child ( PostKey + cont ).hasChild ( "longitud" )) {
-                                longitudinicial = dataSnapshot.child ( PostKey + cont ).child ( "longitud" ).getValue ().toString ();
-                            }
-                            if (dataSnapshot.child ( PostKey + cont ).hasChild ( "distancia" )) {
-                                distanciat = dataSnapshot.child ( PostKey + cont ).child ( "distancia" ).getValue ().toString ();
-                            }
-                            if (dataSnapshot.child ( PostKey + cont ).hasChild ( "velocidadtotal" )) {
-                                velocidadt = dataSnapshot.child ( PostKey + cont ).child ( "velocidadtotal" ).getValue ().toString ();
-                            }
-
-                        }
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            } );
-            UsuarioCarreraRef.removeEventListener ( new ValueEventListener () {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            } );
-            if (countPost > 0) {
-                String contador = String.valueOf ( countPost );
-                Guardar ( locations, contador, latitudinicial, longitudinicial, distanciat, velocidadt );
-            }
-        } catch (Exception e) {
+    @Override
+    protected void onDestroy() {
+        super.onDestroy ();
+        LocalBroadcastManager.getInstance ( this ).unregisterReceiver ( myReceiver );
+        if (wakelock.isHeld ()) {
+            wakelock.release ();
         }
+        fin = false;
+        transmision = false;
+        mService.removeLocationUpdates ();
     }
 
-    private void Guardar(Location location, String cont, String latitudA, String longitudA, String distanciatA, String velocidadtA) {
-        try {
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
 
-            lat = location.getLatitude ();
-            log = location.getLongitude ();
-            vel = location.getSpeed ();
-            Location locationA = new Location ( "punto A" );
-            locationA.setLatitude ( Double.parseDouble ( latitudA ) );
-            locationA.setLongitude ( Double.parseDouble ( longitudA ) );
+            if (transmision) {
+                new AlertDialog.Builder ( this )
+                        .setIcon ( android.R.drawable.ic_dialog_alert )
+                        .setTitle ( "Salir" )
+                        .setMessage ( "Si fuerza la finalizacion del monitoreo es posible que se pierdan datos. Esta seguro?" )
+                        .setNegativeButton ( android.R.string.cancel, null )// sin listener
+                        .setPositiveButton ( android.R.string.ok, new DialogInterface.OnClickListener () {// un listener que al pulsar, cierre la aplicacion
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                fin = false;
+                                transmision = false;
+                                LocalBroadcastManager.getInstance ( MapsActivity.this ).unregisterReceiver ( myReceiver );
+                                mService.removeLocationUpdates ();
+                                if (wakelock.isHeld ()) {
+                                    wakelock.release ();
+                                }
+                                MapsActivity.this.finish ();
 
-            if ((latitudA == "0.0") && (longitudA == "0.0")) {
-
+                            }
+                        } )
+                        .show ();
+                return true;
             } else {
-                Polyline line = mMap.addPolyline ( new PolylineOptions ()
-                        .add ( new LatLng ( locationA.getLatitude (), locationA.getLongitude () ), new LatLng ( location.getLatitude (), location.getLongitude () ) )
-                        .width ( 5 )
-                        .color ( Color.RED ) );
+                new AlertDialog.Builder ( this )
+                        .setIcon ( android.R.drawable.ic_dialog_alert )
+                        .setTitle ( "Salir" )
+                        .setMessage ( "Estás seguro?" )
+                        .setNegativeButton ( android.R.string.cancel, null )// sin listener
+                        .setPositiveButton ( android.R.string.ok, new DialogInterface.OnClickListener () {// un listener que al pulsar, cierre la aplicacion
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                fin = false;
+                                transmision = false;
+                                LocalBroadcastManager.getInstance ( MapsActivity.this ).unregisterReceiver ( myReceiver );
+                                mService.removeLocationUpdates ();
+                                if (wakelock.isHeld ()) {
+                                    wakelock.release ();
+                                }
+                                MapsActivity.this.finish ();
+
+                            }
+                        } )
+                        .show ();
+                return true;
             }
 
-
-
-            float dist = (float) Double.parseDouble ( distanciatA );
-            float distance = locationA.distanceTo ( location ) + dist;
-
-            float veloct = (float) Double.parseDouble ( velocidadtA );
-            float velocidadtotal = (float) (veloct + vel);
-
-            Calendar calFordTime = Calendar.getInstance ();
-            SimpleDateFormat currentTime = new SimpleDateFormat ( "HH:mm:ss" );
-            saveCurrenTime = currentTime.format ( calFordTime.getTime () );
-            String tiempo = cronometro.getText ().toString ();
-
-            if (countPost == 1) {
-                distance = (float) 0.0;
-                HashMap inscrito = new HashMap ();
-                inscrito.put ( "inscrito", "false" );
-                UsuarioCarreraRef.updateChildren ( inscrito );
-            }
-
-            if (distance > 10) {
-                kilometro = kilometro + 1;
-                contguardada = countPost - contguardada;
-                if (contguardada == 0) {
-                    contguardada = 1;
-                }
-                float velocidadkilometro = velocidadtotal / contguardada;
-                GuardarInformacionKilometro ( kilometro, velocidadkilometro, tiempo, saveCurrenTime );
-                distance = distance - 10;
-                velocidadtotal = (float) vel;
-            }
-
-            String latitud = String.valueOf ( lat );
-            String longitud = String.valueOf ( log );
-            String velo = String.valueOf ( vel );
-            String distancia = String.valueOf ( distance );
-            String veltot = String.valueOf ( velocidadtotal );
-
-            HashMap puntos = new HashMap ();
-
-            puntos.put ( "latitud", latitud );
-            puntos.put ( "longitud", longitud );
-            puntos.put ( "velocidad", velo );
-            puntos.put ( "hora", saveCurrenTime );
-            puntos.put ( "distancia", distancia );
-            puntos.put ( "contador", cont );
-            puntos.put ( "tiempo", tiempo );
-            puntos.put ( "velocidadtotal", veltot );
-
-            UsCarrInformationRef.child ( PostKey + cont ).updateChildren ( puntos ).addOnCompleteListener ( new OnCompleteListener () {
-                @Override
-                public void onComplete(@NonNull Task task) {
-                    if (task.isSuccessful ()) {
-                        Toast.makeText ( MapsActivity.this, "New Post is Update succesfully..", Toast.LENGTH_SHORT ).show ();
-                        loadingBar.dismiss ();
-                    }
-                }
-            } );
-        } catch (Exception e) {
         }
-    }
-
-    private void GuardarInformacionKilometro(int km, float velocid, String tiempokm, String hora) {
-
-        try {
-
-            HashMap user = new HashMap ();
-            user.put ( "vel", String.valueOf ( velocid ) );
-            user.put ( "time", tiempokm );
-
-            CarreraUserInf.child ( "Carreras" ).child ( PostKey ).child ( String.valueOf ( km ) ).child ( current_user_id ).updateChildren ( user ).addOnCompleteListener ( new OnCompleteListener () {
-                @Override
-                public void onComplete(@NonNull Task task) {
-                    if (task.isSuccessful ()) {
-                        Toast.makeText ( MapsActivity.this, "New Post is Update succesfully..", Toast.LENGTH_SHORT ).show ();
-                        loadingBar.dismiss ();
-                    }
-                }
-            } );
-
-            HashMap velocidadusr = new HashMap ();
-            velocidadusr.put ( String.valueOf ( km ), String.valueOf ( velocid ) );
-            HashMap tiempousr = new HashMap ();
-            tiempousr.put ( String.valueOf ( km ), tiempokm );
-
-            CarreraUserInf.child ( "Usuarios" ).child ( current_user_id ).child ( PostKey ).child ( "tiempo" ).updateChildren ( tiempousr ).addOnCompleteListener ( new OnCompleteListener () {
-                @Override
-                public void onComplete(@NonNull Task task) {
-                    if (task.isSuccessful ()) {
-                        Toast.makeText ( MapsActivity.this, "New Post is Update succesfully..", Toast.LENGTH_SHORT ).show ();
-                        loadingBar.dismiss ();
-                    }
-                }
-            } );
-
-            CarreraUserInf.child ( "Usuarios" ).child ( current_user_id ).child ( PostKey ).child ( "velocidad" ).updateChildren ( velocidadusr ).addOnCompleteListener ( new OnCompleteListener () {
-                @Override
-                public void onComplete(@NonNull Task task) {
-                    if (task.isSuccessful ()) {
-                        Toast.makeText ( MapsActivity.this, "New Post is Update succesfully..", Toast.LENGTH_SHORT ).show ();
-                        loadingBar.dismiss ();
-                    }
-                }
-            } );
-
-
-        } catch (Exception e) {
-        }
-    }
-
-    private void GuardarInformacionFinal() {
-
-        UsCarrInformationRef.addValueEventListener ( new ValueEventListener () {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                if (dataSnapshot.exists ()) {
-                    if (dataSnapshot.hasChild ( "inscrito" )) {
-                        if (dataSnapshot.child ( "inscrito" ).getValue ().toString ().equals ( "false" )) {
-                            inicio.setVisibility ( View.INVISIBLE );
-                            fin.setVisibility ( View.INVISIBLE );
-                            mensaje.setVisibility ( View.VISIBLE );
-                            mensaje.setText ( "Usted a finalizado la transmision. Mire sus datos en sus carreras realizadas" );
-                        } else {
-                            inicio.setVisibility ( View.INVISIBLE );
-                            fin.setVisibility ( View.INVISIBLE );
-                            mensaje.setVisibility ( View.VISIBLE );
-                            mensaje.setText ( "Se produjo un error mientras intentabamos monitorear su participacion. Lamentamos los inconvenientes" );
-                            EliminarRegistros ();
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        } );
-
-        UsCarrInformationRef.removeEventListener ( new ValueEventListener () {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists ()) {
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-            }
-        } );
-
-
-        if (location != null) SavingInformation ( location );
-
-        CarreraUserInf.child ( "Usuarios" ).child ( current_user_id ).child ( PostKey ).addValueEventListener ( new ValueEventListener () {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                if (dataSnapshot.exists ()) {
-                    HashMap carrusr = new HashMap ();
-                    carrusr.put ( "nombre", nombrecarrera );
-                    carrusr.put ( "imagen", imagencarrera );
-                    carrusr.put ( "descripcion", descripcion );
-                    carrusr.put ( "uid", uid );
-                    CarreraUserInf.child ( "Usuarios" ).child ( current_user_id ).child ( PostKey ).updateChildren ( carrusr );
-                } else {
-                    inicio.setVisibility ( View.INVISIBLE );
-                    fin.setVisibility ( View.INVISIBLE );
-                    mensaje.setVisibility ( View.VISIBLE );
-                    mensaje.setText ( "Se produjo un error mientras intentabamos monitorear su participacion. Lamentamos los inconvenientes" );
-                    EliminarRegistros ();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        } );
-    }
-
-    public void EliminarRegistros() {
-        loadingBar.setTitle ( "Cancelar Inscripcion" );
-        loadingBar.setMessage ( "Espere mientras cancelamos su inscripcion en la carrera." );
-        loadingBar.setCanceledOnTouchOutside ( true );
-        loadingBar.show ();
-        RegistrarUsuario.removeValue ();
+        return super.onKeyDown ( keyCode, event );
     }
 
     private boolean checkPermissions() {
@@ -546,6 +363,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Log.i ( TAG, "User interaction was cancelled." );
             } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 // Permission was granted.
+                transmision = true;
+                if (!wakelock.isHeld ()) {
+                    wakelock.acquire ();
+                }
+                cronometro.setBase ( SystemClock.elapsedRealtime () );
+                cronometro.start ();
+                distanciatotal = 0.0;
+                velocidadtotal = 0.0;
+                velocidadtotalkil = 0.0;
+                contregistor = 0;
+                contregistorkil = 0;
                 mService.requestLocationUpdates ();
             } else {
                 // Permission denied.
@@ -576,20 +404,51 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+
     }
 
-    public void agrerarMarcador(double lat, double log) {
+    public void agrerarMarcador(Location location) {
         try {
-            Location locationA = new Location ( "punto A" );
-            locationA.setLatitude ( Double.parseDouble ( "-0.338574" ) );
-            locationA.setLongitude ( Double.parseDouble ( "-78.450000" ) );
 
-            Polyline line = mMap.addPolyline ( new PolylineOptions ()
-                    .add ( new LatLng ( locationA.getLatitude (), locationA.getLongitude () ), new LatLng ( lat, log ) )
-                    .width ( 5 )
-                    .color ( Color.RED ) );
+            if (transmision) {
+                if (locationA != null) {
+                    Polyline line = mMap.addPolyline ( new PolylineOptions ()
+                            .add ( new LatLng ( locationA.getLatitude (), locationA.getLongitude () ), new LatLng ( location.getLatitude (), location.getLongitude () ) )
+                            .width ( 5 )
+                            .color ( Color.BLUE ) );
 
-            LatLng coordenada = new LatLng ( lat, log );
+                    distanciatotal = locationA.distanceTo ( location ) + distanciatotal;
+                    kilometro = locationA.distanceTo ( location ) + kilometro;
+                    String distguar = formato1.format ( distanciatotal );
+                    distancia.setText ( distguar + " m" );
+                    velocidad.setText ( formato1.format ( location.getSpeed () ) + " m/s" );
+                    velocidadtotal = location.getSpeed () + velocidadtotal;
+                    velocidadtotalkil = location.getSpeed () + velocidadtotalkil;
+                    double distcm = distanciatotal * 100;
+                    double factorpaso = Double.valueOf ( Common.loggedUser.getPaso () );
+                    pasos.setText ( formato1.format ( distcm / factorpaso ) );
+
+                    locationA.setLatitude ( location.getLatitude () );
+                    locationA.setLongitude ( location.getLongitude () );
+                    String tiempo = cronometro.getText ().toString ();
+                    Calendar calFordTime = Calendar.getInstance ();
+                    SimpleDateFormat currentTime = new SimpleDateFormat ( "HH:mm:ss" );
+                    String hora = currentTime.format ( calFordTime.getTime () );
+                    GuardarInformacion ( location, distguar, hora, tiempo );
+                    Monitoreo ( location, Common.loggedUser.getUsername (), hora );
+                    if (kilometro > 100) {
+                        contkil = contkil + 1;
+                        GuardarKilometros ( location, formato1.format ( velocidadtotalkil ), hora, tiempo, contkil, contregistorkil );
+                    }
+
+                } else {
+                    locationA = new Location ( "punto A" );
+                    locationA.setLatitude ( location.getLatitude () );
+                    locationA.setLongitude ( location.getLongitude () );
+                }
+            }
+
+            LatLng coordenada = new LatLng ( location.getLatitude (), location.getLongitude () );
             CameraUpdate miUbicacion = CameraUpdateFactory.newLatLngZoom ( coordenada, 17 );
 
             if (marcador != null) marcador.remove ();
@@ -604,6 +463,66 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
+    private void GuardarKilometros(Location location, String veltot, String hora, String tiempo, int contkil, int contreg) {
+        HashMap puntos = new HashMap ();
+
+        puntos.put ( "latitud", String.valueOf ( location.getLatitude () ) );
+        puntos.put ( "longitud", String.valueOf ( location.getLongitude () ) );
+        puntos.put ( "velocidad", veltot );
+        puntos.put ( "hora", hora );
+        puntos.put ( "tiempo", tiempo );
+        puntos.put ( "registros", contreg );
+
+        CarreraUserInfkil.child ( String.valueOf ( contkil ) ).child ( current_user_id ).updateChildren ( puntos );
+
+        kilometro = kilometro - 100;
+        velocidadtotalkil = 0.0;
+        contregistorkil = 0;
+    }
+
+    private void GuardarFinal(Location location) {
+        String tiempo = cronometro.getText ().toString ();
+        Calendar calFordTime = Calendar.getInstance ();
+        SimpleDateFormat currentTime = new SimpleDateFormat ( "HH:mm:ss" );
+        String hora = currentTime.format ( calFordTime.getTime () );
+
+        LocalBroadcastManager.getInstance ( getApplicationContext () ).unregisterReceiver ( myReceiver );
+        transmision = false;
+        if (wakelock.isHeld ()) {
+            wakelock.release ();
+        }
+        mService.removeLocationUpdates ();
+
+        HashMap puntos = new HashMap ();
+
+        puntos.put ( "latitud", String.valueOf ( location.getLatitude () ) );
+        puntos.put ( "longitud", String.valueOf ( location.getLongitude () ) );
+        puntos.put ( "velocidad", String.valueOf ( velocidadtotal ) );
+        puntos.put ( "distacia", String.valueOf ( distanciatotal ) );
+        puntos.put ( "hora", hora );
+        puntos.put ( "tiempo", tiempo );
+        puntos.put ( "rango", Common.loggedUser.getRango () );
+        puntos.put ( "registros", contregistor );
+        CarreraUserInfRes.updateChildren ( puntos );
+        GuardarResList ();
+        GuardarKilometros ( location, formato1.format ( velocidadtotalkil ), hora, tiempo, contkil + 1, contregistorkil );
+    }
+
+    private void GuardarInformacion(Location location, String distguar, String hora, String tiempo) {
+        contregistor = contregistor + 1;
+        contregistorkil = contregistorkil + 1;
+        HashMap puntos = new HashMap ();
+
+        puntos.put ( "latitud", String.valueOf ( location.getLatitude () ) );
+        puntos.put ( "longitud", String.valueOf ( location.getLongitude () ) );
+        puntos.put ( "velocidad", String.valueOf ( location.getSpeed () ) );
+        puntos.put ( "hora", hora );
+        puntos.put ( "distancia", distguar );
+        puntos.put ( "tiempo", tiempo );
+
+        CarreraUserInf.child ( hora ).updateChildren ( puntos );
+    }
+
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
         // Update the buttons state depending on whether location updates are being requested.
@@ -614,28 +533,63 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void setButtonsState(boolean requestingLocationUpdates) {
-        if (requestingLocationUpdates) {
-            mRequestLocationUpdatesButton.setEnabled ( false );
-            mRemoveLocationUpdatesButton.setEnabled ( true );
+        if (!fin) {
+            if (requestingLocationUpdates) {
+                mRequestLocationUpdatesButton.setEnabled ( false );
+                mRemoveLocationUpdatesButton.setEnabled ( true );
+            } else {
+                mRequestLocationUpdatesButton.setEnabled ( true );
+                mRemoveLocationUpdatesButton.setEnabled ( false );
+            }
         } else {
-            mRequestLocationUpdatesButton.setEnabled ( true );
+            mRequestLocationUpdatesButton.setEnabled ( false );
             mRemoveLocationUpdatesButton.setEnabled ( false );
+        }
+
+    }
+
+    private void Monitoreo(Location location, String username, String hora) {
+
+        HashMap puntos = new HashMap ();
+
+        puntos.put ( "latitud", String.valueOf ( location.getLatitude () ) );
+        puntos.put ( "longitud", String.valueOf ( location.getLongitude () ) );
+        puntos.put ( "usuario", username );
+        puntos.put ( "hora", hora );
+
+        CarreraUserMon.child ( current_user_id ).updateChildren ( puntos );
+    }
+
+    private void GuardarResList() {
+        try {
+            RegistrarUsuario.removeValue ();
+
+            HashMap crear = new HashMap ();
+            crear.put ( "maratonname", Common.carrera.maratonname );
+            crear.put ( "date", Common.carrera.maratondate + " : " + Common.carrera.maratontime );
+            crear.put ( "maratonimagen", Common.carrera.maratonimage );
+            crear.put ( "maratondescription", Common.carrera.description );
+            RegistrarResUsuario.updateChildren ( crear );
+        } catch (Exception e) {
         }
     }
 
     /**
      * Receiver for broadcasts sent by {@link MyService}.
      */
-    private class MyReceiver extends BroadcastReceiver {
+    public class MyReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
             Location location = intent.getParcelableExtra ( MyService.EXTRA_LOCATION );
             if (location != null) {
-                Toast.makeText ( MapsActivity.this, Utils.getLocationText ( location ),
-                        Toast.LENGTH_SHORT ).show ();
-                agrerarMarcador ( location.getLatitude (), location.getLongitude () );
+                agrerarMarcador ( location );
+                if (fin) {
+                    GuardarFinal ( location );
+                }
             }
         }
     }
+
+
 }
 

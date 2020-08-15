@@ -57,8 +57,11 @@ public class MainActivity extends AppCompatActivity {
             super.onCreate ( savedInstanceState );
             setContentView ( R.layout.activity_main );
 
+
             mAuth = FirebaseAuth.getInstance ();
-            UsersRef = FirebaseDatabase.getInstance ().getReference ().child ( "Users" );
+            current_user_id = mAuth.getCurrentUser ().getUid ();
+
+            UsersRef = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( current_user_id );
             PostRef = FirebaseDatabase.getInstance ().getReference ().child ( "Posts" );
 
             mToolbar = findViewById ( R.id.main_page_toolbar );
@@ -118,7 +121,6 @@ public class MainActivity extends AppCompatActivity {
     private void CheckUserExistence() {
         try {
 
-            current_user_id = mAuth.getCurrentUser ().getUid ();
 
             if (Common.loggedUser != null) {
                 NavProfileusername.setText ( Common.loggedUser.getFullname () );
@@ -127,13 +129,13 @@ public class MainActivity extends AppCompatActivity {
                 UsersRef.addValueEventListener ( new ValueEventListener () {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        if (!dataSnapshot.hasChild ( current_user_id )) {
+                        if (!dataSnapshot.exists ()) {
                             SendUserToSetupActivity ();
                         } else {
-                            if (!dataSnapshot.child ( current_user_id ).child ( "Informacion" ).hasChild ( "username" )) {
+                            if (!dataSnapshot.child ( "Informacion" ).hasChild ( "username" )) {
                                 SendUserToSetupActivity ();
                             } else {
-                                Common.loggedUser = dataSnapshot.child ( current_user_id ).child ( "Informacion" ).getValue ( User.class );
+                                Common.loggedUser = dataSnapshot.child ( "Informacion" ).getValue ( User.class );
                                 NavProfileusername.setText ( Common.loggedUser.getFullname () );
                                 Picasso.with ( MainActivity.this ).load ( Common.loggedUser.getProfileimage () ).placeholder ( R.drawable.profile ).into ( NavProfileImage );
                             }

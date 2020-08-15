@@ -4,8 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/register"
+    android:background="@drawable/fondo5"
     tools:context=".ClickMaratonActivity">
+
 
     <ScrollView
         android:layout_width="match_parent"
@@ -13,178 +14,365 @@
         android:layout_below="@+id/carrera_toolbar"
         android:layout_alignParentStart="true">
 
+
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-
-            <Button
-                android:id="@+id/register_maraton_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/Mensaje"
-                android:layout_alignParentStart="true"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:layout_marginBottom="10dp"
-                android:background="@drawable/button"
-                android:text="Inscribirse en la maraton"
-                android:textColor="#FDFFFFFF"
-                android:textSize="13sp" />
-
-            <Button
-                android:id="@+id/cancel_register_maraton_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/register_maraton_button"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:layout_marginBottom="10dp"
-                android:background="@drawable/button"
-                android:text="Cancelar inscripcion en el maraton"
-                android:textColor="#FDFFFFFF"
-                android:textSize="13sp"
-
-                />
-
-            <Button
-                android:id="@+id/monitorear_maraton_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/Mensaje"
-                android:layout_alignParentStart="true"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:layout_marginBottom="10dp"
-                android:background="@drawable/button"
-                android:text="Monitorear Maraton"
-                android:textColor="#FDFFFFFF"
-                android:textSize="13sp" />
-
-
             <ImageView
                 android:id="@+id/maraton_image_principal"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:layout_below="@id/maraton_name_principal"
-                android:layout_margin="10dp"
+                android:layout_height="250dp"
+                android:layout_below="@+id/maraton_name_principal"
                 app:srcCompat="@drawable/select_image" />
 
             <LinearLayout
-                android:id="@+id/maraton_fecha_principal"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/maraton_place_principal"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:layout_marginBottom="10dp"
-                android:orientation="horizontal"
-                android:padding="5dp">
+                android:layout_height="match_parent"
+                android:layout_below="@+id/maraton_image_principal"
+                android:layout_margin="10dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:id="@+id/maraton_fecha_principal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/tableborder"
+                    android:orientation="horizontal"
+                    android:padding="2dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="3"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/maraton_date"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text="Date"
+                            android:textAlignment="center"
+                            android:textColor="@android:color/black"
+                            android:textSize="14dp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="2"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/maraton_time"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Time"
+                            android:textAlignment="textStart"
+                            android:textColor="@android:color/black"
+                            android:textSize="14dp" />
+
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/informacion_contacto"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/maraton_fecha_principal"
+                    android:layout_marginBottom="10dp"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@drawable/tableborder"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_centerHorizontal="true"
+                            android:background="@color/colortable"
+                            android:paddingBottom="2dp"
+                            android:text="Nombre"
+                            android:textAlignment="center"
+                            android:textColor="@android:color/black"
+                            android:textSize="14dp" />
+
+                        <TextView
+                            android:id="@+id/maraton_contact_name_principal"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:padding="2dp"
+                            android:text="Contact Name"
+                            android:textAlignment="center"
+                            android:textColor="@android:color/black"
+                            android:textSize="14dp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@drawable/tableborder"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_centerHorizontal="true"
+                            android:background="@color/colortable"
+                            android:paddingBottom="2dp"
+                            android:text="Telefono"
+                            android:textAlignment="center"
+                            android:textColor="@android:color/black"
+                            android:textSize="14dp" />
+
+                        <TextView
+                            android:id="@+id/maraton_contact_number_principal"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:padding="2dp"
+                            android:text="Contact Number"
+                            android:textAlignment="center"
+                            android:textColor="@android:color/black"
+                            android:textSize="14dp" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <Button
+                            android:id="@+id/register_maraton_button"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@+id/Mensaje"
+                            android:layout_alignParentStart="true"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginRight="10dp"
+                            android:background="@drawable/button"
+                            android:enabled="false"
+                            android:text="Inscribirse"
+                            android:textColor="#FDFFFFFF"
+                            android:textSize="13sp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <Button
+                            android:id="@+id/cancel_register_maraton_button"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_below="@id/register_maraton_button"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginRight="10dp"
+                            android:background="@drawable/button"
+                            android:enabled="false"
+                            android:text="Cancelar inscripcion"
+                            android:textColor="#FDFFFFFF"
+                            android:textSize="13sp" />
+
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="5dp"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="3"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_marginRight="10dp"
+                            android:text="Ingresar Codigo"
+                            android:textAlignment="center"
+                            android:textColor="@android:color/black"
+                            android:textSize="14dp">
+
+                        </TextView>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="4"
+                        android:orientation="vertical">
+
+                        <EditText
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/inputs"
+                            android:padding="2dp"
+                            android:textSize="14dp">
+
+                        </EditText>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"></LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:orientation="vertical">
+
+                        <Button
+                            android:id="@+id/monitorear_maraton_button"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:background="@drawable/button"
+                            android:enabled="false"
+                            android:text="Monitorear Maraton"
+                            android:textColor="#FDFFFFFF"
+                            android:textSize="13sp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical" />
+
+                </LinearLayout>
 
                 <TextView
-                    android:id="@+id/maraton_date"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Date"
+                    android:layout_centerHorizontal="true"
+                    android:background="@color/colortable"
+                    android:paddingTop="2dp"
+                    android:text="Descripción"
+                    android:textAlignment="center"
                     android:textColor="@android:color/black"
-                    android:textSize="12sp" />
+                    android:textSize="16dp" />
 
                 <TextView
-                    android:id="@+id/maraton_time"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/maraton_description_principal"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Time"
+                    android:layout_centerHorizontal="true"
+                    android:background="@drawable/tableborder"
+                    android:padding="2dp"
+                    android:text="Maraton description..."
+                    android:textAlignment="center"
                     android:textColor="@android:color/black"
-                    android:textSize="12sp" />
+                    android:textSize="14dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:background="@color/colortable"
+                    android:text="Informacion de la carrera"
+                    android:textAlignment="center"
+                    android:textColor="@android:color/black"
+                    android:textSize="16dp" />
+
+                <TextView
+                    android:id="@+id/maraton_place_principal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:background="@drawable/tableborder"
+                    android:padding="2dp"
+                    android:text="Lugar"
+                    android:textAlignment="center"
+                    android:textColor="@android:color/black"
+                    android:textSize="14dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:background="@color/colortable"
+                    android:text="Informacion de contacto"
+                    android:textAlignment="center"
+                    android:textColor="@android:color/black"
+                    android:textSize="16dp" />
+
+                <TextView
+                    android:id="@+id/Mensaje"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/informacion_contacto"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="5dp"
+                    android:text=""
+                    android:textAlignment="center"
+                    android:textColor="@color/colortitle"
+                    android:textSize="14dp" />
+
             </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/informacion_contacto"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/maraton_fecha_principal"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:layout_marginBottom="10dp"
-                android:orientation="horizontal"
-                android:padding="5dp">
-
-                <TextView
-                    android:id="@+id/maraton_contact_name_principal"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Contact Name"
-                    android:textColor="@android:color/black"
-                    android:textSize="12sp" />
-
-                <TextView
-                    android:id="@+id/maraton_contact_number_principal"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Contact Number"
-                    android:textColor="@android:color/black"
-                    android:textSize="12sp" />
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/maraton_place_principal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/maraton_description_principal"
-                android:layout_centerHorizontal="true"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="5dp"
-                android:layout_marginRight="10dp"
-                android:layout_marginBottom="5dp"
-                android:padding="5dp"
-                android:text="Lugar"
-                android:textAlignment="textStart"
-                android:textColor="@android:color/black"
-                android:textSize="14sp" />
 
             <TextView
                 android:id="@+id/maraton_name_principal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentTop="true"
-                android:layout_centerHorizontal="true"
-                android:layout_margin="10dp"
-                android:padding="8dp"
+                android:padding="5dp"
                 android:text="Nombre del Maraton"
                 android:textAlignment="center"
-                android:textColor="@color/colortitle"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/maraton_description_principal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/maraton_image_principal"
-                android:layout_centerHorizontal="true"
-                android:layout_marginLeft="10dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginRight="10dp"
-                android:layout_marginBottom="10dp"
-                android:padding="5dp"
-                android:text="Maraton description..."
-                android:textAlignment="textStart"
                 android:textColor="@android:color/black"
-                android:textSize="14sp" />
+                android:textSize="20sp"
+                android:textStyle="bold"
 
-            <TextView
-                android:id="@+id/Mensaje"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/informacion_contacto"
-                android:layout_centerHorizontal="true"
-                android:text=""
-                android:textAlignment="center"
-                android:textColor="@color/colortitle"
-                android:textSize="14sp" />
+                />
         </RelativeLayout>
     </ScrollView>
-
     <include
         android:id="@+id/carrera_toolbar"
         layout="@layout/app_bar_layout"></include>

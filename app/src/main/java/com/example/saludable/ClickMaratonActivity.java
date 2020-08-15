@@ -34,7 +34,7 @@ public class ClickMaratonActivity extends AppCompatActivity {
     private TextView maratonName, maratondescription, maratondate, maratontime, maratoncontactname, maratoncontactnumber, maratonPlace, mensaje;
     private Button registermaratonButton, cancelregistermaratonButton, monitorearmaratonButton;
 
-    private DatabaseReference RegistrarUsuario, RegistrarCarrera, MaratonDatosRef;
+    private DatabaseReference RegistrarUsuario, RegistrarCarrera, MaratonDatosRef, ResultadoUsuario;
     private FirebaseAuth mAuth;
 
     private String PostKey, current_user_id;
@@ -56,6 +56,7 @@ public class ClickMaratonActivity extends AppCompatActivity {
             MaratonDatosRef = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( "Nuevas" ).child ( PostKey );
 
             RegistrarUsuario = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( current_user_id ).child ( "Inscripcion" ).child ( PostKey );
+            ResultadoUsuario = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( current_user_id ).child ( "Resultados" ).child ( "Lista" ).child ( PostKey );
             RegistrarCarrera = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( "Inscripcion" ).child ( PostKey ).child ( current_user_id );
 
             maratonImage = findViewById ( R.id.maraton_image_principal );
@@ -80,14 +81,14 @@ public class ClickMaratonActivity extends AppCompatActivity {
             registermaratonButton = findViewById ( R.id.register_maraton_button );
             cancelregistermaratonButton = findViewById ( R.id.cancel_register_maraton_button );
 
-            registermaratonButton.setVisibility ( View.VISIBLE );
-            cancelregistermaratonButton.setVisibility ( View.INVISIBLE );
-            monitorearmaratonButton.setVisibility ( View.INVISIBLE );
+            //registermaratonButton.setVisibility ( View.VISIBLE );
+            //cancelregistermaratonButton.setVisibility ( View.INVISIBLE );
+            //monitorearmaratonButton.setVisibility ( View.INVISIBLE );
 
             Common.carrera = null;
 
             CargarDatosCarrera ();
-            VerificarInscripcion ();
+            VerificarResultados ();
 
             registermaratonButton.setOnClickListener ( new View.OnClickListener () {
                 @Override
@@ -123,11 +124,11 @@ public class ClickMaratonActivity extends AppCompatActivity {
                     Common.carrera = dataSnapshot.getValue ( Maraton.class );
                     Picasso.with ( ClickMaratonActivity.this ).load ( Common.carrera.maratonimage ).into ( maratonImage );
                     maratondescription.setText ( Common.carrera.description );
-                    maratoncontactname.setText ( "Contacto: " + Common.carrera.contactname );
-                    maratoncontactnumber.setText ( "  Cel:  " + Common.carrera.contactnumber );
+                    maratoncontactname.setText ( Common.carrera.contactname );
+                    maratoncontactnumber.setText ( Common.carrera.contactnumber );
                     maratontime.setText ( Common.carrera.maratontime );
-                    maratondate.setText ( "Fecha del Maraton:  " + Common.carrera.maratondate + " " );
-                    maratonPlace.setText ( "Lugar del Maraton:  " + Common.carrera.place );
+                    maratondate.setText ( "Fecha: " + Common.carrera.maratondate + " " );
+                    maratonPlace.setText ( "Lugar: " + Common.carrera.place );
                     maratonName.setText ( Common.carrera.maratonname );
                 }
             }
@@ -140,20 +141,52 @@ public class ClickMaratonActivity extends AppCompatActivity {
 
     }
 
+
+    private void VerificarResultados() {
+        ResultadoUsuario.addValueEventListener ( new ValueEventListener () {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (dataSnapshot.exists ()) {
+                    registermaratonButton.setEnabled ( false );
+                    cancelregistermaratonButton.setEnabled ( false );
+                    monitorearmaratonButton.setEnabled ( false );
+                    registermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
+                    cancelregistermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
+                    monitorearmaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
+                    mensaje.setText ( "Usted ya registro datos en esta carrera. Dirigase a mis Resultados" );
+                } else {
+                    VerificarInscripcion ();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        } );
+    }
     private void VerificarInscripcion() {
+
         RegistrarCarrera.addValueEventListener ( new ValueEventListener () {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists ()) {
-                    registermaratonButton.setVisibility ( View.INVISIBLE );
-                    cancelregistermaratonButton.setVisibility ( View.VISIBLE );
-                    monitorearmaratonButton.setVisibility ( View.VISIBLE );
-                    mensaje.setVisibility ( View.VISIBLE );
+                    registermaratonButton.setEnabled ( false );
+                    cancelregistermaratonButton.setEnabled ( true );
+                    monitorearmaratonButton.setEnabled ( true );
+                    registermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
+                    cancelregistermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.button ) );
+                    monitorearmaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.button ) );
+                    mensaje.setText ( "Ingrese el codigo de la carrera para iniciar el monitoreo" );
                 } else {
-                    registermaratonButton.setVisibility ( View.VISIBLE );
-                    cancelregistermaratonButton.setVisibility ( View.INVISIBLE );
-                    monitorearmaratonButton.setVisibility ( View.INVISIBLE );
-                    mensaje.setVisibility ( View.INVISIBLE );
+                    registermaratonButton.setEnabled ( true );
+                    cancelregistermaratonButton.setEnabled ( false );
+                    monitorearmaratonButton.setEnabled ( false );
+                    registermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.button ) );
+                    cancelregistermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
+                    monitorearmaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
+                    mensaje.setText ( "INSCRIBETE!!" );
+
                 }
             }
 
@@ -179,10 +212,13 @@ public class ClickMaratonActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task task) {
                         if (task.isSuccessful ()) {
 
-                            registermaratonButton.setVisibility ( View.VISIBLE );
-                            cancelregistermaratonButton.setVisibility ( View.INVISIBLE );
-                            monitorearmaratonButton.setVisibility ( View.INVISIBLE );
-                            mensaje.setText ( "" );
+                            registermaratonButton.setEnabled ( true );
+                            cancelregistermaratonButton.setEnabled ( false );
+                            monitorearmaratonButton.setEnabled ( false );
+                            registermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.button ) );
+                            cancelregistermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
+                            monitorearmaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
+                            mensaje.setText ( "INSCRIBETE!" );
 
                             Toast.makeText ( ClickMaratonActivity.this, "Ha cancelado su inscripcion correctamente.", Toast.LENGTH_SHORT ).show ();
                             loadingBar.dismiss ();
@@ -216,10 +252,13 @@ public class ClickMaratonActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task task) {
                         if (task.isSuccessful ()) {
-                            registermaratonButton.setVisibility ( View.INVISIBLE );
-                            cancelregistermaratonButton.setVisibility ( View.VISIBLE );
-                            monitorearmaratonButton.setVisibility ( View.VISIBLE );
-                            mensaje.setText ( "USUARIO INSCRITO EXITOSAMENTE!" );
+                            registermaratonButton.setEnabled ( false );
+                            cancelregistermaratonButton.setEnabled ( true );
+                            monitorearmaratonButton.setEnabled ( true );
+                            registermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
+                            cancelregistermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.button ) );
+                            monitorearmaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.button ) );
+                            mensaje.setText ( "Ingrese el codigo de la carrera para iniciar el monitoreo" );
                             Toast.makeText ( ClickMaratonActivity.this, "Su inscripcion se realizo exitosamente", Toast.LENGTH_SHORT ).show ();
                             loadingBar.dismiss ();
                         } else {

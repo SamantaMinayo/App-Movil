@@ -212,7 +212,13 @@ public class SetupActivity extends AppCompatActivity {
         String fullname = FullName.getText ().toString ();
         String peso = Peso.getText ().toString ();
         String edad = Edad.getText ().toString ();
+        double rango = Double.valueOf ( edad ) / 5;
+        double decimal = rango % 1;
+        double entero = rango - decimal;
+        String rangos = String.valueOf ( (int) entero );
         String genero = Genero.getText ().toString ();
+        double paso = Double.valueOf ( altura ) * 0.41;
+        String factorpaso = String.valueOf ( paso );
 
         if (TextUtils.isEmpty ( username ) || TextUtils.isEmpty ( country ) || TextUtils.isEmpty ( altura ) || TextUtils.isEmpty ( fullname ) || TextUtils.isEmpty ( peso ) || TextUtils.isEmpty ( edad ) || TextUtils.isEmpty ( genero )) {
             Toast.makeText ( this, "Porfavor verifique que todos los campos se encuentren llenos", Toast.LENGTH_SHORT ).show ();
@@ -240,6 +246,8 @@ public class SetupActivity extends AppCompatActivity {
             userMap.put ( "imc", imc );
             userMap.put ( "genero", genero );
             userMap.put ( "status", "Here Saludable" );
+            userMap.put ( "rango", rangos );
+            userMap.put ( "paso", factorpaso );
 
             UserRef.updateChildren ( userMap ).addOnCompleteListener ( new OnCompleteListener () {
                 @Override
