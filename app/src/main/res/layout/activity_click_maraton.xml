@@ -96,22 +96,6 @@
                     android:orientation="vertical">
 
                     <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_centerHorizontal="true"
-                            android:background="@color/colortable"
-                            android:text="Informacion de la carrera"
-                            android:textAlignment="center"
-                            android:textColor="@color/colorAccent"
-                            android:textSize="16dp" />
-                    </LinearLayout>
-
-                    <LinearLayout
                         android:id="@+id/maraton_fecha_principal"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -122,9 +106,22 @@
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
+                            android:layout_weight="2">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:padding="5dp"
+                                android:text="Fecha"
+                                android:textAlignment="center"
+                                android:textColor="@android:color/black"
+                                android:textSize="14dp" />
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
                             android:layout_weight="3"
                             android:orientation="vertical">
-
                             <TextView
                                 android:id="@+id/maraton_date"
                                 android:layout_width="match_parent"
@@ -136,7 +133,6 @@
                                 android:textSize="14dp" />
 
                         </LinearLayout>
-
                         <LinearLayout
                             android:layout_width="0dp"
                             android:layout_height="match_parent"
@@ -156,24 +152,28 @@
                         </LinearLayout>
                     </LinearLayout>
 
-                    <LinearLayout
+                    <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical">
+                        android:layout_centerHorizontal="true"
+                        android:background="@color/colortable"
+                        android:padding="5dp"
+                        android:text="Informacion de la carrera"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorAccent"
+                        android:textSize="16dp" />
 
-                        <TextView
-                            android:id="@+id/maraton_place_principal"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_centerHorizontal="true"
-                            android:background="@drawable/tableborder"
-                            android:padding="5dp"
-                            android:text="Lugar"
-                            android:textAlignment="center"
-                            android:textColor="@android:color/black"
-                            android:textSize="14dp" />
-
-                    </LinearLayout>
+                    <TextView
+                        android:id="@+id/maraton_place_principal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:background="@drawable/tableborder"
+                        android:padding="5dp"
+                        android:text="Lugar"
+                        android:textAlignment="center"
+                        android:textColor="@android:color/black"
+                        android:textSize="14dp" />
 
                 </LinearLayout>
 
@@ -182,21 +182,15 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <LinearLayout
+                    <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_centerHorizontal="true"
-                            android:background="@color/colortable"
-                            android:text="Informacion de contacto"
-                            android:textAlignment="center"
-                            android:textColor="@color/colorAccent"
-                            android:textSize="16dp" />
-                    </LinearLayout>
+                        android:layout_centerHorizontal="true"
+                        android:background="@color/colortable"
+                        android:text="Informacion de contacto"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorAccent"
+                        android:textSize="16dp" />
 
                     <LinearLayout
                         android:id="@+id/informacion_contacto"
