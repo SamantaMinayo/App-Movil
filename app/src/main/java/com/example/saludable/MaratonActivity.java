@@ -153,15 +153,11 @@ public class MaratonActivity extends AppCompatActivity implements IFirebaseLoadD
             protected void onBindViewHolder(@NonNull MaratonViewHolder maratonViewHolder, int position, @NonNull Maraton maraton) {
 
                 maratonViewHolder.maratonname.setText ( maraton.maratonname );
-                maratonViewHolder.admindate.setText ( maraton.date );
-                maratonViewHolder.admintime.setText ( maraton.time );
                 Picasso.with ( getApplication () ).load ( maraton.maratonimage ).into ( maratonViewHolder.maratonimage );
                 maratonViewHolder.maratondescription.setText ( maraton.description );
                 maratonViewHolder.maratonplace.setText ( maraton.place );
                 maratonViewHolder.maratondate.setText ( maraton.maratondate );
                 maratonViewHolder.maratontime.setText ( maraton.maratontime );
-                maratonViewHolder.contactname.setText ( maraton.contactname );
-                maratonViewHolder.contactnumber.setText ( maraton.contactnumber );
                 final String PostKey = getRef ( position ).getKey ();
                 maratonViewHolder.setiRecyclerItemClickListener ( new IRecyclerItemClickListener () {
                     @Override
