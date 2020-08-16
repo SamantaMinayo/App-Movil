@@ -18,68 +18,135 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-            <ImageView
-                android:id="@+id/maraton_image_principal"
-                android:layout_width="match_parent"
-                android:layout_height="250dp"
-                android:layout_below="@+id/maraton_name_principal"
-                app:srcCompat="@drawable/select_image" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_below="@+id/maraton_image_principal"
                 android:layout_margin="10dp"
                 android:orientation="vertical">
 
+                <ImageView
+                    android:id="@+id/maraton_image_principal"
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp"
+                    android:layout_below="@+id/maraton_name_principal"
+                    android:layout_marginBottom="10dp"
+                    app:srcCompat="@drawable/select_image" />
+
                 <LinearLayout
-                    android:id="@+id/maraton_fecha_principal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/tableborder"
-                    android:orientation="horizontal"
-                    android:padding="2dp">
+                    android:orientation="vertical">
 
                     <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="3"
-                        android:orientation="vertical">
+                        android:id="@+id/maraton_fecha_principal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/tableborder"
+                        android:orientation="horizontal"
+                        android:padding="2dp">
 
-                        <TextView
-                            android:id="@+id/maraton_date"
-                            android:layout_width="match_parent"
+                        <LinearLayout
+                            android:layout_width="0dp"
                             android:layout_height="match_parent"
-                            android:text="Date"
-                            android:textAlignment="center"
-                            android:textColor="@android:color/black"
-                            android:textSize="14dp" />
+                            android:layout_weight="3"
+                            android:orientation="vertical">
 
+                            <TextView
+                                android:id="@+id/maraton_date"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:text="Date"
+                                android:textAlignment="center"
+                                android:textColor="@android:color/black"
+                                android:textSize="14dp" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="2"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/maraton_time"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="Time"
+                                android:textAlignment="textStart"
+                                android:textColor="@android:color/black"
+                                android:textSize="14dp" />
+
+                        </LinearLayout>
                     </LinearLayout>
 
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="2"
-                        android:orientation="vertical">
+                    <TextView
+                        android:id="@+id/maraton_description_principal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:background="@drawable/tableborder"
+                        android:padding="2dp"
+                        android:text="Maraton description..."
+                        android:textAlignment="center"
+                        android:textColor="@android:color/black"
+                        android:textSize="14dp" />
 
-                        <TextView
-                            android:id="@+id/maraton_time"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Time"
-                            android:textAlignment="textStart"
-                            android:textColor="@android:color/black"
-                            android:textSize="14dp" />
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:background="@color/colortable"
+                        android:text="Informacion de la carrera"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorAccent"
+                        android:textSize="16dp" />
 
-                    </LinearLayout>
+                    <TextView
+                        android:id="@+id/maraton_place_principal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:background="@drawable/tableborder"
+                        android:padding="2dp"
+                        android:text="Lugar"
+                        android:textAlignment="center"
+                        android:textColor="@android:color/black"
+                        android:textSize="14dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:background="@color/colortable"
+                        android:paddingTop="2dp"
+                        android:text="Descripción"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorAccent"
+                        android:textSize="16dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:background="@color/colortable"
+                        android:text="Informacion de contacto"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorAccent"
+                        android:textSize="16dp" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/informacion_contacto"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/maraton_fecha_principal"
                     android:layout_marginBottom="10dp"
                     android:orientation="horizontal">
 
@@ -98,7 +165,7 @@
                             android:paddingBottom="2dp"
                             android:text="Nombre"
                             android:textAlignment="center"
-                            android:textColor="@android:color/black"
+                            android:textColor="@color/colorAccent"
                             android:textSize="14dp" />
 
                         <TextView
@@ -128,7 +195,7 @@
                             android:paddingBottom="2dp"
                             android:text="Telefono"
                             android:textAlignment="center"
-                            android:textColor="@android:color/black"
+                            android:textColor="@color/colorAccent"
                             android:textSize="14dp" />
 
                         <TextView
@@ -144,6 +211,17 @@
                     </LinearLayout>
 
                 </LinearLayout>
+
+                <TextView
+                    android:id="@+id/maraton_name_principal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="5dp"
+                    android:text="Nombre del Maraton"
+                    android:textAlignment="center"
+                    android:textColor="@color/colortitle"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -291,61 +369,6 @@
                 </LinearLayout>
 
                 <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
-                    android:background="@color/colortable"
-                    android:paddingTop="2dp"
-                    android:text="Descripción"
-                    android:textAlignment="center"
-                    android:textColor="@android:color/black"
-                    android:textSize="16dp" />
-
-                <TextView
-                    android:id="@+id/maraton_description_principal"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
-                    android:background="@drawable/tableborder"
-                    android:padding="2dp"
-                    android:text="Maraton description..."
-                    android:textAlignment="center"
-                    android:textColor="@android:color/black"
-                    android:textSize="14dp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
-                    android:background="@color/colortable"
-                    android:text="Informacion de la carrera"
-                    android:textAlignment="center"
-                    android:textColor="@android:color/black"
-                    android:textSize="16dp" />
-
-                <TextView
-                    android:id="@+id/maraton_place_principal"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
-                    android:background="@drawable/tableborder"
-                    android:padding="2dp"
-                    android:text="Lugar"
-                    android:textAlignment="center"
-                    android:textColor="@android:color/black"
-                    android:textSize="14dp" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
-                    android:background="@color/colortable"
-                    android:text="Informacion de contacto"
-                    android:textAlignment="center"
-                    android:textColor="@android:color/black"
-                    android:textSize="16dp" />
-
-                <TextView
                     android:id="@+id/Mensaje"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -359,18 +382,6 @@
 
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/maraton_name_principal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:padding="5dp"
-                android:text="Nombre del Maraton"
-                android:textAlignment="center"
-                android:textColor="@android:color/black"
-                android:textSize="20sp"
-                android:textStyle="bold"
-
-                />
         </RelativeLayout>
     </ScrollView>
     <include
