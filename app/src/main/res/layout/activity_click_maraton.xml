@@ -71,7 +71,7 @@
                             android:layout_height="wrap_content"
                             android:layout_centerHorizontal="true"
                             android:background="@color/colortable"
-                            android:paddingTop="2dp"
+                        android:paddingTop="5dp"
                             android:text="Descripción"
                             android:textAlignment="center"
                             android:textColor="@color/colorAccent"
@@ -182,16 +182,6 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_centerHorizontal="true"
-                        android:background="@color/colortable"
-                        android:text="Informacion de contacto"
-                        android:textAlignment="center"
-                        android:textColor="@color/colorAccent"
-                        android:textSize="16dp" />
-
                     <LinearLayout
                         android:id="@+id/informacion_contacto"
                         android:layout_width="match_parent"
@@ -211,7 +201,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_centerHorizontal="true"
                                 android:background="@color/colortable"
-                                android:paddingBottom="2dp"
+                                android:padding="5dp"
                                 android:text="Nombre"
                                 android:textAlignment="center"
                                 android:textColor="@color/colorAccent"
@@ -241,7 +231,7 @@
                                 android:layout_height="wrap_content"
                                 android:layout_centerHorizontal="true"
                                 android:background="@color/colortable"
-                                android:paddingBottom="2dp"
+                                android:padding="5dp"
                                 android:text="Telefono"
                                 android:textAlignment="center"
                                 android:textColor="@color/colorAccent"
@@ -260,6 +250,17 @@
                         </LinearLayout>
 
                     </LinearLayout>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:background="@color/colortable"
+                        android:text="Informacion de contacto"
+                        android:textAlignment="center"
+                        android:padding="5dp"
+                        android:textColor="@color/colorAccent"
+                        android:textSize="16dp" />
 
                 </LinearLayout>
 
