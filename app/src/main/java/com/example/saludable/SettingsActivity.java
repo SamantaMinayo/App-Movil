@@ -344,7 +344,7 @@ public class SettingsActivity extends AppCompatActivity {
                 @Override
                 public void onComplete(@NonNull Task task) {
                     if (task.isSuccessful ()) {
-                        SendUserToMainActivity ();
+                        SendUserToProfile ();
                         Toast.makeText ( SettingsActivity.this, "Usuario actualizado correctamente", Toast.LENGTH_SHORT ).show ();
                         loadingBar.dismiss ();
                     } else {
@@ -358,9 +358,9 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
-    private void SendUserToMainActivity() {
+    private void SendUserToProfile() {
         try {
-            Intent mainIntent = new Intent ( SettingsActivity.this, MainActivity.class );
+            Intent mainIntent = new Intent ( SettingsActivity.this, ProfileActivity.class );
             mainIntent.addFlags ( Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK );
             startActivity ( mainIntent );
             finish ();

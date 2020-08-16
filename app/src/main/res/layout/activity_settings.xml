@@ -28,6 +28,34 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/titulo"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="15dp"
+                        android:layout_marginBottom="15dp"
+                        android:padding="5dp"
+                        android:text="Informacion de usuario"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorAccent"
+                        android:textSize="20dp" />
+
+                    <de.hdodenhof.circleimageview.CircleImageView
+                        android:id="@+id/settings_profile_image"
+                        android:layout_width="200dp"
+                        android:layout_height="200dp"
+                        android:layout_below="@+id/titulo"
+                        android:layout_marginBottom="15dp"
+                        android:src="@drawable/profile" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     android:layout_marginBottom="5dp"
                     android:orientation="horizontal">
@@ -367,6 +395,42 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:gravity="center_horizontal">
+
+                    <RadioGroup
+                        android:id="@+id/setradGroup"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true">
+
+                        <RadioButton
+                            android:id="@+id/setradMale"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="5dp"
+                            android:layout_marginRight="5dp"
+                            android:onClick="checkButton"
+                            android:text="Masculino"
+                            android:textColor="@color/colorAccent"
+                            android:textSize="16dp" />
+
+                        <RadioButton
+                            android:id="@+id/setradFeMale"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="5dp"
+                            android:layout_marginRight="5dp"
+                            android:onClick="checkButton"
+                            android:text="Femenino"
+                            android:textColor="@color/colorAccent"
+                            android:textSize="16dp" />
+                    </RadioGroup>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     android:layout_marginBottom="5dp"
                     android:orientation="horizontal">
@@ -402,52 +466,6 @@
                         android:orientation="vertical"></LinearLayout>
                 </LinearLayout>
 
-                <RadioGroup
-                    android:id="@+id/setradGroup"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true">
-
-                    <RadioButton
-                        android:id="@+id/setradMale"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:layout_marginRight="5dp"
-                        android:onClick="checkButton"
-                        android:text="Masculino"
-                        android:textColor="@color/colorAccent"
-                        android:textSize="16dp" />
-
-                    <RadioButton
-                        android:id="@+id/setradFeMale"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:layout_marginRight="5dp"
-                        android:onClick="checkButton"
-                        android:text="Femenino"
-                        android:textColor="@color/colorAccent"
-                        android:textSize="16dp" />
-                </RadioGroup>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="15dp"
-                    android:layout_marginBottom="15dp"
-                    android:padding="5dp"
-                    android:text="Informacion de usuario"
-                    android:textAlignment="center"
-                    android:textColor="@color/colorAccent"
-                    android:textSize="20dp" />
-
-                <de.hdodenhof.circleimageview.CircleImageView
-                    android:id="@+id/settings_profile_image"
-                    android:layout_width="200dp"
-                    android:layout_height="200dp"
-                    android:layout_marginBottom="15dp"
-                    android:src="@drawable/profile" />
             </LinearLayout>
 
         </RelativeLayout>
