@@ -27,6 +27,32 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="15dp"
+                        android:layout_marginBottom="15dp"
+                        android:padding="5dp"
+                        android:text="Informacion de usuario"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorAccent"
+                        android:textSize="20dp" />
+
+                    <de.hdodenhof.circleimageview.CircleImageView
+                        android:id="@+id/setup_profile_image"
+                        android:layout_width="150dp"
+                        android:layout_height="150dp"
+                        android:layout_marginBottom="15dp"
+                        android:src="@drawable/profile"></de.hdodenhof.circleimageview.CircleImageView>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     android:layout_marginBottom="5dp"
                     android:orientation="horizontal">
@@ -297,8 +323,45 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="5dp"
-                    android:layout_marginBottom="15dp"
+                    android:gravity="center_horizontal"
+                    android:orientation="vertical">
+
+                    <RadioGroup
+                        android:id="@+id/radGroup"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/setuplinegenero"
+                        android:layout_centerHorizontal="true">
+
+                        <RadioButton
+                            android:id="@+id/radMale"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="5dp"
+                            android:onClick="checkButton"
+                            android:padding="5dp"
+                            android:text="Masculino"
+                            android:textColor="@color/colorAccent"
+                            android:textSize="16dp" />
+
+                        <RadioButton
+                            android:id="@+id/radFeMale"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="5dp"
+                            android:onClick="checkButton"
+                            android:padding="5dp"
+                            android:text="Femenino"
+                            android:textColor="@color/colorAccent"
+                            android:textSize="16dp" />
+                    </RadioGroup>
+
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
                     android:orientation="horizontal">
 
                     <LinearLayout
@@ -328,53 +391,6 @@
                         android:layout_weight="1" />
                 </LinearLayout>
 
-                <RadioGroup
-                    android:id="@+id/radGroup"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/setuplinegenero"
-                    android:layout_centerHorizontal="true">
-
-                    <RadioButton
-                        android:id="@+id/radMale"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="5dp"
-                        android:onClick="checkButton"
-                        android:padding="5dp"
-                        android:text="Masculino"
-                        android:textColor="@color/colorAccent"
-                        android:textSize="16dp" />
-
-                    <RadioButton
-                        android:id="@+id/radFeMale"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginRight="5dp"
-                        android:onClick="checkButton"
-                        android:padding="5dp"
-                        android:text="Femenino"
-                        android:textColor="@color/colorAccent"
-                        android:textSize="16dp" />
-                </RadioGroup>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="15dp"
-                    android:layout_marginBottom="15dp"
-                    android:padding="5dp"
-                    android:text="Informacion de usuario"
-                    android:textAlignment="center"
-                    android:textColor="@color/colorAccent"
-                    android:textSize="20dp" />
-
-                <de.hdodenhof.circleimageview.CircleImageView
-                    android:id="@+id/setup_profile_image"
-                    android:layout_width="150dp"
-                    android:layout_height="150dp"
-                    android:layout_marginBottom="15dp"
-                    android:src="@drawable/profile"></de.hdodenhof.circleimageview.CircleImageView>
 
             </LinearLayout>
 

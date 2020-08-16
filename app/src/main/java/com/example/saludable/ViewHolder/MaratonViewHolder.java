@@ -20,14 +20,10 @@ public class MaratonViewHolder extends RecyclerView.ViewHolder implements View.O
 
         super ( itemView );
         username = itemView.findViewById ( R.id.maraton_description );
-        contactname = itemView.findViewById ( R.id.contact_name );
-        contactnumber = itemView.findViewById ( R.id.contact_number );
         maratontime = itemView.findViewById ( R.id.maraton_time );
         maratondate = itemView.findViewById ( R.id.maraton_date );
         maratonplace = itemView.findViewById ( R.id.maraton_place );
         maratonname = itemView.findViewById ( R.id.maraton_name );
-        admintime = itemView.findViewById ( R.id.post_admin_time );
-        admindate = itemView.findViewById ( R.id.post_admin_date );
         maratonimage = itemView.findViewById ( R.id.click_maraton_image );
         maratondescription = itemView.findViewById ( R.id.maraton_description );
         itemView.setOnClickListener ( this );
