@@ -15,7 +15,7 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -88,13 +88,24 @@
                         android:textColor="@android:color/black"
                         android:textSize="14dp" />
 
+                    <TextView
+                        android:id="@+id/titcarrera"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:background="@color/colortable"
+                        android:padding="5dp"
+                        android:text="Informacion de la carrera"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorAccent"
+                        android:textSize="16dp" />
+
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
-
                     <LinearLayout
                         android:id="@+id/maraton_fecha_principal"
                         android:layout_width="match_parent"
@@ -126,8 +137,8 @@
                                 android:id="@+id/maraton_date"
                                 android:layout_width="match_parent"
                                 android:layout_height="match_parent"
-                                android:text="Date"
                                 android:padding="5dp"
+                                android:text="Date"
                                 android:textAlignment="center"
                                 android:textColor="@android:color/black"
                                 android:textSize="14dp" />
@@ -143,8 +154,8 @@
                                 android:id="@+id/maraton_time"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="Time"
                                 android:padding="5dp"
+                                android:text="Time"
                                 android:textAlignment="textStart"
                                 android:textColor="@android:color/black"
                                 android:textSize="14dp" />
@@ -152,16 +163,13 @@
                         </LinearLayout>
                     </LinearLayout>
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_centerHorizontal="true"
-                        android:background="@color/colortable"
-                        android:padding="5dp"
-                        android:text="Informacion de la carrera"
-                        android:textAlignment="center"
-                        android:textColor="@color/colorAccent"
-                        android:textSize="16dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
 
                     <TextView
                         android:id="@+id/maraton_place_principal"
@@ -175,12 +183,28 @@
                         android:textColor="@android:color/black"
                         android:textSize="14dp" />
 
-                </LinearLayout>
+                    <TextView
+                        android:id="@+id/maraton_distance"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:background="@drawable/tableborder"
+                        android:padding="5dp"
+                        android:text="Lugar"
+                        android:textAlignment="center"
+                        android:textColor="@android:color/black"
+                        android:textSize="14dp" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:background="@color/colortable"
+                        android:padding="5dp"
+                        android:text="Informacion de contacto"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorAccent"
+                        android:textSize="16dp" />
 
                     <LinearLayout
                         android:id="@+id/informacion_contacto"
@@ -251,18 +275,13 @@
 
                     </LinearLayout>
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_centerHorizontal="true"
-                        android:background="@color/colortable"
-                        android:text="Informacion de contacto"
-                        android:textAlignment="center"
-                        android:padding="5dp"
-                        android:textColor="@color/colorAccent"
-                        android:textSize="16dp" />
-
                 </LinearLayout>
+
+                <WebView
+                    android:id="@+id/maraton_trayectoria"
+                    android:layout_width="match_parent"
+                    android:layout_height="250dp"
+                    android:layout_margin="10dp"></WebView>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -424,7 +443,6 @@
                         android:orientation="vertical" />
 
                 </LinearLayout>
-
 
             </LinearLayout>
 

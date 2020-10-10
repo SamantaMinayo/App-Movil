@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.example.saludable.Model.Dato;
 import com.example.saludable.Utils.Common;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -40,13 +41,14 @@ public class ProfileActivity extends AppCompatActivity {
     private Toolbar mToolbar;
     private Button settings;
 
-    private DatabaseReference profileuserRef;
+    private DatabaseReference profileuserRef, MaratonDatosUser;
     private FirebaseAuth mAuth;
 
     private String currentUserId;
     private LineChartView chartcalorias, charttime, chartvelocidad;
     private ArrayList xDato = new ArrayList ();
     private ArrayList yDato = new ArrayList ();
+    private ArrayList<Dato> miresultado = new ArrayList<Dato> ();
 
 
     @Override
@@ -59,7 +61,8 @@ public class ProfileActivity extends AppCompatActivity {
             mAuth = FirebaseAuth.getInstance ();
             currentUserId = mAuth.getCurrentUser ().getUid ();
             profileuserRef = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( currentUserId );
-
+            MaratonDatosUser = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( currentUserId )
+                    .child ( "Resultados" ).child ( "Resultado" );
             mToolbar = findViewById ( R.id.mi_perfil_toolbar );
             setSupportActionBar ( mToolbar );
             getSupportActionBar ().setTitle ( "Mi Perfil" );
@@ -85,8 +88,6 @@ public class ProfileActivity extends AppCompatActivity {
             calult = findViewById ( R.id.profile_calorias_ultimo );
             pastot = findViewById ( R.id.profile_pasostotal );
             pasult = findViewById ( R.id.profile_pasosultimo );
-            pesotot = findViewById ( R.id.profile_peso_total );
-            pesoult = findViewById ( R.id.profile_peso_ultimo );
             chartcalorias = findViewById ( R.id.chartcalprof );
             charttime = findViewById ( R.id.charttimeprof );
             chartvelocidad = findViewById ( R.id.chartvelprof );
@@ -112,6 +113,13 @@ public class ProfileActivity extends AppCompatActivity {
                 }
             } );
 
+            ArrayList axisData = new ArrayList ();
+            ArrayList yAxisData = new ArrayList ();
+            axisData.add ( "0" );
+            yAxisData.add ( (float) 0.0 );
+            Graficar ( axisData, yAxisData, charttime, "Carrera", "Tiempo [min]" );
+            Graficar ( axisData, yAxisData, chartcalorias, "Carrera", "Calorias [cal]" );
+            Graficar ( axisData, yAxisData, chartvelocidad, "Carrera", "Velocidad [m/s]" );
             CargarDatos ();
 
         } catch (Exception e) {
@@ -120,176 +128,13 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void CargarDatos() {
 
-        profileuserRef.child ( "carreras" ).child ( "velocidad" ).addValueEventListener ( new ValueEventListener () {
+        MaratonDatosUser.addValueEventListener ( new ValueEventListener () {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists ()) {
-                    float vltotal = 0;
-                    float carreras = dataSnapshot.getChildrenCount ();
-                    xDato = new ArrayList ();
-                    yDato = new ArrayList ();
-                    xDato.add ( "0" );
-                    yDato.add ( Float.parseFloat ( "0.0" ) );
-                    String velult = "";
-                    for (DataSnapshot childDataSnapshot : dataSnapshot.getChildren ()) {
-                        String km = childDataSnapshot.getKey ();
-                        float vl = Float.parseFloat ( childDataSnapshot.getValue ().toString () );
-                        vltotal = vltotal + vl;
-                        xDato.add ( km );
-                        yDato.add ( vl );
-                        velult = String.valueOf ( vl );
-                    }
-
-                    Graficar ( xDato, yDato, chartvelocidad, "Carrera", "Velocidad [m/s]" );
-                    if (carreras > 0) {
-                        String velpro = String.valueOf ( vltotal / carreras );
-                        velpromtot.setText ( velpro );
-                        velpromult.setText ( velult );
-                    }
+                for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
+                    miresultado.add ( postSnapshot.getValue ( Dato.class ) );
                 }
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        } );
-        profileuserRef.child ( "carreras" ).child ( "tiempo" ).addValueEventListener ( new ValueEventListener () {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists ()) {
-                    xDato = new ArrayList ();
-                    yDato = new ArrayList ();
-                    xDato.add ( "0" );
-                    yDato.add ( Float.parseFloat ( "0.0" ) );
-                    float tmtotal = 0;
-                    float carreras = dataSnapshot.getChildrenCount ();
-                    String timeult = "";
-
-                    for (DataSnapshot childDataSnapshot : dataSnapshot.getChildren ()) {
-                        String km = childDataSnapshot.getKey ();
-                        String tm = childDataSnapshot.getValue ().toString ();
-                        xDato.add ( km );
-                        float tim;
-                        String[] tiempo = tm.split ( ":" );
-                        if (tiempo.length == 3) {
-                            tim = Float.parseFloat ( tiempo[0] ) * 60 + Float.parseFloat ( tiempo[1] ) + Float.parseFloat ( tiempo[2] ) / 60;
-                        } else {
-                            tim = Float.parseFloat ( tiempo[0] ) + Float.parseFloat ( tiempo[1] ) / 60;
-                        }
-                        tmtotal = tmtotal + tim;
-                        timeult = String.valueOf ( tim );
-                        yDato.add ( tim );
-                    }
-                    if (carreras > 0) {
-                        String tmpro = String.valueOf ( tmtotal / carreras );
-                        tiempromtot.setText ( tmpro );
-                        tiempromult.setText ( timeult );
-                    }
-                    Graficar ( xDato, yDato, charttime, "Carrera", "Tiempo [min]" );
-                }
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        } );
-        profileuserRef.child ( "carreras" ).child ( "calorias" ).addValueEventListener ( new ValueEventListener () {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists ()) {
-                    xDato = new ArrayList ();
-                    yDato = new ArrayList ();
-                    xDato.add ( "0" );
-                    yDato.add ( Float.parseFloat ( "0.0" ) );
-                    float caltotal = 0;
-                    String calultimo = "";
-
-                    for (DataSnapshot childDataSnapshot : dataSnapshot.getChildren ()) {
-                        String km = childDataSnapshot.getKey ();
-                        String cal = childDataSnapshot.getValue ().toString ();
-                        xDato.add ( km );
-                        yDato.add ( Float.parseFloat ( cal ) );
-                        caltotal = caltotal + Float.parseFloat ( cal );
-                        calultimo = cal;
-                    }
-
-                    caltot.setText ( String.valueOf ( caltotal ) );
-                    calult.setText ( calultimo );
-                    Graficar ( xDato, yDato, chartcalorias, "Carrera", "Calorias [cal]" );
-                }
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        } );
-        profileuserRef.child ( "carreras" ).child ( "distancia" ).addValueEventListener ( new ValueEventListener () {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists ()) {
-                    String dis = "";
-                    float distotal = 0;
-                    for (DataSnapshot childDataSnapshot : dataSnapshot.getChildren ()) {
-                        dis = childDataSnapshot.getValue ().toString ();
-                        distotal = distotal + Float.parseFloat ( dis );
-                    }
-                    disttot.setText ( String.valueOf ( distotal ) );
-                    distult.setText ( dis );
-                }
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        } );
-        profileuserRef.child ( "carreras" ).child ( "pasos" ).addValueEventListener ( new ValueEventListener () {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists ()) {
-                    String pas = "";
-                    float pastotal = 0;
-                    for (DataSnapshot childDataSnapshot : dataSnapshot.getChildren ()) {
-                        pas = childDataSnapshot.getValue ().toString ();
-                        pastotal = pastotal + Float.parseFloat ( pas );
-                    }
-                    pastot.setText ( String.valueOf ( pastotal ) );
-                    pasult.setText ( pas );
-                }
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        } );
-        profileuserRef.child ( "carreras" ).child ( "peso" ).addValueEventListener ( new ValueEventListener () {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                if (dataSnapshot.exists ()) {
-                    String peso = "";
-                    float pesototal = 0;
-                    float carreras = dataSnapshot.getChildrenCount ();
-
-                    for (DataSnapshot childDataSnapshot : dataSnapshot.getChildren ()) {
-                        peso = childDataSnapshot.getValue ().toString ();
-                        pesototal = pesototal + Float.parseFloat ( peso );
-                    }
-                    if (carreras > 0) {
-                        pesotot.setText ( String.valueOf ( pesototal / carreras ) );
-                        pesoult.setText ( peso );
-                    }
-                }
-
-
+                GenerarDatos ();
             }
 
             @Override
@@ -298,13 +143,54 @@ public class ProfileActivity extends AppCompatActivity {
             }
         } );
 
+    }
+
+    private void GenerarDatos() {
         ArrayList axisData = new ArrayList ();
-        ArrayList yAxisData = new ArrayList ();
+        ArrayList yAxisDataT = new ArrayList ();
+        ArrayList yAxisDataC = new ArrayList ();
+        ArrayList yAxisDataV = new ArrayList ();
         axisData.add ( "0" );
-        yAxisData.add ( (float) 0.0 );
-        Graficar ( axisData, yAxisData, charttime, "Carrera", "Tiempo [min]" );
-        Graficar ( axisData, yAxisData, chartcalorias, "Carrera", "Calorias [cal]" );
-        Graficar ( axisData, yAxisData, chartvelocidad, "Carrera", "Velocidad [m/s]" );
+        yAxisDataT.add ( (float) 0.0 );
+        yAxisDataC.add ( (float) 0.0 );
+        yAxisDataV.add ( (float) 0.0 );
+        int cont = 0;
+        float velprom = 0;
+        float timprom = 0;
+        float distotal = 0;
+        float caltotal = 0;
+        float pastotal = 0;
+
+        for (Dato dato : miresultado) {
+            cont = cont + 1;
+            if (cont == 1) {
+                velpromult.setText ( String.valueOf ( dato.velocidad ) );
+                tiempromult.setText ( String.valueOf ( Float.valueOf ( dato.getTiempo () ) / (Float.valueOf ( dato.getDistancia () ) / 1000) ) );
+                distult.setText ( String.valueOf ( Float.valueOf ( dato.distancia ) / 1000 ) );
+                calult.setText ( String.valueOf ( Float.valueOf ( dato.calorias ) / 1000 ) );
+                pasult.setText ( String.valueOf ( dato.pasos ) );
+            }
+            velprom = Float.valueOf ( dato.getVelocidad () ) + velprom;
+            timprom = Float.valueOf ( dato.getTiempo () ) / (Float.valueOf ( dato.getDistancia () ) / 1000) + timprom;
+            distotal = distotal + Float.valueOf ( dato.distancia );
+            caltotal = caltotal + Float.valueOf ( dato.calorias );
+            pastotal = pastotal + Float.valueOf ( dato.pasos );
+
+            axisData.add ( String.valueOf ( cont ) );
+            yAxisDataT.add ( Float.valueOf ( dato.getTiempo () ) / (Float.valueOf ( dato.getDistancia () ) / 1000) );
+            yAxisDataC.add ( Float.valueOf ( dato.getCalorias () ) / 1000 );
+            yAxisDataV.add ( Float.valueOf ( dato.getVelocidad () ) );
+        }
+
+        velpromtot.setText ( String.valueOf ( velprom / cont ) );
+        tiempromtot.setText ( String.valueOf ( timprom / cont ) );
+        disttot.setText ( String.valueOf ( distotal / 1000 ) );
+        caltot.setText ( String.valueOf ( caltotal / 1000 ) );
+        pastot.setText ( String.valueOf ( pastotal ) );
+
+        Graficar ( axisData, yAxisDataT, charttime, "Carrera", "Tiempo [min]" );
+        Graficar ( axisData, yAxisDataC, chartcalorias, "Carrera", "Calorias [cal]" );
+        Graficar ( axisData, yAxisDataV, chartvelocidad, "Carrera", "Velocidad [m/s]" );
     }
 
     private void Graficar(ArrayList axisData, ArrayList yAxisData, LineChartView chart, String ejex, String ejey) {
@@ -335,15 +221,14 @@ public class ProfileActivity extends AppCompatActivity {
         Axis yAxis = new Axis ();
         data.setAxisYLeft ( yAxis );
 
-        axis.setTextSize ( 12 );
-        axis.setTextColor ( Color.parseColor ( "#03A9F4" ) );
+        axis.setTextSize ( 10 );
+        axis.setTextColor ( Color.parseColor ( "#000000" ) );
         axis.setHasLines ( true );
-        yAxis.setTextColor ( Color.parseColor ( "#03A9F4" ) );
-        yAxis.setTextSize ( 12 );
+        yAxis.setTextColor ( Color.parseColor ( "#000000" ) );
+        yAxis.setTextSize ( 10 );
         yAxis.setName ( ejey );
         yAxis.setHasLines ( true );
         Viewport viewport = new Viewport ( chart.getMaximumViewport () );
-        chart.setPadding ( 5, 5, 0, 0 );
         chart.setMaximumViewport ( viewport );
         chart.setCurrentViewport ( viewport );
         chart.animate ();

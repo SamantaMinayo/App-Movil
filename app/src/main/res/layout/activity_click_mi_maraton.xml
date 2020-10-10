@@ -14,41 +14,413 @@
         <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:id="@+id/micarrera"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/mi_maraton_name"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:background="@drawable/tableborder"
+                android:orientation="horizontal"
+                android:padding="5dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:orientation="horizontal"
+                        android:padding="2dp">
+
+                        <TextView
+                            android:id="@+id/text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="Fecha de la Carrera : "
+                            android:textAlignment="center"
+                            android:textColor="@android:color/darker_gray"
+                            android:textSize="10sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/carrerahora"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="2"
+                            android:text="hora"
+                            android:textAlignment="center"
+                            android:textColor="@android:color/black"
+                            android:textSize="11sp" />
+
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/carreradescription"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginTop="5dp"
+                        android:text="Descripcion"
+                        android:textAlignment="center"
+                        android:textColor="@android:color/black"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/carreradist"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginTop="5dp"
+                        android:text="Distancia"
+                        android:textAlignment="center"
+                        android:textColor="@android:color/black"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/carreralugar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginTop="5dp"
+                        android:text="Lugar"
+                        android:textAlignment="center"
+                        android:textColor="@android:color/black"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/carreraimage"
+                    android:layout_width="100dp"
+                    android:layout_height="100dp"
+                    android:layout_marginLeft="4dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/profile" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/resultados"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/misres"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginRight="10dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/tableborder"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Velocidad"
+                        android:textAlignment="center"
+                        android:textColor="@android:color/black"
+                        android:textSize="15dp" />
+
+                    <TextView
+                        android:id="@+id/velocidadprom"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="5dp"
+                        android:text="0.0 m/s"
+                        android:textAlignment="center"
+                        android:textSize="15dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/tableborder"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Pasos"
+                        android:textAlignment="center"
+                        android:textColor="@android:color/black"
+                        android:textSize="15dp" />
+
+                    <TextView
+                        android:id="@+id/pasostotal"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="5dp"
+                        android:text="0 "
+                        android:textAlignment="center"
+                        android:textSize="15dp" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/resultadostc"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/resultados"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="5dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/tableborder"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Tiempo"
+                        android:textAlignment="center"
+                        android:textColor="@android:color/black"
+                        android:textSize="15dp" />
+
+                    <TextView
+                        android:id="@+id/tiempototal"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="5dp"
+                        android:text="0 "
+                        android:textAlignment="center"
+                        android:textSize="15dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/tableborder"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Calorias"
+                        android:textAlignment="center"
+                        android:textColor="@android:color/black"
+                        android:textSize="15dp" />
+
+                    <TextView
+                        android:id="@+id/caltotal"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="5dp"
+                        android:text="0 "
+                        android:textAlignment="center"
+                        android:textSize="15dp" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/resultadosglob"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/glores"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/tableborder"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Velocidad Promedio"
+                        android:textAlignment="center"
+                        android:textColor="@android:color/black"
+                        android:textSize="15dp" />
+
+                    <TextView
+                        android:id="@+id/velocidadpromglo"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="5dp"
+                        android:text="0.0 m/s"
+                        android:textAlignment="center"
+                        android:textSize="15dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/tableborder"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Pasos Promedio"
+                        android:textAlignment="center"
+                        android:textColor="@android:color/black"
+                        android:textSize="15dp" />
+
+                    <TextView
+                        android:id="@+id/pasostotalglob"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="5dp"
+                        android:text="0 "
+                        android:textAlignment="center"
+                        android:textSize="15dp" />
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/resultadostcglobales"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/resultadosglob"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginBottom="5dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/tableborder"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Tiempo Promedio"
+                        android:textAlignment="center"
+                        android:textColor="@android:color/black"
+                        android:textSize="15dp" />
+
+                    <TextView
+                        android:id="@+id/tiempototalglob"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="5dp"
+                        android:text="0 "
+                        android:textAlignment="center"
+                        android:textSize="15dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/tableborder"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Calorias Promedio"
+                        android:textAlignment="center"
+                        android:textColor="@android:color/black"
+                        android:textSize="15dp" />
+
+                    <TextView
+                        android:id="@+id/caltotalglob"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_margin="5dp"
+                        android:text="0 "
+                        android:textAlignment="center"
+                        android:textSize="15dp" />
+                </LinearLayout>
+
+            </LinearLayout>
+
             <TextView
                 android:id="@+id/mi_maraton_name"
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
+                android:layout_height="30dp"
                 android:layout_alignParentStart="true"
+                android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
                 android:text="Nombre Carrera"
-                android:textAlignment="center" />
+                android:textAlignment="center"
+                android:textColor="@android:color/black"
+                android:textSize="20dp" />
 
+            <TextView
+                android:id="@+id/misres"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:layout_below="@+id/micarrera"
+                android:layout_alignParentStart="true"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:text="Mis resultados"
+                android:textAlignment="center"
+                android:textColor="@android:color/black"
+                android:textSize="15dp" />
+
+            <TextView
+                android:id="@+id/glores"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:layout_below="@+id/resultadostc"
+                android:layout_alignParentStart="true"
+                android:layout_marginBottom="10dp"
+                android:text="Resultados Globales"
+                android:textAlignment="center"
+                android:textColor="@android:color/black"
+                android:textSize="15dp" />
 
             <TextView
                 android:id="@+id/graf_tiempo"
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_below="@id/mi_maraton_name"
+                android:layout_height="20dp"
+                android:layout_below="@id/resultadostcglobales"
                 android:layout_alignParentStart="true"
                 android:layout_marginBottom="10dp"
+                android:layout_marginTop="15dp"
+                android:textColor="@android:color/black"
+                android:textSize="15dp"
                 android:text="Grafica distancia-tiempo"
                 android:textAlignment="center" />
 
             <TextView
                 android:id="@+id/graf_velocidad"
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
+                android:layout_height="20dp"
                 android:layout_alignParentStart="true"
                 android:layout_marginBottom="10dp"
                 android:layout_below="@id/charttime"
+                android:textColor="@android:color/black"
+                android:textSize="15dp"
                 android:text="Grafica distancia-velocidad"
                 android:textAlignment="center" />
+
             <lecho.lib.hellocharts.view.LineChartView
                 android:id="@+id/charttime"
                 android:layout_width="match_parent"
                 android:layout_height="300dp"
                 android:layout_below="@+id/graf_tiempo"
-                android:layout_margin="10dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginBottom="20dp"
                 android:padding="20dp"
                 android:verticalScrollbarPosition="defaultPosition" />
 
@@ -58,6 +430,8 @@
                 android:layout_margin="10dp"
                 android:layout_width="match_parent"
                 android:layout_height="300dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
                 android:padding="20dp"
                 android:verticalScrollbarPosition="defaultPosition" />
         </RelativeLayout>

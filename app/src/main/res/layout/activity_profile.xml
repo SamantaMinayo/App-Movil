@@ -6,33 +6,41 @@
     android:background="@color/colorProfile"
     tools:context=".ProfileActivity">
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"></LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="6">
+
+            <Button
+                android:id="@+id/profile_settings"
+                android:layout_width="45dp"
+                android:layout_height="45dp"
+                android:layout_margin="5dp"
+                android:background="@drawable/editprofile"
+                android:icon="@drawable/editprofile" />
+        </LinearLayout>
+    </LinearLayout>
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_alignParentStart="true"
-        android:layout_below="@+id/mi_perfil_toolbar"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="55dp">
+        android:layout_below="@+id/mi_perfil_toolbar">
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <Button
-                android:id="@+id/profile_settings"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_alignParentEnd="true"
-                android:background="@drawable/editprofile"
-                android:icon="@drawable/settings" />
-
-            <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/my_profile_pic"
-                android:layout_width="150dp"
-                android:layout_height="150dp"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="15dp"
-                android:src="@drawable/profile" />
             <LinearLayout
                 android:id="@+id/profile_header"
                 android:layout_width="match_parent"
@@ -45,12 +53,11 @@
                     android:id="@+id/my_profile_full_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
                     android:text="Profile Name"
                     android:textAlignment="center"
                     android:textAllCaps="false"
                     android:textColor="@color/colortitle"
-                    android:textSize="19sp"
+                    android:textSize="16sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -63,7 +70,7 @@
                     android:textAlignment="center"
                     android:textAllCaps="false"
                     android:textColor="@android:color/background_light"
-                    android:textSize="16sp" />
+                    android:textSize="14sp" />
 
                 <TextView
                     android:id="@+id/my_profile_state"
@@ -71,16 +78,14 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/my_profile_username"
                     android:layout_margin="5dp"
-                    android:layout_marginTop="10dp"
                     android:padding="2dp"
                     android:text="Hey there. Im using this App,develop by coding cafe......."
                     android:textAlignment="center"
                     android:textAllCaps="false"
                     android:textColor="@android:color/background_light"
-                    android:textSize="16sp" />
+                    android:textSize="14sp" />
 
             </LinearLayout>
-
             <LinearLayout
                 android:id="@+id/my_profile_information_total"
                 android:layout_width="match_parent"
@@ -106,79 +111,79 @@
                         android:textAlignment="center"
                         android:textAllCaps="false"
                         android:textColor="@color/colortitle"
-                        android:textSize="18sp" />
+                        android:textSize="16sp" />
 
                     <TextView
                         android:id="@+id/my_profile_country"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/my_title1"
-                        android:layout_marginTop="5dp"
+                        android:padding="3sp"
                         android:text="Profile Country"
                         android:textAlignment="center"
                         android:textAllCaps="false"
                         android:textColor="@android:color/background_light"
-                        android:textSize="16sp" />
+                        android:textSize="14sp" />
 
                     <TextView
                         android:id="@+id/my_profile_genero"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/my_profile_country"
-                        android:layout_marginTop="5dp"
+                        android:padding="3sp"
                         android:text="Profile Genero"
                         android:textAlignment="center"
                         android:textAllCaps="false"
                         android:textColor="@android:color/background_light"
-                        android:textSize="16sp" />
+                        android:textSize="14sp" />
 
                     <TextView
                         android:id="@+id/my_profile_edad"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/my_profile_genero"
-                        android:layout_marginTop="5dp"
+                        android:padding="3sp"
                         android:text="Profile Edad"
                         android:textAlignment="center"
                         android:textAllCaps="false"
                         android:textColor="@android:color/background_light"
-                        android:textSize="16sp" />
+                        android:textSize="14sp" />
 
                     <TextView
                         android:id="@+id/my_profile_peso"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/my_profile_edad"
-                        android:layout_marginTop="5dp"
+                        android:padding="3sp"
                         android:text="Profile Peso"
                         android:textAlignment="center"
                         android:textAllCaps="false"
                         android:textColor="@android:color/background_light"
-                        android:textSize="16sp" />
+                        android:textSize="14sp" />
 
                     <TextView
                         android:id="@+id/my_profile_altura"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/my_profile_peso"
-                        android:layout_marginTop="5dp"
+                        android:padding="3sp"
                         android:text="Profile Estatura"
                         android:textAlignment="center"
                         android:textAllCaps="false"
                         android:textColor="@android:color/background_light"
-                        android:textSize="16sp" />
+                        android:textSize="14sp" />
 
                     <TextView
                         android:id="@+id/my_profile_IMC"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/my_profile_altura"
-                        android:layout_marginTop="5dp"
+                        android:padding="3sp"
                         android:text="Profile IMC"
                         android:textAlignment="center"
                         android:textAllCaps="false"
                         android:textColor="@android:color/background_light"
-                        android:textSize="16sp" />
+                        android:textSize="14sp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -188,6 +193,253 @@
                     android:layout_below="@id/my_profile_information"
                     android:gravity="center"
                     android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="10dp"
+                        android:background="@drawable/tableborder"
+                        android:gravity="center"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:padding="3dp"
+                                android:background="@color/colortable"
+                                android:text="Por km"
+                                android:textAlignment="center"
+                                android:textColor="@android:color/background_light"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:padding="3dp"
+                                android:textAlignment="center"
+                                android:text="Promedio de Carreras"
+                                android:textColor="@android:color/background_light"
+                                android:textSize="14sp" />
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:background="@color/colortable"
+                                android:padding="3dp"
+                                android:text="Ultima Carrera"
+                                android:textAlignment="center"
+                                android:textColor="@android:color/background_light"
+                                android:textSize="14sp" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:padding="3dp"
+                                android:text="Velocidad (m/s)"
+                                android:textAlignment="center"
+                                android:textColor="@android:color/background_light"
+                                android:textSize="12sp" />
+                            <TextView
+                                android:id="@+id/profile_velpromtotal"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:background="@color/colortable"
+                                android:padding="3dp"
+                                android:text="0"
+                                android:textAlignment="center"
+                                android:textColor="@android:color/background_light"
+                                android:textSize="12sp" />
+
+                            <TextView
+                                android:id="@+id/profile_velpromfinal"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:padding="3dp"
+                                android:text="0"
+                                android:textAlignment="center"
+                                android:textColor="@android:color/background_light"
+                                android:textSize="12sp" />
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal">
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:background="@color/colortable"
+                                android:padding="3dp"
+                                android:textAlignment="center"
+                                android:text="Tiempo (min)"
+                                android:textColor="@android:color/background_light"
+                                android:textSize="12sp" />
+
+                            <TextView
+                                android:id="@+id/profile_tiempopromtotal"
+                                android:layout_width="match_parent"
+                                android:layout_weight="1"
+                                android:layout_height="wrap_content"
+                                android:text="0"
+                                android:textAlignment="center"
+                                android:padding="3dp"
+                                android:textColor="@android:color/background_light"
+                                android:textSize="12sp" />
+
+                            <TextView
+                                android:id="@+id/profile_tiempopromfinal"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:background="@color/colortable"
+                                android:padding="3dp"
+                                android:text="0"
+                                android:textAlignment="center"
+                                android:textColor="@android:color/background_light"
+                                android:textSize="12sp" />
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:padding="3dp"
+                                android:text="Distancia Total (km)"
+                                android:textColor="@android:color/background_light"
+                                android:textAlignment="center"
+                                android:textSize="12sp" />
+
+                            <TextView
+                                android:id="@+id/profile_distanciatotal"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:padding="3dp"
+                                android:text="0"
+                                android:background="@color/colortable"
+                                android:textAlignment="center"
+                                android:textColor="@android:color/background_light"
+                                android:textSize="12sp" />
+
+                            <TextView
+                                android:id="@+id/profile_distanciafinal"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="0"
+                                android:textAlignment="center"
+                                android:textColor="@android:color/background_light"
+                                android:padding="3dp"
+                                android:textSize="12sp" />
+
+
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal">
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:background="@color/colortable"
+                                android:padding="3dp"
+                                android:textAlignment="center"
+                                android:text="Calorias Total (KCal)"
+                                android:textColor="@android:color/background_light"
+                                android:textSize="12sp" />
+
+                            <TextView
+                                android:id="@+id/profile_caloriastotal"
+                                android:layout_width="match_parent"
+                                android:layout_weight="1"
+                                android:layout_height="wrap_content"
+                                android:padding="3dp"
+                                android:text="0"
+                                android:textAlignment="center"
+                                android:textColor="@android:color/background_light"
+                                android:textSize="12sp" />
+
+                            <TextView
+                                android:id="@+id/profile_calorias_ultimo"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:background="@color/colortable"
+                                android:text="0"
+                                android:padding="3dp"
+                                android:textAlignment="center"
+                                android:textColor="@android:color/background_light"
+                                android:textSize="12sp" />
+
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:padding="3dp"
+                                android:text="Pasos Totales"
+                                android:textAlignment="center"
+                                android:textColor="@android:color/background_light"
+                                android:textSize="12sp" />
+
+                            <TextView
+                                android:id="@+id/profile_pasostotal"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:background="@color/colortable"
+                                android:text="0"
+                                android:textAlignment="center"
+                                android:textColor="@android:color/background_light"
+                                android:padding="3dp"
+                                android:textSize="12sp" />
+
+                            <TextView
+                                android:id="@+id/profile_pasosultimo"
+                                android:layout_width="match_parent"
+                                android:layout_weight="1"
+                                android:layout_height="wrap_content"
+                                android:padding="3dp"
+                                android:text="0"
+                                android:textAlignment="center"
+                                android:textColor="@android:color/background_light"
+                                android:textSize="12sp" />
+
+                        </LinearLayout>
+                    </LinearLayout>
 
                     <TextView
                         android:id="@+id/my_title2"
@@ -199,384 +451,107 @@
                         android:textAlignment="center"
                         android:textAllCaps="false"
                         android:textColor="@color/colortitle"
-                        android:textSize="18sp" />
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="10dp"
-                        android:background="@drawable/tableborder"
-                        android:gravity="center"
-                        android:orientation="horizontal">
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="35dp"
-                                android:background="@color/colortable"
-                                android:paddingTop="1dp"
-                                android:paddingBottom="1dp"
-                                android:text="Por km"
-                                android:textAlignment="center"
-                                android:textColor="@android:color/background_light"
-                                android:textSize="14sp" />
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:paddingLeft="5dp"
-                                android:paddingTop="2dp"
-                                android:paddingRight="2dp"
-                                android:paddingBottom="2dp"
-                                android:text="Velocidad (m/s)"
-                                android:textAlignment="center"
-                                android:textColor="@android:color/background_light"
-                                android:textSize="12sp" />
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:paddingLeft="5dp"
-                                android:paddingTop="2dp"
-                                android:paddingRight="2dp"
-                                android:paddingBottom="2dp"
-                                android:background="@color/colortable"
-                                android:textAlignment="center"
-                                android:text="Tiempo (min)"
-                                android:textColor="@android:color/background_light"
-                                android:textSize="12sp" />
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:paddingLeft="5dp"
-                                android:paddingTop="2dp"
-                                android:paddingRight="2dp"
-                                android:paddingBottom="2dp"
-                                android:text="Peso (kg)"
-                                android:textColor="@android:color/background_light"
-                                android:textAlignment="center"
-                                android:textSize="12sp" />
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:paddingLeft="5dp"
-                                android:paddingTop="2dp"
-                                android:paddingRight="2dp"
-                                android:paddingBottom="2dp"
-                                android:textColor="@android:color/background_light"
-                                android:background="@color/colortable"
-                                android:text="Distancia Total (km)"
-                                android:textAlignment="center"
-                                android:textSize="12sp" />
-
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:paddingLeft="5dp"
-                                android:paddingTop="2dp"
-                                android:paddingRight="2dp"
-                                android:paddingBottom="2dp"
-                                android:text="Calorias Total (KCal)"
-                                android:textAlignment="center"
-                                android:textColor="@android:color/background_light"
-                                android:textSize="12sp" />
-
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:background="@color/colortable"
-                                android:paddingLeft="5dp"
-                                android:paddingTop="2dp"
-                                android:paddingRight="2dp"
-                                android:paddingBottom="2dp"
-                                android:text="Pasos Totales"
-                                android:textAlignment="center"
-                                android:textColor="@android:color/background_light"
-                                android:textSize="12sp" />
-
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="35dp"
-                                android:paddingLeft="10dp"
-                                android:paddingTop="1dp"
-                                android:paddingRight="10dp"
-                                android:paddingBottom="1dp"
-                                android:text="Promedio de Carreras"
-                                android:textAlignment="center"
-                                android:textColor="@android:color/background_light"
-                                android:textSize="14sp"
-                                />
-
-                            <TextView
-                                android:id="@+id/profile_velpromtotal"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:background="@color/colortable"
-                                android:padding="2dp"
-                                android:text="0"
-                                android:textAlignment="center"
-                                android:textColor="@android:color/background_light"
-                                android:textSize="12sp" />
-
-                            <TextView
-                                android:id="@+id/profile_tiempopromtotal"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:padding="2dp"
-                                android:text="0"
-                                android:textAlignment="center"
-                                android:textColor="@android:color/background_light"
-                                android:textSize="12sp" />
-                            <TextView
-                                android:id="@+id/profile_peso_total"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:padding="2dp"
-                                android:text="0"
-                                android:textAlignment="center"
-                                android:background="@color/colortable"
-                                android:textColor="@android:color/background_light"
-                                android:textSize="12sp" />
-
-                            <TextView
-                                android:id="@+id/profile_distanciatotal"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:padding="2dp"
-                                android:text="0"
-                                android:textAlignment="center"
-                                android:textColor="@android:color/background_light"
-                                android:textSize="12sp" />
-
-                            <TextView
-                                android:id="@+id/profile_caloriastotal"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:background="@color/colortable"
-                                android:padding="2dp"
-                                android:text="0"
-                                android:textAlignment="center"
-                                android:textColor="@android:color/background_light"
-                                android:textSize="12sp" />
-
-                            <TextView
-                                android:id="@+id/profile_pasostotal"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:padding="2dp"
-                                android:text="0"
-                                android:textAlignment="center"
-                                android:textColor="@android:color/background_light"
-                                android:textSize="12sp" />
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="center"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="35dp"
-                                android:background="@color/colortable"
-                                android:paddingLeft="10dp"
-                                android:paddingTop="1dp"
-                                android:paddingRight="10dp"
-                                android:paddingBottom="1dp"
-                                android:text="Ultima Carrera"
-                                android:textAlignment="center"
-                                android:textColor="@android:color/background_light"
-                                android:textSize="14sp" />
-
-                            <TextView
-                                android:id="@+id/profile_velpromfinal"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:padding="2dp"
-                                android:text="0"
-                                android:textAlignment="center"
-                                android:textColor="@android:color/background_light"
-                                android:textSize="12sp" />
-
-                            <TextView
-                                android:id="@+id/profile_tiempopromfinal"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:background="@color/colortable"
-                                android:padding="2dp"
-                                android:text="0"
-                                android:textAlignment="center"
-                                android:textColor="@android:color/background_light"
-                                android:textSize="12sp" />
-                            <TextView
-                                android:id="@+id/profile_peso_ultimo"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:padding="2dp"
-                                android:text="0"
-                                android:textAlignment="center"
-                                android:textColor="@android:color/background_light"
-                                android:textSize="12sp" />
-
-                            <TextView
-                                android:id="@+id/profile_distanciafinal"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:padding="2dp"
-                                android:background="@color/colortable"
-                                android:text="0"
-                                android:textAlignment="center"
-                                android:textColor="@android:color/background_light"
-                                android:textSize="12sp" />
-
-
-                            <TextView
-                                android:id="@+id/profile_calorias_ultimo"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:padding="2dp"
-                                android:text="0"
-                                android:textAlignment="center"
-                                android:textColor="@android:color/background_light"
-                                android:textSize="12sp" />
-
-                            <TextView
-                                android:id="@+id/profile_pasosultimo"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:background="@color/colortable"
-                                android:padding="2dp"
-                                android:text="0"
-                                android:textAlignment="center"
-                                android:textColor="@android:color/background_light"
-                                android:textSize="12sp" />
-                        </LinearLayout>
-                    </LinearLayout>
+                        android:textSize="16sp" />
                 </LinearLayout>
 
-                <LinearLayout
-                    android:id="@+id/profile_avance_carreras"
+                <TextView
+                    android:id="@+id/my_title3"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_below="@id/profile_carreras"
-                    android:gravity="center"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/my_title3"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/tableborder"
-                        android:padding="3dp"
-                        android:text="Avance por carreras"
-                        android:textAlignment="center"
-                        android:textAllCaps="false"
-                        android:textColor="@color/colortitle"
-                        android:textSize="18sp" />
-                    <LinearLayout
-                        android:id="@+id/profile_avance_carreras_tiempo"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_below="@id/profile_avance_carreras_velocidad"
-                        android:orientation="vertical">
-
-
-                        <TextView
-                            android:id="@+id/my_title_tiempo"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="10dp"
-                            android:text="Tiempo por Carrera"
-                            android:textAlignment="center"
-                            android:textAllCaps="false"
-                            android:textColor="@android:color/background_light"
-                            android:textSize="18sp" />
-
-                        <lecho.lib.hellocharts.view.LineChartView
-                            android:id="@+id/charttimeprof"
-                            android:layout_width="match_parent"
-                            android:layout_height="300dp"
-                            android:layout_margin="10dp"
-                            android:padding="20dp"
-                            android:verticalScrollbarPosition="defaultPosition" />
-                    </LinearLayout>
-                    <LinearLayout
-                        android:id="@+id/profile_avance_carreras_velocidad"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_below="@id/profile_carreras"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/my_title_velocidad"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="10dp"
-                            android:text="Velocidad por Carrera"
-                            android:textAlignment="center"
-                            android:textAllCaps="false"
-                            android:textColor="@android:color/background_light"
-                            android:textSize="18sp" />
-
-                        <lecho.lib.hellocharts.view.LineChartView
-                            android:id="@+id/chartvelprof"
-                            android:layout_width="match_parent"
-                            android:layout_height="300dp"
-                            android:layout_below="@+id/graf_velocidad"
-                            android:layout_margin="10dp"
-                            android:verticalScrollbarPosition="defaultPosition" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/profile_avance_carreras_calorias"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_below="@id/profile_avance_carreras_tiempo"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/my_title_calorias"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="10dp"
-                            android:text="Calorias por Carrera"
-                            android:textAlignment="center"
-                            android:textAllCaps="false"
-                            android:textColor="@android:color/background_light"
-                            android:textSize="18sp" />
-
-                        <lecho.lib.hellocharts.view.LineChartView
-                            android:id="@+id/chartcalprof"
-                            android:layout_width="match_parent"
-                            android:layout_height="300dp"
-                            android:layout_margin="10dp"
-                            android:padding="20dp"
-                            android:verticalScrollbarPosition="defaultPosition" />
-                    </LinearLayout>
-                </LinearLayout>
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/tableborder"
+                    android:padding="3sp"
+                    android:text="Avance por carreras"
+                    android:textAlignment="center"
+                    android:textAllCaps="false"
+                    android:textColor="@color/colortitle"
+                    android:textSize="16sp" />
             </LinearLayout>
 
+            <TextView
+                android:id="@+id/my_title_tiempo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/my_profile_information_total"
+                android:layout_margin="5dp"
+                android:text="Tiempo por Carrera"
+                android:textAlignment="center"
+                android:textAllCaps="false"
+                android:textColor="@android:color/background_light"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/my_title_velocidad"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/charttimeprof"
+                android:layout_margin="5dp"
+                android:text="Velocidad por Carrera"
+                android:textAlignment="center"
+                android:textAllCaps="false"
+                android:textColor="@android:color/background_light"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/my_title_calorias"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/chartvelprof"
+                android:layout_margin="5dp"
+                android:text="Calorias por Carrera"
+                android:textAlignment="center"
+                android:textAllCaps="false"
+                android:textColor="@android:color/background_light"
+                android:textSize="16sp" />
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/my_profile_pic"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="5dp"
+                android:src="@drawable/profile" />
+
+            <lecho.lib.hellocharts.view.LineChartView
+                android:id="@+id/chartvelprof"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:layout_below="@+id/my_title_velocidad"
+                android:layout_margin="5dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:background="@drawable/tableborder"
+                android:padding="20dp"
+                android:verticalScrollbarPosition="defaultPosition" />
+
+
+            <lecho.lib.hellocharts.view.LineChartView
+                android:id="@+id/charttimeprof"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:layout_below="@+id/my_title_tiempo"
+                android:layout_margin="5dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:background="@drawable/tableborder"
+                android:padding="20dp"
+                android:verticalScrollbarPosition="defaultPosition" />
+
+            <lecho.lib.hellocharts.view.LineChartView
+                android:id="@+id/chartcalprof"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:layout_below="@+id/my_title_calorias"
+                android:layout_margin="5dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:background="@drawable/tableborder"
+                android:padding="20dp"
+                android:verticalScrollbarPosition="defaultPosition" />
         </RelativeLayout>
     </ScrollView>
 
     <include
         android:id="@+id/mi_perfil_toolbar"
         layout="@layout/app_bar_layout"></include>
+
 </RelativeLayout>

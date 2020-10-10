@@ -4,6 +4,9 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -31,10 +34,11 @@ public class ClickMaratonActivity extends AppCompatActivity {
 
 
     private ImageView maratonImage;
-    private TextView maratonName, maratondescription, maratondate, maratontime, maratoncontactname, maratoncontactnumber, maratonPlace, mensaje;
+    private TextView maratonName, maratondescription, maratondate, maratontime, maratoncontactname, maratoncontactnumber, maratonPlace, mensaje, maratondist;
     private Button registermaratonButton, cancelregistermaratonButton, monitorearmaratonButton;
+    private WebView maratontrayectoria;
 
-    private DatabaseReference RegistrarUsuario, RegistrarCarrera, MaratonDatosRef, ResultadoUsuario;
+    private DatabaseReference RegistrarUsuario, RegistrarCarrera, MaratonDatosRef, ResultadoUsuario, UsuarioMon;
     private FirebaseAuth mAuth;
 
     private String PostKey, current_user_id;
@@ -58,11 +62,16 @@ public class ClickMaratonActivity extends AppCompatActivity {
             RegistrarUsuario = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( current_user_id ).child ( "Inscripcion" ).child ( PostKey );
             ResultadoUsuario = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( current_user_id ).child ( "Resultados" ).child ( "Lista" ).child ( PostKey );
             RegistrarCarrera = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( "Inscripcion" ).child ( PostKey ).child ( current_user_id );
-
+            UsuarioMon = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( "Inicio" ).child ( PostKey ).child ( current_user_id );
             maratonImage = findViewById ( R.id.maraton_image_principal );
             maratonName = findViewById ( R.id.maraton_name_principal );
             maratondescription = findViewById ( R.id.maraton_description_principal );
             maratonPlace = findViewById ( R.id.maraton_place_principal );
+            maratondist = findViewById ( R.id.maraton_distance );
+
+            maratontrayectoria = findViewById ( R.id.maraton_trayectoria );
+            final WebSettings ajustesVisorWeb = maratontrayectoria.getSettings ();
+            ajustesVisorWeb.setJavaScriptEnabled ( true );
 
             maratondate = findViewById ( R.id.maraton_date );
             maratontime = findViewById ( R.id.maraton_time );
@@ -107,6 +116,13 @@ public class ClickMaratonActivity extends AppCompatActivity {
             monitorearmaratonButton.setOnClickListener ( new View.OnClickListener () {
                 @Override
                 public void onClick(View v) {
+                    HashMap usuario = new HashMap ();
+
+                    usuario.put ( "userName", Common.loggedUser.fullname );
+                    usuario.put ( "userImagen", Common.loggedUser.profileimage );
+                    usuario.put ( "uid", current_user_id );
+
+                    UsuarioMon.updateChildren ( usuario );
                     SendUserToMaratonActivity ();
                 }
             } );
@@ -127,9 +143,12 @@ public class ClickMaratonActivity extends AppCompatActivity {
                     maratoncontactname.setText ( Common.carrera.contactname );
                     maratoncontactnumber.setText ( Common.carrera.contactnumber );
                     maratontime.setText ( Common.carrera.maratontime );
-                    maratondate.setText ( "Fecha: " + Common.carrera.maratondate + " " );
+                    maratondate.setText ( Common.carrera.maratondate + " " );
                     maratonPlace.setText ( "Lugar: " + Common.carrera.place );
                     maratonName.setText ( Common.carrera.maratonname );
+                    maratondist.setText ( "Distancia: " + Common.carrera.maratondist + " km" );
+                    maratontrayectoria.loadUrl ( Common.carrera.maratontrayectoriaweb );
+                    maratontrayectoria.setWebViewClient ( new WebViewClient () );
                 }
             }
 
@@ -149,10 +168,10 @@ public class ClickMaratonActivity extends AppCompatActivity {
                 if (dataSnapshot.exists ()) {
                     registermaratonButton.setEnabled ( false );
                     cancelregistermaratonButton.setEnabled ( false );
-                    monitorearmaratonButton.setEnabled ( false );
+                    monitorearmaratonButton.setEnabled ( true );
                     registermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
                     cancelregistermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
-                    monitorearmaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
+                    monitorearmaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.button ) );
                     mensaje.setText ( "Usted ya registro datos en esta carrera. Dirigase a mis Resultados" );
                 } else {
                     VerificarInscripcion ();
@@ -176,7 +195,7 @@ public class ClickMaratonActivity extends AppCompatActivity {
                     monitorearmaratonButton.setEnabled ( true );
                     registermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
                     cancelregistermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.button ) );
-                    monitorearmaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.button ) );
+                    //       monitorearmaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.button ) );
                     mensaje.setText ( "Ingrese el codigo de la carrera para iniciar el monitoreo" );
                 } else {
                     registermaratonButton.setEnabled ( true );
@@ -184,7 +203,7 @@ public class ClickMaratonActivity extends AppCompatActivity {
                     monitorearmaratonButton.setEnabled ( false );
                     registermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.button ) );
                     cancelregistermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
-                    monitorearmaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
+                    //   monitorearmaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
                     mensaje.setText ( "INSCRIBETE!!" );
 
                 }
@@ -217,7 +236,7 @@ public class ClickMaratonActivity extends AppCompatActivity {
                             monitorearmaratonButton.setEnabled ( false );
                             registermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.button ) );
                             cancelregistermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
-                            monitorearmaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
+                            //          monitorearmaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
                             mensaje.setText ( "INSCRIBETE!" );
 
                             Toast.makeText ( ClickMaratonActivity.this, "Ha cancelado su inscripcion correctamente.", Toast.LENGTH_SHORT ).show ();
@@ -242,12 +261,14 @@ public class ClickMaratonActivity extends AppCompatActivity {
                 crear.put ( "date", Common.carrera.maratondate + " : " + Common.carrera.maratontime );
                 crear.put ( "maratonimagen", Common.carrera.maratonimage );
                 crear.put ( "maratondescription", Common.carrera.description );
+                crear.put ( "uid", Common.carrera.uid );
                 RegistrarUsuario.updateChildren ( crear );
                 HashMap usuario = new HashMap ();
                 usuario.put ( "userName", Common.loggedUser.fullname );
                 usuario.put ( "userGenero", Common.loggedUser.genero );
                 usuario.put ( "userEdad", Common.loggedUser.edad );
                 usuario.put ( "userImagen", Common.loggedUser.profileimage );
+                usuario.put ( "uid", current_user_id );
                 RegistrarCarrera.updateChildren ( usuario ).addOnCompleteListener ( new OnCompleteListener () {
                     @Override
                     public void onComplete(@NonNull Task task) {
@@ -257,7 +278,7 @@ public class ClickMaratonActivity extends AppCompatActivity {
                             monitorearmaratonButton.setEnabled ( true );
                             registermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
                             cancelregistermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.button ) );
-                            monitorearmaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.button ) );
+                            //     monitorearmaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.button ) );
                             mensaje.setText ( "Ingrese el codigo de la carrera para iniciar el monitoreo" );
                             Toast.makeText ( ClickMaratonActivity.this, "Su inscripcion se realizo exitosamente", Toast.LENGTH_SHORT ).show ();
                             loadingBar.dismiss ();

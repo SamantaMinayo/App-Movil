@@ -12,11 +12,41 @@ public class Maraton {
     public String maratondate;
     public String place;
     public String maratonname;
-
+    public String estado;
     public String codigo;
+    public String maratondist;
+    public String maratontrayectoriaweb;
 
 
+    public Maraton(String uid, String time, String date, String maratonimage, String description, String contactname, String contactnumber, String maratontime, String maratondate, String place, String maratonname, String codigo, String estado, String distancia, String maratontrayectoriaweb) {
+        this.uid = uid;
+        this.time = time;
+        this.date = date;
+        this.maratonimage = maratonimage;
+        this.description = description;
+        this.contactname = contactname;
+        this.contactnumber = contactnumber;
+        this.maratontime = maratontime;
+        this.maratondate = maratondate;
+        this.place = place;
+        this.maratonname = maratonname;
+        this.codigo = codigo;
+        this.estado = estado;
+        this.maratondist = distancia;
+        this.maratontrayectoriaweb = maratontrayectoriaweb;
+    }
 
+    public String getMaratondist() {
+        return maratondist;
+    }
+
+    public void setMaratondist(String maratondist) {
+        this.maratondist = maratondist;
+    }
+
+    public String getMaratontrayectoriaweb() {
+        return maratontrayectoriaweb;
+    }
 
     public String getUid() {
         return uid;
@@ -106,19 +136,16 @@ public class Maraton {
         this.maratonname = maratonname;
     }
 
-    public Maraton(String uid, String time, String date, String maratonimage, String description, String contactname, String contactnumber, String maratontime, String maratondate, String place, String maratonname, String codigo) {
-        this.uid = uid;
-        this.time = time;
-        this.date = date;
-        this.maratonimage = maratonimage;
-        this.description = description;
-        this.contactname = contactname;
-        this.contactnumber = contactnumber;
-        this.maratontime = maratontime;
-        this.maratondate = maratondate;
-        this.place = place;
-        this.maratonname = maratonname;
-        this.codigo = codigo;
+    public void setMaratontrayectoriaweb(String maratontrayectoriaweb) {
+        this.maratontrayectoriaweb = maratontrayectoriaweb;
+    }
+
+    public String getEstado() {
+        return estado;
+    }
+
+    public void setEstado(String estado) {
+        this.estado = estado;
     }
 
     public Maraton() {

@@ -48,8 +48,11 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -61,23 +64,31 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private GoogleMap mMap;
     private Marker marcador;
-    double velocidadtotalkil = 0.0;
+
     private FirebaseAuth mAuth;
-    private DatabaseReference CarreraUserInf, CarreraUserMon, CarreraUserInfkil, RegistrarUsuario, RegistrarResUsuario, CarreraUserInfRes;
+    double factorpaso;
+
     private ProgressDialog loadingBar;
-    private String PostKey, current_user_id;
-    private Chronometer cronometro;
     PowerManager powerManager;
-    private TextView velocidad, distancia, pasos;
     private Location locationA;
+    private DatabaseReference CarreraUserInf, CarreraUserMon, CarreraUserInfGraf,
+            RegistrarUsuario, RegistrarResUsuario, CarreraUserInfRes, Carrera, CarreraResInfo;
     private boolean transmision = false;
     private boolean fin = false;
+    private String PostKey, current_user_id;
     private double distanciatotal = 0.0;
-    private double kilometro = 0.0;
+    private String inicio = "false";
     private double velocidadtotal = 0.0;
-    private int contkil = 0;
+    private double distgrafica = 0.0;
     private int contregistor = 0;
-    private int contregistorkil = 0;
+    private int contgraf = 0;
+    private int contregistrograf = 0;
+    private double velgraficas = 0.0;
+    ///////////////////////////
+    private String horacarrera;
+    ///////////////////////////
+    private Calendar calFordTime;
+    private SimpleDateFormat currentTime;
 
     private PowerManager.WakeLock wakelock;
 
@@ -113,6 +124,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     // UI elements.
     private Button mRequestLocationUpdatesButton;
     private Button mRemoveLocationUpdatesButton;
+    private TextView velocidad, distancia, pasos;
+    private Chronometer cronometro;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,31 +143,48 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         wakelock = powerManager.newWakeLock ( PowerManager.PARTIAL_WAKE_LOCK,
                 "MyApp::MyWakelockTag" );
 
-
         mAuth = FirebaseAuth.getInstance ();
         current_user_id = mAuth.getCurrentUser ().getUid ();
         PostKey = getIntent ().getExtras ().get ( "PostKey" ).toString ();
+
         CarreraUserInf = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( "Resultados" )
                 .child ( PostKey ).child ( Common.loggedUser.getGenero () )
                 .child ( Common.loggedUser.getRango () ).child ( current_user_id );
-
-        CarreraUserInfkil = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" )
-                .child ( "Kilometro" ).child ( PostKey ).child ( Common.loggedUser.getGenero () )
-                .child ( Common.loggedUser.getRango () );
-
+        CarreraUserInfGraf = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" )
+                .child ( "Graficas" ).child ( PostKey );
         CarreraUserMon = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).
                 child ( "Monitoreo" ).child ( PostKey );
+        RegistrarUsuario = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).
+                child ( current_user_id ).child ( "Inscripcion" ).child ( PostKey );
+        RegistrarResUsuario = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).
+                child ( current_user_id ).child ( "Resultados" ).child ( "Lista" ).child ( PostKey );
+        CarreraUserInfRes = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).
+                child ( current_user_id ).child ( "Resultados" ).child ( "Resultado" ).child ( PostKey );
+        CarreraResInfo = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( "Resultados" ).
+                child ( PostKey ).child ( current_user_id );
+        Carrera = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).
+                child ( "Nuevas" ).child ( PostKey ).child ( "estado" );
 
-        RegistrarUsuario = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( current_user_id ).child ( "Inscripcion" ).child ( PostKey );
-        RegistrarResUsuario = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( current_user_id ).child ( "Resultados" ).child ( "Lista" ).child ( PostKey );
-        CarreraUserInfRes = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( current_user_id ).child ( "Resultados" ).child ( "Resultado" ).child ( PostKey );
-
+        horacarrera = Common.carrera.getMaratontime ();
         // Check that the user hasn't revoked permissions by going to Settings.
         if (Utils.requestingLocationUpdates ( this )) {
             if (!checkPermissions ()) {
                 requestPermissions ();
             }
         }
+
+        Carrera.addValueEventListener ( new ValueEventListener () {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                inicio = (String) dataSnapshot.getValue ();
+                if (inicio.equals ( "fin" )) fin = true;
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+            }
+        } );
+
     }
 
     @Override
@@ -162,6 +192,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onStart ();
         PreferenceManager.getDefaultSharedPreferences ( this )
                 .registerOnSharedPreferenceChangeListener ( this );
+
+        currentTime = new SimpleDateFormat ( "HH:mm:ss" );
+
 
         mRequestLocationUpdatesButton = findViewById ( R.id.inicio_button );
         mRemoveLocationUpdatesButton = findViewById ( R.id.fin_button );
@@ -171,6 +204,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         formato1 = new DecimalFormat ( "#.00" );
         cronometro = findViewById ( R.id.cronometro );
         loadingBar = new ProgressDialog ( this );
+
 
         mRequestLocationUpdatesButton.setOnClickListener ( new View.OnClickListener () {
             @Override
@@ -188,9 +222,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     cronometro.start ();
                     distanciatotal = 0.0;
                     velocidadtotal = 0.0;
-                    velocidadtotalkil = 0.0;
+                    velgraficas = 0.0;
                     contregistor = 0;
-                    contregistorkil = 0;
+                    contregistrograf = 0;
                     mService.requestLocationUpdates ();
                 }
             }
@@ -371,9 +405,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 cronometro.start ();
                 distanciatotal = 0.0;
                 velocidadtotal = 0.0;
-                velocidadtotalkil = 0.0;
+                velgraficas = 0.0;
                 contregistor = 0;
-                contregistorkil = 0;
+                contregistrograf = 0;
                 mService.requestLocationUpdates ();
             } else {
                 // Permission denied.
@@ -410,44 +444,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void agrerarMarcador(Location location) {
         try {
 
-            if (transmision) {
-                if (locationA != null) {
-                    Polyline line = mMap.addPolyline ( new PolylineOptions ()
-                            .add ( new LatLng ( locationA.getLatitude (), locationA.getLongitude () ), new LatLng ( location.getLatitude (), location.getLongitude () ) )
-                            .width ( 5 )
-                            .color ( Color.BLUE ) );
-
-                    distanciatotal = locationA.distanceTo ( location ) + distanciatotal;
-                    kilometro = locationA.distanceTo ( location ) + kilometro;
-                    String distguar = formato1.format ( distanciatotal );
-                    distancia.setText ( distguar + " m" );
-                    velocidad.setText ( formato1.format ( location.getSpeed () ) + " m/s" );
-                    velocidadtotal = location.getSpeed () + velocidadtotal;
-                    velocidadtotalkil = location.getSpeed () + velocidadtotalkil;
-                    double distcm = distanciatotal * 100;
-                    double factorpaso = Double.valueOf ( Common.loggedUser.getPaso () );
-                    pasos.setText ( formato1.format ( distcm / factorpaso ) );
-
-                    locationA.setLatitude ( location.getLatitude () );
-                    locationA.setLongitude ( location.getLongitude () );
-                    String tiempo = cronometro.getText ().toString ();
-                    Calendar calFordTime = Calendar.getInstance ();
-                    SimpleDateFormat currentTime = new SimpleDateFormat ( "HH:mm:ss" );
-                    String hora = currentTime.format ( calFordTime.getTime () );
-                    GuardarInformacion ( location, distguar, hora, tiempo );
-                    Monitoreo ( location, Common.loggedUser.getUsername (), hora );
-                    if (kilometro > 100) {
-                        contkil = contkil + 1;
-                        GuardarKilometros ( location, formato1.format ( velocidadtotalkil ), hora, tiempo, contkil, contregistorkil );
-                    }
-
-                } else {
-                    locationA = new Location ( "punto A" );
-                    locationA.setLatitude ( location.getLatitude () );
-                    locationA.setLongitude ( location.getLongitude () );
-                }
-            }
-
             LatLng coordenada = new LatLng ( location.getLatitude (), location.getLongitude () );
             CameraUpdate miUbicacion = CameraUpdateFactory.newLatLngZoom ( coordenada, 17 );
 
@@ -457,34 +453,103 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     .title ( "Mi posision actual" )
             );
             mMap.animateCamera ( miUbicacion );
+            //hora
+            calFordTime = Calendar.getInstance ();
+            String hora = currentTime.format ( calFordTime.getTime () );
+            Monitoreo ( location, Common.loggedUser.getUsername (), hora );
+            if (transmision && inicio.equals ( "true" )) {
+                if (locationA != null) {
+                    Polyline line = mMap.addPolyline ( new PolylineOptions ()
+                            .add ( new LatLng ( locationA.getLatitude (), locationA.getLongitude () ), new LatLng ( location.getLatitude (), location.getLongitude () ) )
+                            .width ( 5 )
+                            .color ( Color.BLUE ) );
+
+                    factorpaso = Double.valueOf ( Common.loggedUser.getPaso () );
+                    //datos actuales y totales
+                    distanciatotal = locationA.distanceTo ( location ) + distanciatotal;
+                    String distguar = formato1.format ( distanciatotal );
+                    distancia.setText ( distguar + " m" );
+                    velocidad.setText ( formato1.format ( location.getSpeed () ) + " m/s" );
+                    double distcm = distanciatotal * 100;
+                    pasos.setText ( formato1.format ( distcm / factorpaso ) );
+                    velocidadtotal = location.getSpeed () + velocidadtotal;
+
+                    //datos para graficas
+                    velgraficas = location.getSpeed () + velgraficas;
+                    distgrafica = locationA.distanceTo ( location ) + distgrafica;
+                    locationA.setLatitude ( location.getLatitude () );
+                    locationA.setLongitude ( location.getLongitude () );
+                    contregistor = contregistor + 1;
+                    contregistrograf = contregistrograf + 1;
+                    //datos por kilometro
+
+                    //  GuardarInformacion ( location, distguar, hora, tiempo );
+                    if (distgrafica > 200) {
+                        contgraf = contgraf + 1;
+                        String tiempo = getDifferenceBetwenDates ( horacarrera, hora );
+                        String[] fin = tiempo.split ( ":" );
+                        double min = Integer.parseInt ( fin[0] ) * 60 + Integer.parseInt ( fin[1] ) + Integer.parseInt ( fin[2] ) / 60;
+                        String pasosgra = formato1.format ( 20000 / factorpaso );
+
+                        GuardarGraf ( velgraficas, min, "200", contgraf, contregistrograf, pasosgra );
+
+                        distgrafica = distgrafica - 200;
+                        velgraficas = 0.0;
+                        contregistrograf = 0;
+                    }
+
+
+                } else {
+                    locationA = new Location ( "punto A" );
+                    locationA.setLatitude ( location.getLatitude () );
+                    locationA.setLongitude ( location.getLongitude () );
+                }
+            }
+            if (inicio == "fin") {
+                GuardarFinal ();
+            }
         } catch (Exception e) {
             String error = "ERROR";
         }
 
     }
 
-    private void GuardarKilometros(Location location, String veltot, String hora, String tiempo, int contkil, int contreg) {
+    private void GuardarGraf(double veltot, double min, String distancia, int contgrafi, int contreg, String pasosgra) {
+        if (min < 1) {
+            min = 1.00;
+        }
+        String calorias = formato1.format ( 8 * min * 0.0175 * Double.valueOf ( Common.loggedUser.getPeso () ) );
+
+        double velocidad = veltot / contreg;
         HashMap puntos = new HashMap ();
 
-        puntos.put ( "latitud", String.valueOf ( location.getLatitude () ) );
-        puntos.put ( "longitud", String.valueOf ( location.getLongitude () ) );
-        puntos.put ( "velocidad", veltot );
-        puntos.put ( "hora", hora );
-        puntos.put ( "tiempo", tiempo );
-        puntos.put ( "registros", contreg );
-
-        CarreraUserInfkil.child ( String.valueOf ( contkil ) ).child ( current_user_id ).updateChildren ( puntos );
-
-        kilometro = kilometro - 100;
-        velocidadtotalkil = 0.0;
-        contregistorkil = 0;
+        puntos.put ( "distancia", distancia );
+        puntos.put ( "velocidad", formato1.format ( velocidad ) );
+        puntos.put ( "tiempo", formato1.format ( min ) );
+        puntos.put ( "calorias", calorias );
+        puntos.put ( "pasos", pasosgra );
+        puntos.put ( "genero", Common.loggedUser.getGenero () );
+        puntos.put ( "rango", Common.loggedUser.getRango () );
+        puntos.put ( "usuario", Common.loggedUser.getUsername () );
+        puntos.put ( "uid", current_user_id );
+        puntos.put ( "punto", String.valueOf ( contgrafi ) );
+        CarreraUserInfGraf.child ( String.valueOf ( contgrafi ) ).child ( current_user_id ).updateChildren ( puntos );
     }
 
-    private void GuardarFinal(Location location) {
-        String tiempo = cronometro.getText ().toString ();
-        Calendar calFordTime = Calendar.getInstance ();
-        SimpleDateFormat currentTime = new SimpleDateFormat ( "HH:mm:ss" );
+    private void GuardarFinal() {
         String hora = currentTime.format ( calFordTime.getTime () );
+        String tiempo = getDifferenceBetwenDates ( horacarrera, hora );
+        String[] fin = tiempo.split ( ":" );
+        double min = Integer.parseInt ( fin[0] ) * 60 + Integer.parseInt ( fin[1] ) + Integer.parseInt ( fin[2] ) / 60;
+        String pasosgra = formato1.format ( (distgrafica * 100) / factorpaso );
+
+        GuardarGraf ( velgraficas, min, formato1.format ( distgrafica ), contgraf + 1, contregistrograf, pasosgra );
+
+        calFordTime = Calendar.getInstance ();
+        tiempo = getDifferenceBetwenDates ( Common.carrera.getMaratontime (), hora );
+        fin = tiempo.split ( ":" );
+        min = Integer.parseInt ( fin[0] ) * 60 + Integer.parseInt ( fin[1] ) + Integer.parseInt ( fin[2] ) / 60;
+        String calorias = formato1.format ( 8 * min * 0.0175 * Double.valueOf ( Common.loggedUser.getPeso () ) );
 
         LocalBroadcastManager.getInstance ( getApplicationContext () ).unregisterReceiver ( myReceiver );
         transmision = false;
@@ -493,24 +558,28 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         mService.removeLocationUpdates ();
 
+
+        String pas = formato1.format ( (distanciatotal * 100) / factorpaso );
+        String velprom = formato1.format ( velocidadtotal / contregistor );
         HashMap puntos = new HashMap ();
 
-        puntos.put ( "latitud", String.valueOf ( location.getLatitude () ) );
-        puntos.put ( "longitud", String.valueOf ( location.getLongitude () ) );
-        puntos.put ( "velocidad", String.valueOf ( velocidadtotal ) );
-        puntos.put ( "distacia", String.valueOf ( distanciatotal ) );
-        puntos.put ( "hora", hora );
-        puntos.put ( "tiempo", tiempo );
+        puntos.put ( "distancia", formato1.format ( distanciatotal ) );
+        puntos.put ( "velocidad", velprom );
+        puntos.put ( "tiempo", formato1.format ( min ) );
+        puntos.put ( "calorias", calorias );
+        puntos.put ( "pasos", pas );
+        puntos.put ( "genero", Common.loggedUser.getGenero () );
         puntos.put ( "rango", Common.loggedUser.getRango () );
-        puntos.put ( "registros", contregistor );
+        puntos.put ( "usuario", Common.loggedUser.getUsername () );
+        puntos.put ( "uid", current_user_id );
+        CarreraResInfo.updateChildren ( puntos );
         CarreraUserInfRes.updateChildren ( puntos );
         GuardarResList ();
-        GuardarKilometros ( location, formato1.format ( velocidadtotalkil ), hora, tiempo, contkil + 1, contregistorkil );
     }
 
     private void GuardarInformacion(Location location, String distguar, String hora, String tiempo) {
         contregistor = contregistor + 1;
-        contregistorkil = contregistorkil + 1;
+        contregistrograf = contregistrograf + 1;
         HashMap puntos = new HashMap ();
 
         puntos.put ( "latitud", String.valueOf ( location.getLatitude () ) );
@@ -569,9 +638,23 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             crear.put ( "date", Common.carrera.maratondate + " : " + Common.carrera.maratontime );
             crear.put ( "maratonimagen", Common.carrera.maratonimage );
             crear.put ( "maratondescription", Common.carrera.description );
+            crear.put ( "uid", Common.carrera.uid );
             RegistrarResUsuario.updateChildren ( crear );
         } catch (Exception e) {
         }
+    }
+
+    public String getDifferenceBetwenDates(String dateInicio, String dateFinal) {
+        String[] inicio = dateInicio.split ( ":" );
+        String[] fin = dateFinal.split ( ":" );
+        int start = Integer.parseInt ( inicio[0] ) * 3600 + Integer.parseInt ( inicio[1] ) * 60 + Integer.parseInt ( inicio[2] );
+        int end = Integer.parseInt ( fin[0] ) * 3600 + Integer.parseInt ( fin[1] ) * 60 + Integer.parseInt ( fin[2] );
+        int result = end - start;
+        int hour = result / 3600;
+        int minu = (result % 3600) / 60;
+        int segu = ((result % 3600) % 60) % 60;
+        horacarrera = dateFinal;
+        return hour + ":" + minu + ":" + segu;
     }
 
     /**
@@ -580,12 +663,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public class MyReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
+
             Location location = intent.getParcelableExtra ( MyService.EXTRA_LOCATION );
             if (location != null) {
                 agrerarMarcador ( location );
-                if (fin) {
-                    GuardarFinal ( location );
-                }
+                if (fin) GuardarFinal ();
             }
         }
     }

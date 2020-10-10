@@ -5,12 +5,14 @@ public class MiMaraton {
     public String maratonimagen;
     public String maratondescription;
     public String date;
+    public String uid;
 
-    public MiMaraton(String maratonname, String maratonimagen, String maratondescription, String date) {
+    public MiMaraton(String maratonname, String maratonimagen, String maratondescription, String date, String uid) {
         this.maratonname = maratonname;
         this.maratonimagen = maratonimagen;
         this.maratondescription = maratondescription;
         this.date = date;
+        this.uid = uid;
     }
 
     public MiMaraton() {
@@ -46,6 +48,14 @@ public class MiMaraton {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
     }
 
 

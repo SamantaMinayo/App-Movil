@@ -42,7 +42,7 @@ public class MaratonActivity extends AppCompatActivity implements IFirebaseLoadD
     IFirebaseLoadDone firebaseLoadDone;
     MaterialSearchBar searchBar;
     List<String> suggestList = new ArrayList<> ();
-
+    List<Maraton> maratones = new ArrayList<Maraton> ();
     private Toolbar mToolbar;
 
 
@@ -102,7 +102,6 @@ public class MaratonActivity extends AppCompatActivity implements IFirebaseLoadD
 
                 }
             } );
-
             recycler_all_maraton = findViewById ( R.id.all_maratons_post_list );
             recycler_all_maraton.setHasFixedSize ( true );
             RecyclerView.LayoutManager layoutManager = new LinearLayoutManager ( this );
@@ -142,7 +141,11 @@ public class MaratonActivity extends AppCompatActivity implements IFirebaseLoadD
     }
 
     private void loadUserList() {
-        Query query = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( "Nuevas" );
+        Query query = FirebaseDatabase.getInstance ().getReference ().
+                child ( "Carreras" ).
+                child ( "Nuevas" )
+                .orderByChild ( "estado" )
+                .equalTo ( "false" );
 
         FirebaseRecyclerOptions<Maraton> options = new FirebaseRecyclerOptions.Builder<Maraton> ()
                 .setQuery ( query, Maraton.class )
@@ -152,6 +155,7 @@ public class MaratonActivity extends AppCompatActivity implements IFirebaseLoadD
             @Override
             protected void onBindViewHolder(@NonNull MaratonViewHolder maratonViewHolder, int position, @NonNull Maraton maraton) {
 
+                maratones.add ( maraton );
                 maratonViewHolder.maratonname.setText ( maraton.maratonname );
                 Picasso.with ( getApplication () ).load ( maraton.maratonimage ).into ( maratonViewHolder.maratonimage );
                 maratonViewHolder.maratondescription.setText ( maraton.description );
@@ -181,6 +185,7 @@ public class MaratonActivity extends AppCompatActivity implements IFirebaseLoadD
 
         adapter.startListening ();
         recycler_all_maraton.setAdapter ( adapter );
+
     }
 
     private void startSearch(String text_search) {
@@ -188,10 +193,8 @@ public class MaratonActivity extends AppCompatActivity implements IFirebaseLoadD
                 .getReference ()
                 .child ( "Carreras" )
                 .child ( "Nuevas" )
-                .child ( "Informacion" )
                 .orderByChild ( "maratonname" )
                 .startAt ( text_search );
-
         FirebaseRecyclerOptions<Maraton> options = new FirebaseRecyclerOptions.Builder<Maraton> ()
                 .setQuery ( query, Maraton.class )
                 .build ();
