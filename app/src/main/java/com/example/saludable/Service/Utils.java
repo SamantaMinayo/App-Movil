@@ -5,17 +5,15 @@ import android.location.Location;
 import android.preference.PreferenceManager;
 
 import com.example.saludable.R;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.model.Marker;
 
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.util.Date;
 
 public class Utils {
 
     public static final String KEY_REQUESTING_LOCATION_UPDATES = "requesting_location_updates";
-    public GoogleMap mMap;
-    public Marker marcador;
+    private static DecimalFormat formato1;
 
     /**
      * Returns true if requesting location updates, otherwise returns false.
@@ -44,13 +42,15 @@ public class Utils {
      *
      * @param location The {@link Location}.
      */
-    public static String getLocationText(Location location) {
+    public static String getLocationText(Location location, float distancia) {
+        formato1 = new DecimalFormat ( "#.00" );
+
         if (location == null) {
 
             return "Unknown location";
         } else {
-            //  agregarMarcador(location.getLatitude(),location.getLongitude());
-            return "(" + location.getLatitude () + ", " + location.getLongitude () + ")";
+
+            return "(" + formato1.format ( distancia ) + "m, vel: " + formato1.format ( location.getSpeed () ) + " m/s )";
 
         }
 

@@ -92,7 +92,10 @@ public class MyService extends Service {
     /**
      * The current location.
      */
+    private Location mLocationant;
     private Location mLocation;
+    private float distancia = 0;
+
 
     public MyService() {
     }
@@ -233,7 +236,7 @@ public class MyService extends Service {
     private Notification getNotification() {
         Intent intent = new Intent ( this, MyService.class );
 
-        CharSequence text = Utils.getLocationText ( mLocation );
+        CharSequence text = Utils.getLocationText ( mLocation, distancia );
 
         // Extra to help us figure out if we arrived in onStartCommand via the notification or not.
         intent.putExtra ( EXTRA_STARTED_FROM_NOTIFICATION, true );
@@ -295,14 +298,18 @@ public class MyService extends Service {
     public void onNewLocation(Location location) {
         Log.i ( TAG, "New location: " + location );
 
-        mLocation = location;
 
+        mLocation = location;
+        if (mLocationant == null) {
+            mLocationant = mLocation;
+        }
         // Notify anyone listening for broadcasts about the new location.
         Intent intent = new Intent ( ACTION_BROADCAST );
         intent.putExtra ( EXTRA_LOCATION, location );
         LocalBroadcastManager.getInstance ( getApplicationContext () ).sendBroadcast ( intent );
 
-
+        distancia = distancia + mLocationant.distanceTo ( mLocation );
+        mLocationant = mLocation;
         // Update notification content if running as a foreground service.
         if (serviceIsRunningInForeground ( this )) {
             mNotificationManager.notify ( NOTIFICATION_ID, getNotification () );

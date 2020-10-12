@@ -1,2 +1,2 @@
-include ':app', ':jplot1.1', ':hellocharts-library-1.5.8'
+include ':app', ':jplot1.1', ':hellocharts-library-1.5.8', ':mapbox-android-sdk-9.5.0'
 rootProject.name='Saludable'

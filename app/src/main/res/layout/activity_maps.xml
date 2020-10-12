@@ -161,7 +161,6 @@
         android:layout_height="match_parent"
         android:layout_above="@+id/botones"
         android:layout_below="@+id/valores" />
-
     <include
         android:id="@+id/map_toolbar"
         layout="@layout/app_bar_layout"></include>

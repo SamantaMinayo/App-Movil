@@ -189,12 +189,11 @@ public class MaratonActivity extends AppCompatActivity implements IFirebaseLoadD
     }
 
     private void startSearch(String text_search) {
-        Query query = FirebaseDatabase.getInstance ()
-                .getReference ()
+        Query query = FirebaseDatabase.getInstance ().getReference ()
                 .child ( "Carreras" )
                 .child ( "Nuevas" )
                 .orderByChild ( "maratonname" )
-                .startAt ( text_search );
+                .startAt ( text_search ).limitToFirst ( 2 );
         FirebaseRecyclerOptions<Maraton> options = new FirebaseRecyclerOptions.Builder<Maraton> ()
                 .setQuery ( query, Maraton.class )
                 .build ();
@@ -203,16 +202,13 @@ public class MaratonActivity extends AppCompatActivity implements IFirebaseLoadD
             @Override
             protected void onBindViewHolder(@NonNull MaratonViewHolder maratonViewHolder, int position, @NonNull Maraton maraton) {
 
+                maratones.add ( maraton );
                 maratonViewHolder.maratonname.setText ( maraton.maratonname );
-                maratonViewHolder.admindate.setText ( maraton.date );
-                maratonViewHolder.admintime.setText ( maraton.time );
-                maratonViewHolder.maratondescription.setText ( maraton.description );
                 Picasso.with ( getApplication () ).load ( maraton.maratonimage ).into ( maratonViewHolder.maratonimage );
+                maratonViewHolder.maratondescription.setText ( maraton.description );
                 maratonViewHolder.maratonplace.setText ( maraton.place );
                 maratonViewHolder.maratondate.setText ( maraton.maratondate );
                 maratonViewHolder.maratontime.setText ( maraton.maratontime );
-                maratonViewHolder.contactname.setText ( maraton.contactname );
-                maratonViewHolder.contactnumber.setText ( maraton.contactnumber );
                 final String PostKey = getRef ( position ).getKey ();
                 maratonViewHolder.setiRecyclerItemClickListener ( new IRecyclerItemClickListener () {
                     @Override

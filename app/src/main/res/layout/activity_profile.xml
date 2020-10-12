@@ -194,6 +194,17 @@
                     android:gravity="center"
                     android:orientation="vertical">
 
+                    <TextView
+                        android:id="@+id/my_title2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/tableborder"
+                        android:padding="3dp"
+                        android:text="Informacion de Carreras"
+                        android:textAlignment="center"
+                        android:textAllCaps="false"
+                        android:textColor="@color/colortitle"
+                        android:textSize="16sp" />
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -441,17 +452,6 @@
                         </LinearLayout>
                     </LinearLayout>
 
-                    <TextView
-                        android:id="@+id/my_title2"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:background="@drawable/tableborder"
-                        android:padding="3dp"
-                        android:text="Informacion de Carreras"
-                        android:textAlignment="center"
-                        android:textAllCaps="false"
-                        android:textColor="@color/colortitle"
-                        android:textSize="16sp" />
                 </LinearLayout>
 
                 <TextView
@@ -479,30 +479,6 @@
                 android:textColor="@android:color/background_light"
                 android:textSize="16sp" />
 
-            <TextView
-                android:id="@+id/my_title_velocidad"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/charttimeprof"
-                android:layout_margin="5dp"
-                android:text="Velocidad por Carrera"
-                android:textAlignment="center"
-                android:textAllCaps="false"
-                android:textColor="@android:color/background_light"
-                android:textSize="16sp" />
-
-            <TextView
-                android:id="@+id/my_title_calorias"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/chartvelprof"
-                android:layout_margin="5dp"
-                android:text="Calorias por Carrera"
-                android:textAlignment="center"
-                android:textAllCaps="false"
-                android:textColor="@android:color/background_light"
-                android:textSize="16sp" />
-
             <de.hdodenhof.circleimageview.CircleImageView
                 android:id="@+id/my_profile_pic"
                 android:layout_width="150dp"
@@ -511,42 +487,7 @@
                 android:layout_marginTop="5dp"
                 android:src="@drawable/profile" />
 
-            <lecho.lib.hellocharts.view.LineChartView
-                android:id="@+id/chartvelprof"
-                android:layout_width="match_parent"
-                android:layout_height="300dp"
-                android:layout_below="@+id/my_title_velocidad"
-                android:layout_margin="5dp"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
-                android:background="@drawable/tableborder"
-                android:padding="20dp"
-                android:verticalScrollbarPosition="defaultPosition" />
 
-
-            <lecho.lib.hellocharts.view.LineChartView
-                android:id="@+id/charttimeprof"
-                android:layout_width="match_parent"
-                android:layout_height="300dp"
-                android:layout_below="@+id/my_title_tiempo"
-                android:layout_margin="5dp"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
-                android:background="@drawable/tableborder"
-                android:padding="20dp"
-                android:verticalScrollbarPosition="defaultPosition" />
-
-            <lecho.lib.hellocharts.view.LineChartView
-                android:id="@+id/chartcalprof"
-                android:layout_width="match_parent"
-                android:layout_height="300dp"
-                android:layout_below="@+id/my_title_calorias"
-                android:layout_margin="5dp"
-                android:layout_marginLeft="20dp"
-                android:layout_marginRight="20dp"
-                android:background="@drawable/tableborder"
-                android:padding="20dp"
-                android:verticalScrollbarPosition="defaultPosition" />
         </RelativeLayout>
     </ScrollView>
 

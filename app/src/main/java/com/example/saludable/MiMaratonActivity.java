@@ -208,8 +208,8 @@ public class MiMaratonActivity extends AppCompatActivity implements IFirebaseLoa
 
                 maratonViewHolder.maratonname.setText ( maraton.maratonname );
                 maratonViewHolder.maratondate.setText ( maraton.date );
-                maratonViewHolder.maratondescription.setText ( maraton.maratondescription );
                 Picasso.with ( getApplication () ).load ( maraton.maratonimagen ).into ( maratonViewHolder.maratonimage );
+                maratonViewHolder.maratondescription.setText ( maraton.maratondescription );
                 final String PostKey = getRef ( position ).getKey ();
                 maratonViewHolder.setiRecyclerItemClickListener ( new IRecyclerItemClickListener () {
                     @Override

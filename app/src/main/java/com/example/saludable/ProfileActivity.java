@@ -1,7 +1,6 @@
 package com.example.saludable;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -22,16 +21,15 @@ import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-import lecho.lib.hellocharts.model.Axis;
+/*import lecho.lib.hellocharts.model.Axis;
 import lecho.lib.hellocharts.model.AxisValue;
 import lecho.lib.hellocharts.model.Line;
 import lecho.lib.hellocharts.model.LineChartData;
 import lecho.lib.hellocharts.model.PointValue;
 import lecho.lib.hellocharts.model.Viewport;
-import lecho.lib.hellocharts.view.LineChartView;
+import lecho.lib.hellocharts.view.LineChartView;*/
 
 public class ProfileActivity extends AppCompatActivity {
 
@@ -45,7 +43,7 @@ public class ProfileActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
 
     private String currentUserId;
-    private LineChartView chartcalorias, charttime, chartvelocidad;
+    //private LineChartView chartcalorias, charttime, chartvelocidad;
     private ArrayList xDato = new ArrayList ();
     private ArrayList yDato = new ArrayList ();
     private ArrayList<Dato> miresultado = new ArrayList<Dato> ();
@@ -88,9 +86,9 @@ public class ProfileActivity extends AppCompatActivity {
             calult = findViewById ( R.id.profile_calorias_ultimo );
             pastot = findViewById ( R.id.profile_pasostotal );
             pasult = findViewById ( R.id.profile_pasosultimo );
-            chartcalorias = findViewById ( R.id.chartcalprof );
-            charttime = findViewById ( R.id.charttimeprof );
-            chartvelocidad = findViewById ( R.id.chartvelprof );
+            //chartcalorias = findViewById ( R.id.chartcalprof );
+            //charttime = findViewById ( R.id.charttimeprof );
+            //chartvelocidad = findViewById ( R.id.chartvelprof );
 
             userProfileImage = findViewById ( R.id.my_profile_pic );
 
@@ -117,9 +115,9 @@ public class ProfileActivity extends AppCompatActivity {
             ArrayList yAxisData = new ArrayList ();
             axisData.add ( "0" );
             yAxisData.add ( (float) 0.0 );
-            Graficar ( axisData, yAxisData, charttime, "Carrera", "Tiempo [min]" );
-            Graficar ( axisData, yAxisData, chartcalorias, "Carrera", "Calorias [cal]" );
-            Graficar ( axisData, yAxisData, chartvelocidad, "Carrera", "Velocidad [m/s]" );
+            //          Graficar ( axisData, yAxisData, charttime, "Carrera", "Tiempo [min]" );
+            //        Graficar ( axisData, yAxisData, chartcalorias, "Carrera", "Calorias [cal]" );
+            //      Graficar ( axisData, yAxisData, chartvelocidad, "Carrera", "Velocidad [m/s]" );
             CargarDatos ();
 
         } catch (Exception e) {
@@ -188,52 +186,52 @@ public class ProfileActivity extends AppCompatActivity {
         caltot.setText ( String.valueOf ( caltotal / 1000 ) );
         pastot.setText ( String.valueOf ( pastotal ) );
 
-        Graficar ( axisData, yAxisDataT, charttime, "Carrera", "Tiempo [min]" );
-        Graficar ( axisData, yAxisDataC, chartcalorias, "Carrera", "Calorias [cal]" );
-        Graficar ( axisData, yAxisDataV, chartvelocidad, "Carrera", "Velocidad [m/s]" );
+        //    Graficar ( axisData, yAxisDataT, charttime, "Carrera", "Tiempo [min]" );
+        //  Graficar ( axisData, yAxisDataC, chartcalorias, "Carrera", "Calorias [cal]" );
+//        Graficar ( axisData, yAxisDataV, chartvelocidad, "Carrera", "Velocidad [m/s]" );
     }
 
-    private void Graficar(ArrayList axisData, ArrayList yAxisData, LineChartView chart, String ejex, String ejey) {
-        List yAxisValues = new ArrayList ();
-        List axisValues = new ArrayList ();
+    /*  private void Graficar(ArrayList axisData, ArrayList yAxisData, LineChartView chart, String ejex, String ejey) {
+          List yAxisValues = new ArrayList ();
+          List axisValues = new ArrayList ();
 
-        Line line = new Line ( yAxisValues ).setColor ( Color.parseColor ( "#33FFC3" ) );
-        for (int i = 0; i < axisData.size (); i++) {
-            axisValues.add ( i, new AxisValue ( i ).setLabel ( (String) axisData.get ( i ) ) );
-        }
+          Line line = new Line ( yAxisValues ).setColor ( Color.parseColor ( "#33FFC3" ) );
+          for (int i = 0; i < axisData.size (); i++) {
+              axisValues.add ( i, new AxisValue ( i ).setLabel ( (String) axisData.get ( i ) ) );
+          }
 
-        for (int i = 0; i < yAxisData.size (); i++) {
-            yAxisValues.add ( new PointValue ( i, (Float) yAxisData.get ( i ) ) );
-        }
-        List lines = new ArrayList ();
+          for (int i = 0; i < yAxisData.size (); i++) {
+              yAxisValues.add ( new PointValue ( i, (Float) yAxisData.get ( i ) ) );
+          }
+          List lines = new ArrayList ();
 
-        lines.add ( line );
+          lines.add ( line );
 
-        LineChartData data = new LineChartData ();
-        data.setLines ( lines );
-        chart.setLineChartData ( data );
+          LineChartData data = new LineChartData ();
+          data.setLines ( lines );
+          chart.setLineChartData ( data );
 
-        Axis axis = new Axis ();
-        axis.setValues ( axisValues );
-        data.setAxisXBottom ( axis );
-        axis.setName ( ejex );
+          Axis axis = new Axis ();
+          axis.setValues ( axisValues );
+          data.setAxisXBottom ( axis );
+          axis.setName ( ejex );
 
-        Axis yAxis = new Axis ();
-        data.setAxisYLeft ( yAxis );
+          Axis yAxis = new Axis ();
+          data.setAxisYLeft ( yAxis );
 
-        axis.setTextSize ( 10 );
-        axis.setTextColor ( Color.parseColor ( "#000000" ) );
-        axis.setHasLines ( true );
-        yAxis.setTextColor ( Color.parseColor ( "#000000" ) );
-        yAxis.setTextSize ( 10 );
-        yAxis.setName ( ejey );
-        yAxis.setHasLines ( true );
-        Viewport viewport = new Viewport ( chart.getMaximumViewport () );
-        chart.setMaximumViewport ( viewport );
-        chart.setCurrentViewport ( viewport );
-        chart.animate ();
-    }
-
+          axis.setTextSize ( 10 );
+          axis.setTextColor ( Color.parseColor ( "#000000" ) );
+          axis.setHasLines ( true );
+          yAxis.setTextColor ( Color.parseColor ( "#000000" ) );
+          yAxis.setTextSize ( 10 );
+          yAxis.setName ( ejey );
+          yAxis.setHasLines ( true );
+          Viewport viewport = new Viewport ( chart.getMaximumViewport () );
+          chart.setMaximumViewport ( viewport );
+          chart.setCurrentViewport ( viewport );
+          chart.animate ();
+      }
+  */
     private void SendUserToSettingsActivity() {
         try {
             Intent loginIntent = new Intent ( ProfileActivity.this, SettingsActivity.class );

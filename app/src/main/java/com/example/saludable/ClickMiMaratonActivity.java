@@ -1,6 +1,7 @@
 package com.example.saludable;
 
 import android.graphics.Color;
+import android.location.Location;
 import android.os.Bundle;
 import android.widget.TextView;
 
@@ -10,7 +11,16 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.example.saludable.Model.Dato;
 import com.example.saludable.Model.Maraton;
+import com.example.saludable.Model.Punto;
 import com.example.saludable.Utils.Common;
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -21,22 +31,22 @@ import com.squareup.picasso.Picasso;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-import lecho.lib.hellocharts.model.Axis;
-import lecho.lib.hellocharts.model.AxisValue;
-import lecho.lib.hellocharts.model.Line;
-import lecho.lib.hellocharts.model.LineChartData;
-import lecho.lib.hellocharts.model.PointValue;
-import lecho.lib.hellocharts.model.Viewport;
-import lecho.lib.hellocharts.view.LineChartView;
+//import lecho.lib.hellocharts.model.Axis;
+//import lecho.lib.hellocharts.model.AxisValue;
+//import lecho.lib.hellocharts.model.Line;
+//import lecho.lib.hellocharts.model.LineChartData;
+//import lecho.lib.hellocharts.model.PointValue;
+//import lecho.lib.hellocharts.model.Viewport;
+//import lecho.lib.hellocharts.view.LineChartView;
 
-public class ClickMiMaratonActivity extends AppCompatActivity {
+public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapReadyCallback {
 
-    private LineChartView chartvel, charttime;
+    private GoogleMap mMap;
+    //  private LineChartView chartvel, charttime;
     private String PostKey, current_user_id;
-    private DatabaseReference CarreraUserInf, CarreraInf, DatosCarreraResult, ResultadoCarrera, MaratonDatosRef;
+    private DatabaseReference CarreraUserInf, CarreraInf, DatosCarreraResult, ResultadoCarrera, MaratonDatosRef, MaratonPointsRef;
     private FirebaseAuth mAuth;
     private ArrayList xDato = new ArrayList ();
     private ArrayList yDato = new ArrayList ();
@@ -46,6 +56,8 @@ public class ClickMiMaratonActivity extends AppCompatActivity {
     private ArrayList<Dato> listadatos = new ArrayList<Dato> ();
     private ArrayList<Dato> misdatos = new ArrayList<Dato> ();
     private ArrayList<Dato> listaresultadosglobales = new ArrayList<Dato> ();
+    private ArrayList<Punto> listadatosloc = new ArrayList<Punto> ();
+
     private long puntos = 0;
     private Toolbar mToolbar;
     private TextView velocidad, pasos, calorias, tiempo;
@@ -60,8 +72,12 @@ public class ClickMiMaratonActivity extends AppCompatActivity {
         super.onCreate ( savedInstanceState );
         setContentView ( R.layout.activity_click_mi_maraton );
 
-        chartvel = findViewById ( R.id.chartvel );
-        charttime = findViewById ( R.id.charttime );
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager ()
+                .findFragmentById ( R.id.mapmi );
+        mapFragment.getMapAsync ( this );
+
+        //  chartvel = findViewById ( R.id.chartvel );
+        //    charttime = findViewById ( R.id.charttime );
         pasos = findViewById ( R.id.pasostotal );
         velocidad = findViewById ( R.id.velocidadprom );
         calorias = findViewById ( R.id.caltotal );
@@ -93,16 +109,66 @@ public class ClickMiMaratonActivity extends AppCompatActivity {
         ResultadoCarrera = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( current_user_id ).child ( "Resultados" ).child ( "Resultado" ).child ( PostKey );
         MaratonDatosRef = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( "Nuevas" ).child ( PostKey );
         DatosCarreraResult = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( "Resultados" ).child ( PostKey );
+        MaratonPointsRef = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( "Datos" ).child ( PostKey ).child ( current_user_id );
         ArrayList axisData = new ArrayList ();
         ArrayList yAxisData = new ArrayList ();
         axisData.add ( "0" );
         yAxisData.add ( (float) 0.0 );
-        AddGraficar ( axisData, yAxisData, yAxisData, charttime, "Distancia [km]", "Tiempo [min]" );
-        AddGraficar ( axisData, yAxisData, yAxisData, chartvel, "Distancia [km]", "Velocidad [m/s]" );
+        //AddGraficar ( axisData, yAxisData, yAxisData, charttime, "Distancia [km]", "Tiempo [min]" );
+        //AddGraficar ( axisData, yAxisData, yAxisData, chartvel, "Distancia [km]", "Velocidad [m/s]" );
         CargarDatosCarrera ();
         CargarResultadosCarrera ();
         LoadResult ();
 
+        CargarTrayectoria ();
+
+    }
+
+    private void CargarTrayectoria() {
+        MaratonPointsRef.addValueEventListener ( new ValueEventListener () {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot pointSnapshot : dataSnapshot.getChildren ()) {
+                    listadatosloc.add ( pointSnapshot.getValue ( Punto.class ) );
+                }
+                GraficarTrayectoria ();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        } );
+    }
+
+    private void GraficarTrayectoria() {
+
+        Location locationa = null;
+        for (Punto point : listadatosloc) {
+            if (locationa == null) {
+                locationa = new Location ( "punto A" );
+                double lat = Double.valueOf ( point.latitud );
+                double longi = Double.valueOf ( point.longitud );
+                locationa.setLatitude ( lat );
+                locationa.setLongitude ( longi );
+                LatLng coordenada = new LatLng ( lat, longi );
+
+                CameraUpdate miUbicacion = CameraUpdateFactory.newLatLngZoom ( coordenada, 17 );
+
+                mMap.animateCamera ( miUbicacion );
+            } else {
+                Location locationb = new Location ( "punto B" );
+                Double lat = Double.valueOf ( point.latitud );
+                Double longi = Double.valueOf ( point.longitud );
+                locationb.setLatitude ( lat );
+                locationb.setLongitude ( longi );
+                Polyline line = mMap.addPolyline ( new PolylineOptions ()
+                        .add ( new LatLng ( locationa.getLatitude (), locationa.getLongitude () ), new LatLng ( locationb.getLatitude (), locationb.getLongitude () ) )
+                        .width ( 5 )
+                        .color ( Color.BLUE ) );
+            }
+
+        }
     }
 
     private void CargarResultadosCarrera() {
@@ -224,7 +290,7 @@ public class ClickMiMaratonActivity extends AppCompatActivity {
                         } );
     }
 
-    private void AddGraficar(ArrayList axisData, ArrayList yAxisData, ArrayList yinAxisdata, LineChartView chart, String ejex, String ejey) {
+    /*private void AddGraficar(ArrayList axisData, ArrayList yAxisData, ArrayList yinAxisdata, LineChartView chart, String ejex, String ejey) {
         List yAxisValues = new ArrayList ();
         List axisValues = new ArrayList ();
         Line linea, lineb;
@@ -272,7 +338,7 @@ public class ClickMiMaratonActivity extends AppCompatActivity {
         chart.setMaximumViewport ( viewport );
         chart.setCurrentViewport ( viewport );
         chart.animate ();
-    }
+    }*/
 
     private void GenerarInfGrafTiempo() {
         ArrayList axisData = new ArrayList ();
@@ -308,7 +374,7 @@ public class ClickMiMaratonActivity extends AppCompatActivity {
 
             yAxisDatat.add ( tiempo );
         }
-        AddGraficar ( axisData, yAxisDatat, yAxisData, charttime, "Distancia [km]", "Tiempo [min]" );
+        // AddGraficar ( axisData, yAxisDatat, yAxisData, charttime, "Distancia [km]", "Tiempo [min]" );
 
     }
 
@@ -341,9 +407,13 @@ public class ClickMiMaratonActivity extends AppCompatActivity {
             axisData.add ( String.valueOf ( i ) );
             yAxisDatat.add ( valor / cant );
         }
-        AddGraficar ( axisData, yAxisDatat, yAxisData, chartvel, "Distancia [km]", "Velocidad [m/s]" );
+        //AddGraficar ( axisData, yAxisDatat, yAxisData, chartvel, "Distancia [km]", "Velocidad [m/s]" );
 
     }
 
 
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        mMap = googleMap;
+    }
 }
