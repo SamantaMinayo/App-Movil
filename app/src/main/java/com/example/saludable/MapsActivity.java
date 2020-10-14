@@ -41,6 +41,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -446,12 +447,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             inicio = "true";
             LatLng coordenada = new LatLng ( location.getLatitude (), location.getLongitude () );
-            CameraUpdate miUbicacion = CameraUpdateFactory.newLatLngZoom ( coordenada, 17 );
+            CameraUpdate miUbicacion = CameraUpdateFactory.newLatLngZoom ( coordenada, 15 );
 
             if (marcador != null) marcador.remove ();
             marcador = mMap.addMarker ( new MarkerOptions ()
                     .position ( coordenada )
                     .title ( "Mi posision actual" )
+                    .icon ( BitmapDescriptorFactory.defaultMarker ( 2 ) )
             );
             mMap.animateCamera ( miUbicacion );
             //hora
@@ -475,8 +477,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     pasos.setText ( formato1.format ( distcm / factorpaso ) );
                     velocidadtotal = location.getSpeed () + velocidadtotal;
 
-                    locationA.setLatitude ( location.getLatitude () );
-                    locationA.setLongitude ( location.getLongitude () );
+                    locationA = location;
                     contregistro = contregistro + 1;
                     String tiempo = getDifferenceBetwenDates ( horacarrera, hora );
                     String timet = getDifferenceBetwenDates ( horainicio, hora );
@@ -524,7 +525,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         fint = tiempot.split ( ":" );
         mint = Integer.parseInt ( fint[0] ) * 60 + Integer.parseInt ( fint[1] ) + Integer.parseInt ( fint[2] ) / 60;
 
-        String calorias = formato1.format ( 8 * min * 0.0175 * Double.valueOf ( Common.loggedUser.getPeso () ) );
+        String calorias = formato1.format ( 8 * mint * 0.0175 * Double.valueOf ( Common.loggedUser.getPeso () ) );
 
         LocalBroadcastManager.getInstance ( getApplicationContext () ).unregisterReceiver ( myReceiver );
         transmision = false;
@@ -542,10 +543,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         puntos.put ( "distancia", formato1.format ( distanciatotal ) );
         puntos.put ( "velmed", velmed );
-        puntos.put ( "velocidad", velprom );
-        puntos.put ( "velocidadmed", velpromt );
-        puntos.put ( "tiempo", formato1.format ( min ) );
-        puntos.put ( "tiempomed", formato1.format ( mint ) );
+        puntos.put ( "velocidadmed", velprom );
+        puntos.put ( "velocidad", velpromt );
+        puntos.put ( "tiempomed", formato1.format ( min ) );
+        puntos.put ( "tiempo", formato1.format ( mint ) );
         puntos.put ( "calorias", calorias );
         puntos.put ( "pasos", pas );
         puntos.put ( "genero", Common.loggedUser.getGenero () );
@@ -558,17 +559,19 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void GuardarInformacion(Location location, String distguar, String hora, String tiempo, String timet) {
-        HashMap puntos = new HashMap ();
+        if (!tiempo.equals ( "0:0:0" )) {
+            HashMap puntos = new HashMap ();
 
-        puntos.put ( "latitud", String.valueOf ( location.getLatitude () ) );
-        puntos.put ( "longitud", String.valueOf ( location.getLongitude () ) );
-        puntos.put ( "velocidad", String.valueOf ( location.getSpeed () ) );
-        puntos.put ( "hora", hora );
-        puntos.put ( "distancia", distguar );
-        puntos.put ( "tiempo", tiempo );
-        puntos.put ( "timp", timet );
+            puntos.put ( "latitud", String.valueOf ( location.getLatitude () ) );
+            puntos.put ( "longitud", String.valueOf ( location.getLongitude () ) );
+            puntos.put ( "velocidad", formato1.format ( location.getSpeed () ) );
+            puntos.put ( "hora", hora );
+            puntos.put ( "distancia", distguar );
+            puntos.put ( "tiempo", tiempo );
+            puntos.put ( "timp", timet );
 
-        CarreraUserInf.child ( String.valueOf ( contregistro ) ).updateChildren ( puntos );
+            CarreraUserInf.child ( String.valueOf ( contregistro ) ).updateChildren ( puntos );
+        }
     }
 
     @Override

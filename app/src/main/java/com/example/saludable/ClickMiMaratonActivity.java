@@ -153,7 +153,7 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
                 locationa.setLongitude ( longi );
                 LatLng coordenada = new LatLng ( lat, longi );
 
-                CameraUpdate miUbicacion = CameraUpdateFactory.newLatLngZoom ( coordenada, 17 );
+                CameraUpdate miUbicacion = CameraUpdateFactory.newLatLngZoom ( coordenada, 15 );
 
                 mMap.animateCamera ( miUbicacion );
             } else {
@@ -166,6 +166,7 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
                         .add ( new LatLng ( locationa.getLatitude (), locationa.getLongitude () ), new LatLng ( locationb.getLatitude (), locationb.getLongitude () ) )
                         .width ( 5 )
                         .color ( Color.BLUE ) );
+                locationa = locationb;
             }
 
         }
