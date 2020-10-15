@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.saludable.Interfaces.IFirebaseLoadDone;
 import com.example.saludable.Interfaces.IRecyclerItemClickListener;
 import com.example.saludable.Model.Maraton;
+import com.example.saludable.Utils.Common;
 import com.example.saludable.ViewHolder.MaratonViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
@@ -32,6 +33,7 @@ import com.mancj.materialsearchbar.MaterialSearchBar;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class MaratonActivity extends AppCompatActivity implements IFirebaseLoadDone {
@@ -111,146 +113,176 @@ public class MaratonActivity extends AppCompatActivity implements IFirebaseLoadD
 
             firebaseLoadDone = this;
 
-            loadUserList ();
+            loadMaratonList ();
             loadSearchData ();
 
         } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MaratonActivity" ).child ( "LoadSearchData" ).child ( Common.loggedUser.getUid () ).updateChildren ( error );
         }
     }
 
     private void loadSearchData() {
-
-        final List<String> lstMaratonName = new ArrayList<> ();
-        DatabaseReference MaratonList = FirebaseDatabase.getInstance ()
-                .getReference ( "Carreras" ).child ( "Nuevas" );
-        MaratonList.addListenerForSingleValueEvent ( new ValueEventListener () {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot MaratonSnapshot : dataSnapshot.getChildren ()) {
-                    Maraton maraton = MaratonSnapshot.getValue ( Maraton.class );
-                    lstMaratonName.add ( maraton.maratonname );
+        try {
+            final List<String> lstMaratonName = new ArrayList<> ();
+            DatabaseReference MaratonList = FirebaseDatabase.getInstance ()
+                    .getReference ( "Carreras" ).child ( "Nuevas" );
+            MaratonList.addListenerForSingleValueEvent ( new ValueEventListener () {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    for (DataSnapshot MaratonSnapshot : dataSnapshot.getChildren ()) {
+                        Maraton maraton = MaratonSnapshot.getValue ( Maraton.class );
+                        lstMaratonName.add ( maraton.maratonname );
+                    }
                 }
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                firebaseLoadDone.onFirebaseLoadFaile ( databaseError.getMessage () );
-            }
-        } );
+                    firebaseLoadDone.onFirebaseLoadFaile ( databaseError.getMessage () );
+                }
+            } );
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MaratonActivity" ).child ( "LoadSearchData" ).child ( Common.loggedUser.getUid () ).updateChildren ( error );
+        }
     }
 
-    private void loadUserList() {
-        Query query = FirebaseDatabase.getInstance ().getReference ().
-                child ( "Carreras" ).
-                child ( "Nuevas" )
-                .orderByChild ( "estado" )
-                .equalTo ( "false" );
+    private void loadMaratonList() {
+        try {
+            Query query = FirebaseDatabase.getInstance ().getReference ().
+                    child ( "Carreras" ).
+                    child ( "Nuevas" )
+                    .orderByChild ( "estado" )
+                    .equalTo ( "false" );
 
-        FirebaseRecyclerOptions<Maraton> options = new FirebaseRecyclerOptions.Builder<Maraton> ()
-                .setQuery ( query, Maraton.class )
-                .build ();
+            FirebaseRecyclerOptions<Maraton> options = new FirebaseRecyclerOptions.Builder<Maraton> ()
+                    .setQuery ( query, Maraton.class )
+                    .build ();
 
-        adapter = new FirebaseRecyclerAdapter<Maraton, MaratonViewHolder> ( options ) {
-            @Override
-            protected void onBindViewHolder(@NonNull MaratonViewHolder maratonViewHolder, int position, @NonNull Maraton maraton) {
+            adapter = new FirebaseRecyclerAdapter<Maraton, MaratonViewHolder> ( options ) {
+                @Override
+                protected void onBindViewHolder(@NonNull MaratonViewHolder maratonViewHolder, int position, @NonNull Maraton maraton) {
 
-                maratones.add ( maraton );
-                maratonViewHolder.maratonname.setText ( maraton.maratonname );
-                Picasso.with ( getApplication () ).load ( maraton.maratonimage ).into ( maratonViewHolder.maratonimage );
-                maratonViewHolder.maratondescription.setText ( maraton.description );
-                maratonViewHolder.maratonplace.setText ( maraton.place );
-                maratonViewHolder.maratondate.setText ( maraton.maratondate );
-                maratonViewHolder.maratontime.setText ( maraton.maratontime );
-                final String PostKey = getRef ( position ).getKey ();
-                maratonViewHolder.setiRecyclerItemClickListener ( new IRecyclerItemClickListener () {
-                    @Override
-                    public void onItemClickListener(View view, int position) {
-                        Intent clickPostIntent = new Intent ( MaratonActivity.this, ClickMaratonActivity.class );
-                        clickPostIntent.putExtra ( "PostKey", PostKey );
-                        startActivity ( clickPostIntent );
-                    }
-                } );
+                    maratones.add ( maraton );
+                    maratonViewHolder.maratonname.setText ( maraton.maratonname );
+                    Picasso.with ( getApplication () ).load ( maraton.maratonimage ).into ( maratonViewHolder.maratonimage );
+                    maratonViewHolder.maratondescription.setText ( maraton.description );
+                    maratonViewHolder.maratonplace.setText ( maraton.place );
+                    maratonViewHolder.maratondate.setText ( maraton.maratondate );
+                    maratonViewHolder.maratontime.setText ( maraton.maratontime );
+                    final String PostKey = getRef ( position ).getKey ();
+                    maratonViewHolder.setiRecyclerItemClickListener ( new IRecyclerItemClickListener () {
+                        @Override
+                        public void onItemClickListener(View view, int position) {
+                            Intent clickPostIntent = new Intent ( MaratonActivity.this, ClickMaratonActivity.class );
+                            clickPostIntent.putExtra ( "PostKey", PostKey );
+                            startActivity ( clickPostIntent );
+                        }
+                    } );
 
-            }
+                }
 
-            @NonNull
-            @Override
-            public MaratonViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                View itemView = LayoutInflater.from ( parent.getContext () )
-                        .inflate ( R.layout.all_carreras_layout, parent, false );
-                return new MaratonViewHolder ( itemView );
-            }
-        };
+                @NonNull
+                @Override
+                public MaratonViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                    View itemView = LayoutInflater.from ( parent.getContext () )
+                            .inflate ( R.layout.all_carreras_layout, parent, false );
+                    return new MaratonViewHolder ( itemView );
+                }
+            };
 
-        adapter.startListening ();
-        recycler_all_maraton.setAdapter ( adapter );
+            adapter.startListening ();
+            recycler_all_maraton.setAdapter ( adapter );
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MaratonActivity" ).child ( "loadMaratonList" ).child ( Common.loggedUser.getUid () ).updateChildren ( error );
+        }
 
     }
 
     private void startSearch(String text_search) {
-        Query query = FirebaseDatabase.getInstance ().getReference ()
-                .child ( "Carreras" )
-                .child ( "Nuevas" )
-                .orderByChild ( "maratonname" )
-                .startAt ( text_search ).limitToFirst ( 2 );
-        FirebaseRecyclerOptions<Maraton> options = new FirebaseRecyclerOptions.Builder<Maraton> ()
-                .setQuery ( query, Maraton.class )
-                .build ();
+        try {
+            Query query = FirebaseDatabase.getInstance ().getReference ()
+                    .child ( "Carreras" )
+                    .child ( "Nuevas" )
+                    .orderByChild ( "maratonname" )
+                    .startAt ( text_search ).limitToFirst ( 2 );
+            FirebaseRecyclerOptions<Maraton> options = new FirebaseRecyclerOptions.Builder<Maraton> ()
+                    .setQuery ( query, Maraton.class )
+                    .build ();
 
-        searchAdapter = new FirebaseRecyclerAdapter<Maraton, MaratonViewHolder> ( options ) {
-            @Override
-            protected void onBindViewHolder(@NonNull MaratonViewHolder maratonViewHolder, int position, @NonNull Maraton maraton) {
+            searchAdapter = new FirebaseRecyclerAdapter<Maraton, MaratonViewHolder> ( options ) {
+                @Override
+                protected void onBindViewHolder(@NonNull MaratonViewHolder maratonViewHolder, int position, @NonNull Maraton maraton) {
 
-                maratones.add ( maraton );
-                maratonViewHolder.maratonname.setText ( maraton.maratonname );
-                Picasso.with ( getApplication () ).load ( maraton.maratonimage ).into ( maratonViewHolder.maratonimage );
-                maratonViewHolder.maratondescription.setText ( maraton.description );
-                maratonViewHolder.maratonplace.setText ( maraton.place );
-                maratonViewHolder.maratondate.setText ( maraton.maratondate );
-                maratonViewHolder.maratontime.setText ( maraton.maratontime );
-                final String PostKey = getRef ( position ).getKey ();
-                maratonViewHolder.setiRecyclerItemClickListener ( new IRecyclerItemClickListener () {
-                    @Override
-                    public void onItemClickListener(View view, int position) {
-                        Intent clickPostIntent = new Intent ( MaratonActivity.this, ClickMaratonActivity.class );
-                        clickPostIntent.putExtra ( "PostKey", PostKey );
-                        startActivity ( clickPostIntent );
-                    }
-                } );
+                    maratones.add ( maraton );
+                    maratonViewHolder.maratonname.setText ( maraton.maratonname );
+                    Picasso.with ( getApplication () ).load ( maraton.maratonimage ).into ( maratonViewHolder.maratonimage );
+                    maratonViewHolder.maratondescription.setText ( maraton.description );
+                    maratonViewHolder.maratonplace.setText ( maraton.place );
+                    maratonViewHolder.maratondate.setText ( maraton.maratondate );
+                    maratonViewHolder.maratontime.setText ( maraton.maratontime );
+                    final String PostKey = getRef ( position ).getKey ();
+                    maratonViewHolder.setiRecyclerItemClickListener ( new IRecyclerItemClickListener () {
+                        @Override
+                        public void onItemClickListener(View view, int position) {
+                            Intent clickPostIntent = new Intent ( MaratonActivity.this, ClickMaratonActivity.class );
+                            clickPostIntent.putExtra ( "PostKey", PostKey );
+                            startActivity ( clickPostIntent );
+                        }
+                    } );
 
-            }
+                }
 
-            @NonNull
-            @Override
-            public MaratonViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                View itemView = LayoutInflater.from ( parent.getContext () )
-                        .inflate ( R.layout.all_carreras_layout, parent, false );
-                return new MaratonViewHolder ( itemView );
-            }
-        };
-
-
-        searchAdapter.startListening ();
-        recycler_all_maraton.setAdapter ( searchAdapter );
+                @NonNull
+                @Override
+                public MaratonViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                    View itemView = LayoutInflater.from ( parent.getContext () )
+                            .inflate ( R.layout.all_carreras_layout, parent, false );
+                    return new MaratonViewHolder ( itemView );
+                }
+            };
+            searchAdapter.startListening ();
+            recycler_all_maraton.setAdapter ( searchAdapter );
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MaratonActivity" ).child ( "startSearch" ).child ( Common.loggedUser.getUid () ).updateChildren ( error );
+        }
     }
 
     @Override
     protected void onStop() {
-        super.onStop ();
-        adapter.stopListening ();
-        super.onStop ();
+        try {
+            super.onStop ();
+            adapter.stopListening ();
+            super.onStop ();
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MaratonActivity" ).child ( "onStop" ).child ( Common.loggedUser.getUid () ).updateChildren ( error );
+        }
     }
 
     @Override
     protected void onResume() {
-        super.onResume ();
-        if (adapter != null) {
-            adapter.startListening ();
-        }
+        try {
+            super.onResume ();
+            if (adapter != null) {
+                adapter.startListening ();
+            }
 
-        if (searchAdapter != null) {
-            searchAdapter.startListening ();
+            if (searchAdapter != null) {
+                searchAdapter.startListening ();
+            }
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MaratonActivity" ).child ( "onResume" ).child ( Common.loggedUser.getUid () ).updateChildren ( error );
         }
     }
 

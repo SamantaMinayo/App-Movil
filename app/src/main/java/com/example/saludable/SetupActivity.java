@@ -61,7 +61,6 @@ public class SetupActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         try {
-
             super.onCreate ( savedInstanceState );
             setContentView ( R.layout.activity_setup );
 
@@ -122,170 +121,209 @@ public class SetupActivity extends AppCompatActivity {
 
                 }
             } );
-
-
         } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "SetupActivity" ).child ( "onCreate" ).child ( currentUserID ).updateChildren ( error );
         }
     }
 
     private void openGallery() {
-
-        CropImage.activity ()
-                .setGuidelines ( CropImageView.Guidelines.ON )
-                .setAspectRatio ( 1, 1 )
-                .start ( this );
-
+        try {
+            CropImage.activity ()
+                    .setGuidelines ( CropImageView.Guidelines.ON )
+                    .setAspectRatio ( 1, 1 )
+                    .start ( this );
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "SetupActivity" ).child ( "openGallery" ).child ( currentUserID ).updateChildren ( error );
+        }
     }
     public void checkButton(View v) {
-        int radioId = radioGroup.getCheckedRadioButtonId ();
-        radioButton = findViewById ( radioId );
-        Genero.setText ( radioButton.getText ().toString () );
+        try {
+            int radioId = radioGroup.getCheckedRadioButtonId ();
+            radioButton = findViewById ( radioId );
+            Genero.setText ( radioButton.getText ().toString () );
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "SetupActivity" ).child ( "checkButton" ).updateChildren ( error );
+        }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult ( requestCode, resultCode, data );
+        try {
+            super.onActivityResult ( requestCode, resultCode, data );
 
-        if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
 
-            CropImage.ActivityResult result = CropImage.getActivityResult ( data );
+                CropImage.ActivityResult result = CropImage.getActivityResult ( data );
 
-            if (resultCode == RESULT_OK) {
+                if (resultCode == RESULT_OK) {
 
-            loadingBar.setTitle ( "Imagen de Perfil" );
-            loadingBar.setMessage ( "Espere mientras cargamos su imagen de perfil" );
-            loadingBar.setCanceledOnTouchOutside ( true );
-            loadingBar.show ();
+                    loadingBar.setTitle ( "Imagen de Perfil" );
+                    loadingBar.setMessage ( "Espere mientras cargamos su imagen de perfil" );
+                    loadingBar.setCanceledOnTouchOutside ( true );
+                    loadingBar.show ();
 
-                Uri resultUri = result.getUri ();
+                    Uri resultUri = result.getUri ();
 
-            final StorageReference filePath = UserProfileImageRef.child ( currentUserID + ".jpg" );
+                    final StorageReference filePath = UserProfileImageRef.child ( currentUserID + ".jpg" );
 
-            filePath.putFile ( resultUri ).addOnCompleteListener ( new OnCompleteListener<UploadTask.TaskSnapshot> () {
-                @Override
-                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                    if (task.isSuccessful ()) {
+                    filePath.putFile ( resultUri ).addOnCompleteListener ( new OnCompleteListener<UploadTask.TaskSnapshot> () {
+                        @Override
+                        public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                            if (task.isSuccessful ()) {
 
-                        filePath.getDownloadUrl ().addOnCompleteListener ( new OnCompleteListener<Uri> () {
-                            @Override
-                            public void onComplete(@NonNull Task<Uri> task) {
-                                final String downloadUri = task.getResult ().toString ();
-                                UserRef.child ( "profileimage" ).setValue ( downloadUri )
-                                        .addOnCompleteListener ( new OnCompleteListener<Void> () {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
+                                filePath.getDownloadUrl ().addOnCompleteListener ( new OnCompleteListener<Uri> () {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Uri> task) {
+                                        final String downloadUri = task.getResult ().toString ();
+                                        UserRef.child ( "profileimage" ).setValue ( downloadUri )
+                                                .addOnCompleteListener ( new OnCompleteListener<Void> () {
+                                                    @Override
+                                                    public void onComplete(@NonNull Task<Void> task) {
 
-                                                if (task.isSuccessful ()) {
-                                                    Toast.makeText ( SetupActivity.this, "Su imagen de perfil cargada correctamente", Toast.LENGTH_SHORT ).show ();
-                                                    loadingBar.dismiss ();
-                                                } else {
-                                                    String message = task.getException ().getMessage ();
-                                                    Toast.makeText ( SetupActivity.this, "A ocurrido un error: " + message, Toast.LENGTH_SHORT ).show ();
-                                                    loadingBar.dismiss ();
-                                                }
-                                            }
-                                        } );
+                                                        if (task.isSuccessful ()) {
+                                                            Toast.makeText ( SetupActivity.this, "Su imagen de perfil cargada correctamente", Toast.LENGTH_SHORT ).show ();
+                                                            loadingBar.dismiss ();
+                                                        } else {
+                                                            String message = task.getException ().getMessage ();
+                                                            Toast.makeText ( SetupActivity.this, "A ocurrido un error: " + message, Toast.LENGTH_SHORT ).show ();
+                                                            loadingBar.dismiss ();
+                                                        }
+                                                    }
+                                                } );
+                                    }
+                                } );
+
+                            } else {
+                                String message = task.getException ().getMessage ();
+                                Toast.makeText ( SetupActivity.this, "Error Occured: " + message, Toast.LENGTH_SHORT ).show ();
+                                loadingBar.dismiss ();
                             }
-                        } );
+                        }
+                    } );
+                } else {
 
-                    } else {
-                        String message = task.getException ().getMessage ();
-                        Toast.makeText ( SetupActivity.this, "Error Occured: " + message, Toast.LENGTH_SHORT ).show ();
-                        loadingBar.dismiss ();
-                    }
+                    Toast.makeText ( this, "A ocurrido un error. Intentelo nuevamente", Toast.LENGTH_SHORT ).show ();
+                    loadingBar.dismiss ();
                 }
-            } );
-            } else {
-
-                Toast.makeText ( this, "A ocurrido un error. Intentelo nuevamente", Toast.LENGTH_SHORT ).show ();
-                loadingBar.dismiss ();
             }
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "SetupActivity" ).child ( "onActivityResult" ).child ( currentUserID ).updateChildren ( error );
         }
+
     }
 
 
 
     private void SaveAccountSetupInformation() {
-        String username = UserName.getText ().toString ();
-        String country = Country.getText ().toString ();
-        String altura = Altura.getText ().toString ();
-        String fullname = FullName.getText ().toString ();
-        String peso = Peso.getText ().toString ();
-        String edad = Edad.getText ().toString ();
-        double rango = Double.valueOf ( edad ) / 5;
-        double decimal = rango % 1;
-        double entero = rango - decimal;
-        String rangos = String.valueOf ( (int) entero );
-        String genero = Genero.getText ().toString ();
-        double paso = Double.valueOf ( altura ) * 0.41;
-        String factorpaso = String.valueOf ( paso );
+        try {
+            String username = UserName.getText ().toString ();
+            String country = Country.getText ().toString ();
+            String altura = Altura.getText ().toString ();
+            String fullname = FullName.getText ().toString ();
+            String peso = Peso.getText ().toString ();
+            String edad = Edad.getText ().toString ();
+            double rango = Double.valueOf ( edad ) / 5;
+            double decimal = rango % 1;
+            double entero = rango - decimal;
+            String rangos = String.valueOf ( (int) entero );
+            String genero = Genero.getText ().toString ();
+            double paso = Double.valueOf ( altura ) * 0.41;
+            String factorpaso = String.valueOf ( paso );
 
-        if (TextUtils.isEmpty ( username ) || TextUtils.isEmpty ( country ) || TextUtils.isEmpty ( altura ) || TextUtils.isEmpty ( fullname ) || TextUtils.isEmpty ( peso ) || TextUtils.isEmpty ( edad ) || TextUtils.isEmpty ( genero )) {
-            Toast.makeText ( this, "Porfavor verifique que todos los campos se encuentren llenos", Toast.LENGTH_SHORT ).show ();
-        } else {
+            if (TextUtils.isEmpty ( username ) || TextUtils.isEmpty ( country ) || TextUtils.isEmpty ( altura ) || TextUtils.isEmpty ( fullname ) || TextUtils.isEmpty ( peso ) || TextUtils.isEmpty ( edad ) || TextUtils.isEmpty ( genero )) {
+                Toast.makeText ( this, "Porfavor verifique que todos los campos se encuentren llenos", Toast.LENGTH_SHORT ).show ();
+            } else {
 
-            loadingBar.setTitle ( "Guardando Informacion" );
-            loadingBar.setMessage ( "Espere mientras guardamos su informacion" );
-            loadingBar.show ();
-            loadingBar.setCanceledOnTouchOutside ( true );
+                loadingBar.setTitle ( "Guardando Informacion" );
+                loadingBar.setMessage ( "Espere mientras guardamos su informacion" );
+                loadingBar.show ();
+                loadingBar.setCanceledOnTouchOutside ( true );
 
-            double h = Integer.parseInt ( altura );
-            double p = Integer.parseInt ( peso );
-            double cal = (p / (h * h)) * 10000;
-            MathContext m = new MathContext ( 4 );
-            BigDecimal imcnum = new BigDecimal ( cal );
-            String imc = String.valueOf ( imcnum.round ( m ) );
+                double h = Integer.parseInt ( altura );
+                double p = Integer.parseInt ( peso );
+                double cal = (p / (h * h)) * 10000;
+                MathContext m = new MathContext ( 4 );
+                BigDecimal imcnum = new BigDecimal ( cal );
+                String imc = String.valueOf ( imcnum.round ( m ) );
 
-            HashMap userMap = new HashMap ();
-            userMap.put ( "username", username );
-            userMap.put ( "fullname", fullname );
-            userMap.put ( "country", country );
-            userMap.put ( "altura", altura );
-            userMap.put ( "peso", peso );
-            userMap.put ( "edad", edad );
-            userMap.put ( "imc", imc );
-            userMap.put ( "genero", genero );
-            userMap.put ( "status", "Here Saludable" );
-            userMap.put ( "rango", rangos );
-            userMap.put ( "paso", factorpaso );
+                HashMap userMap = new HashMap ();
+                userMap.put ( "username", username );
+                userMap.put ( "fullname", fullname );
+                userMap.put ( "country", country );
+                userMap.put ( "altura", altura );
+                userMap.put ( "peso", peso );
+                userMap.put ( "edad", edad );
+                userMap.put ( "imc", imc );
+                userMap.put ( "genero", genero );
+                userMap.put ( "status", "Here Saludable" );
+                userMap.put ( "rango", rangos );
+                userMap.put ( "paso", factorpaso );
 
-            UserRef.updateChildren ( userMap ).addOnCompleteListener ( new OnCompleteListener () {
-                @Override
-                public void onComplete(@NonNull Task task) {
-                    if (task.isSuccessful ()) {
-                        SendUserToMainActivity ();
-                        Toast.makeText ( SetupActivity.this, "Usuario creado correctamente.", Toast.LENGTH_SHORT ).show ();
-                        loadingBar.dismiss ();
-                    } else {
-                        String message = task.getException ().getMessage ();
-                        Toast.makeText ( SetupActivity.this, "A ocurrido un error" + message, Toast.LENGTH_SHORT ).show ();
-                        loadingBar.dismiss ();
+                UserRef.updateChildren ( userMap ).addOnCompleteListener ( new OnCompleteListener () {
+                    @Override
+                    public void onComplete(@NonNull Task task) {
+                        if (task.isSuccessful ()) {
+                            SendUserToMainActivity ();
+                            Toast.makeText ( SetupActivity.this, "Usuario creado correctamente.", Toast.LENGTH_SHORT ).show ();
+                            loadingBar.dismiss ();
+                        } else {
+                            String message = task.getException ().getMessage ();
+                            Toast.makeText ( SetupActivity.this, "A ocurrido un error" + message, Toast.LENGTH_SHORT ).show ();
+                            loadingBar.dismiss ();
+                        }
+
                     }
-
-                }
-            } );
+                } );
+            }
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "SetupActivity" ).child ( "SaveAccountSetupInformation" ).child ( currentUserID ).updateChildren ( error );
         }
+
     }
 
 
     private void SendUserToMainActivity() {
-        Intent setupIntent = new Intent ( SetupActivity.this, MainActivity.class );
-        setupIntent.addFlags ( Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK );
-        startActivity ( setupIntent );
-        finish ();
+        try {
+            Intent setupIntent = new Intent ( SetupActivity.this, MainActivity.class );
+            setupIntent.addFlags ( Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK );
+            startActivity ( setupIntent );
+            finish ();
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "SetupActivity" ).child ( "SendUserToMainActivity" ).child ( currentUserID ).updateChildren ( error );
+        }
+
     }
 
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResult) {
-        super.onRequestPermissionsResult ( requestCode, permissions, grantResult );
+        try {
+            super.onRequestPermissionsResult ( requestCode, permissions, grantResult );
 
-        if (requestCode == REQUEST_STORAGE) {
-            if (grantResult.length > 0 && grantResult[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText ( this, "Permission granted", Toast.LENGTH_SHORT ).show ();
-            } else {
-                Toast.makeText ( this, "Permission denied", Toast.LENGTH_SHORT ).show ();
+            if (requestCode == REQUEST_STORAGE) {
+                if (grantResult.length > 0 && grantResult[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText ( this, "Permission granted", Toast.LENGTH_SHORT ).show ();
+                } else {
+                    Toast.makeText ( this, "Permission denied", Toast.LENGTH_SHORT ).show ();
+                }
             }
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "SetupActivity" ).child ( "onRequestPermissionsResult" ).child ( currentUserID ).updateChildren ( error );
         }
+
     }
 }

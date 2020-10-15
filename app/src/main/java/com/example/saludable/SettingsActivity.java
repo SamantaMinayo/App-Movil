@@ -199,22 +199,37 @@ public class SettingsActivity extends AppCompatActivity {
                 }
             } );
         } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "SettingsActivity" ).child ( "onCreate" ).child ( currentUserId ).updateChildren ( error );
         }
     }
 
     private void openGallery() {
-
-        CropImage.activity ()
-                .setGuidelines ( CropImageView.Guidelines.ON )
-                .setAspectRatio ( 1, 1 )
-                .start ( this );
+        try {
+            CropImage.activity ()
+                    .setGuidelines ( CropImageView.Guidelines.ON )
+                    .setAspectRatio ( 1, 1 )
+                    .start ( this );
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "SettingsActivity" ).child ( "openGallery" ).child ( currentUserId ).updateChildren ( error );
+        }
     }
+
     public void checkButton(View v) {
-        int radioId = radioGroup.getCheckedRadioButtonId ();
+        try {
+            int radioId = radioGroup.getCheckedRadioButtonId ();
 
-        radioButton = findViewById ( radioId );
-        userGenero.setText ( radioButton.getText ().toString () );
+            radioButton = findViewById ( radioId );
+            userGenero.setText ( radioButton.getText ().toString () );
 
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "SettingsActivity" ).child ( "checkButton" ).child ( currentUserId ).updateChildren ( error );
+        }
     }
 
     @Override
@@ -282,11 +297,20 @@ public class SettingsActivity extends AppCompatActivity {
             }
 
         } catch (Exception e) {
-
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "SettingsActivity" ).child ( "onActivityResult" ).child ( currentUserId ).updateChildren ( error );
         }
     }
 
     private void ValidateAccountInfo() {
+        try {
+
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "SettingsActivity" ).child ( "onRequestPermissionsResult" ).child ( currentUserId ).updateChildren ( error );
+        }
         String username = userName.getText ().toString ();
         String profilename = userProfName.getText ().toString ();
         String status = userStatus.getText ().toString ();
@@ -355,6 +379,9 @@ public class SettingsActivity extends AppCompatActivity {
                 }
             } );
         } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "SettingsActivity" ).child ( "UpdateAccountInfo" ).child ( currentUserId ).updateChildren ( error );
         }
     }
 
@@ -364,21 +391,31 @@ public class SettingsActivity extends AppCompatActivity {
             mainIntent.addFlags ( Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK );
             startActivity ( mainIntent );
             finish ();
-        } catch (Exception e) {
-        }
 
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "SettingsActivity" ).child ( "SendUserToProfile" ).child ( currentUserId ).updateChildren ( error );
+        }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResult) {
-        super.onRequestPermissionsResult ( requestCode, permissions, grantResult );
+        try {
+            super.onRequestPermissionsResult ( requestCode, permissions, grantResult );
 
-        if (requestCode == REQUEST_STORAGE) {
-            if (grantResult.length > 0 && grantResult[0] == PackageManager.PERMISSION_GRANTED) {
-                Toast.makeText ( this, "Permission granted", Toast.LENGTH_SHORT ).show ();
-            } else {
-                Toast.makeText ( this, "Permission denied", Toast.LENGTH_SHORT ).show ();
+            if (requestCode == REQUEST_STORAGE) {
+                if (grantResult.length > 0 && grantResult[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText ( this, "Permission granted", Toast.LENGTH_SHORT ).show ();
+                } else {
+                    Toast.makeText ( this, "Permission denied", Toast.LENGTH_SHORT ).show ();
+                }
             }
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "SettingsActivity" ).child ( "onRequestPermissionsResult" ).child ( currentUserId ).updateChildren ( error );
         }
+
     }
 }

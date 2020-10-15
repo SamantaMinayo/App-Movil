@@ -4,11 +4,7 @@ import android.content.Context;
 import android.location.Location;
 import android.preference.PreferenceManager;
 
-import com.example.saludable.R;
-
-import java.text.DateFormat;
 import java.text.DecimalFormat;
-import java.util.Date;
 
 public class Utils {
 
@@ -30,7 +26,7 @@ public class Utils {
      *
      * @param requestingLocationUpdates The location updates state.
      */
-    static void setRequestingLocationUpdates(Context context, boolean requestingLocationUpdates) {
+    public static void setRequestingLocationUpdates(Context context, boolean requestingLocationUpdates) {
         PreferenceManager.getDefaultSharedPreferences ( context )
                 .edit ()
                 .putBoolean ( KEY_REQUESTING_LOCATION_UPDATES, requestingLocationUpdates )
@@ -56,9 +52,5 @@ public class Utils {
 
     }
 
-    static String getLocationTitle(Context context) {
-        return context.getString ( R.string.location_updated,
-                DateFormat.getDateTimeInstance ().format ( new Date () ) );
-    }
 
 }

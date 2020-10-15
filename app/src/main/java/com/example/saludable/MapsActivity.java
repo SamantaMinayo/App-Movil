@@ -15,6 +15,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -29,6 +30,7 @@ import android.widget.Chronometer;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -128,135 +130,152 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        try {
+            super.onCreate ( savedInstanceState );
 
-        super.onCreate ( savedInstanceState );
+            myReceiver = new MyReceiver ();
 
-        myReceiver = new MyReceiver ();
+            setContentView ( R.layout.activity_maps );
+            SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager ()
+                    .findFragmentById ( R.id.map );
+            mapFragment.getMapAsync ( this );
 
-        setContentView ( R.layout.activity_maps );
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager ()
-                .findFragmentById ( R.id.map );
-        mapFragment.getMapAsync ( this );
+            powerManager = (PowerManager) getSystemService ( POWER_SERVICE );
+            wakelock = powerManager.newWakeLock ( PowerManager.PARTIAL_WAKE_LOCK,
+                    "MyApp::MyWakelockTag" );
 
-        powerManager = (PowerManager) getSystemService ( POWER_SERVICE );
-        wakelock = powerManager.newWakeLock ( PowerManager.PARTIAL_WAKE_LOCK,
-                "MyApp::MyWakelockTag" );
+            mAuth = FirebaseAuth.getInstance ();
+            current_user_id = mAuth.getCurrentUser ().getUid ();
+            PostKey = getIntent ().getExtras ().get ( "PostKey" ).toString ();
+            //Guardar Datos cada 15 a 20 seg depende del GPS
+            CarreraUserInf = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" )
+                    .child ( "Datos" ).child ( PostKey ).child ( current_user_id );
+            //Dato usado para el monitoreo en tiempo real desde el administrador
+            CarreraUserMon = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).
+                    child ( "Monitoreo" ).child ( PostKey );
+            //Cuando finalice la carrera el usuario elimina su registro de inscripcion en la carrera y lo envia a realizzada
+            RegistrarUsuario = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).
+                    child ( current_user_id ).child ( "Inscripcion" ).child ( PostKey );
+            //Cuando finalice la carrera el usuario elimina su registro de inscripcion en la carrera y lo envia a realizzada
+            RegistrarResUsuario = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).
+                    child ( current_user_id ).child ( "Resultados" ).child ( "Lista" ).child ( PostKey );
+            //Guardar resultados en el nodo del usuario
+            CarreraUserInfRes = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).
+                    child ( current_user_id ).child ( "Resultados" ).child ( "Resultado" ).child ( PostKey );
+            //Guardar resultados en el nodo resultados por carrera
+            CarreraResInfo = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( "Resultados" ).
+                    child ( PostKey ).child ( current_user_id );
+            //Verificar si la usuario a iniciado o a finalizado.
+            Carrera = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).
+                    child ( "Nuevas" ).child ( PostKey ).child ( "estado" );
 
-        mAuth = FirebaseAuth.getInstance ();
-        current_user_id = mAuth.getCurrentUser ().getUid ();
-        PostKey = getIntent ().getExtras ().get ( "PostKey" ).toString ();
-        //Guardar Datos cada 15 a 20 seg depende del GPS
-        CarreraUserInf = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" )
-                .child ( "Datos" ).child ( PostKey ).child ( current_user_id );
-        //Dato usado para el monitoreo en tiempo real desde el administrador
-        CarreraUserMon = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).
-                child ( "Monitoreo" ).child ( PostKey );
-        //Cuando finalice la carrera el usuario elimina su registro de inscripcion en la carrera y lo envia a realizzada
-        RegistrarUsuario = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).
-                child ( current_user_id ).child ( "Inscripcion" ).child ( PostKey );
-        //Cuando finalice la carrera el usuario elimina su registro de inscripcion en la carrera y lo envia a realizzada
-        RegistrarResUsuario = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).
-                child ( current_user_id ).child ( "Resultados" ).child ( "Lista" ).child ( PostKey );
-        //Guardar resultados en el nodo del usuario
-        CarreraUserInfRes = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).
-                child ( current_user_id ).child ( "Resultados" ).child ( "Resultado" ).child ( PostKey );
-        //Guardar resultados en el nodo resultados por carrera
-        CarreraResInfo = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( "Resultados" ).
-                child ( PostKey ).child ( current_user_id );
-        //Verificar si la usuario a iniciado o a finalizado.
-        Carrera = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).
-                child ( "Nuevas" ).child ( PostKey ).child ( "estado" );
-
-        horacarrera = Common.carrera.getMaratontime ();
-        // Check that the user hasn't revoked permissions by going to Settings.
-        if (Utils.requestingLocationUpdates ( this )) {
-            if (!checkPermissions ()) {
-                requestPermissions ();
+            horacarrera = Common.carrera.getMaratontime ();
+            // Check that the user hasn't revoked permissions by going to Settings.
+            if (Utils.requestingLocationUpdates ( this )) {
+                if (!checkPermissions ()) {
+                    requestPermissions ();
+                }
             }
+
+            Carrera.addValueEventListener ( new ValueEventListener () {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    inicio = (String) dataSnapshot.getValue ();
+                    if (inicio.equals ( "fin" )) fin = true;
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+                }
+            } );
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MapaActivity" ).child ( "onCreate" ).child ( current_user_id ).updateChildren ( error );
         }
-
-        Carrera.addValueEventListener ( new ValueEventListener () {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                inicio = (String) dataSnapshot.getValue ();
-                if (inicio.equals ( "fin" )) fin = true;
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-            }
-        } );
-
     }
 
     @Override
     protected void onStart() {
-        super.onStart ();
-        PreferenceManager.getDefaultSharedPreferences ( this )
-                .registerOnSharedPreferenceChangeListener ( this );
+        try {
+            super.onStart ();
+            PreferenceManager.getDefaultSharedPreferences ( this )
+                    .registerOnSharedPreferenceChangeListener ( this );
 
-        currentTime = new SimpleDateFormat ( "HH:mm:ss" );
-
-
-        mRequestLocationUpdatesButton = findViewById ( R.id.inicio_button );
-        mRemoveLocationUpdatesButton = findViewById ( R.id.fin_button );
-        velocidad = findViewById ( R.id.velocidadmap );
-        distancia = findViewById ( R.id.distancemap );
-        pasos = findViewById ( R.id.pasosmap );
-        formato1 = new DecimalFormat ( "#.00" );
-        cronometro = findViewById ( R.id.cronometro );
-        loadingBar = new ProgressDialog ( this );
+            currentTime = new SimpleDateFormat ( "HH:mm:ss" );
 
 
-        mRequestLocationUpdatesButton.setOnClickListener ( new View.OnClickListener () {
-            @Override
-            public void onClick(View view) {
-                if (!checkPermissions ()) {
-                    requestPermissions ();
-                } else {
-                    // LocalBroadcastManager.getInstance ( getApplicationContext () ).registerReceiver ( myReceiver,
-                    //new IntentFilter ( MyService.ACTION_BROADCAST ) );
-                    transmision = true;
-                    if (!wakelock.isHeld ()) {
-                        wakelock.acquire ();
+            mRequestLocationUpdatesButton = findViewById ( R.id.inicio_button );
+            mRemoveLocationUpdatesButton = findViewById ( R.id.fin_button );
+            velocidad = findViewById ( R.id.velocidadmap );
+            distancia = findViewById ( R.id.distancemap );
+            pasos = findViewById ( R.id.pasosmap );
+            formato1 = new DecimalFormat ( "#.00" );
+            cronometro = findViewById ( R.id.cronometro );
+            loadingBar = new ProgressDialog ( this );
+
+
+            mRequestLocationUpdatesButton.setOnClickListener ( new View.OnClickListener () {
+                @RequiresApi(api = Build.VERSION_CODES.O)
+                @Override
+                public void onClick(View view) {
+                    if (!checkPermissions ()) {
+                        requestPermissions ();
+                    } else {
+                        // LocalBroadcastManager.getInstance ( getApplicationContext () ).registerReceiver ( myReceiver,
+                        //new IntentFilter ( MyService.ACTION_BROADCAST ) );
+                        transmision = true;
+                        if (!wakelock.isHeld ()) {
+                            wakelock.acquire ();
+                        }
+                        cronometro.setBase ( SystemClock.elapsedRealtime () );
+                        cronometro.start ();
+                        calFordTime = Calendar.getInstance ();
+                        horainicio = currentTime.format ( calFordTime.getTime () );
+                        horainiciofija = currentTime.format ( calFordTime.getTime () );
+
+                        distanciatotal = 0.0;
+                        velocidadtotal = 0.0;
+                        mService.requestLocationUpdates ();
                     }
-                    cronometro.setBase ( SystemClock.elapsedRealtime () );
-                    cronometro.start ();
-                    calFordTime = Calendar.getInstance ();
-                    horainicio = currentTime.format ( calFordTime.getTime () );
-                    horainiciofija = currentTime.format ( calFordTime.getTime () );
-
-                    distanciatotal = 0.0;
-                    velocidadtotal = 0.0;
-                    mService.requestLocationUpdates ();
                 }
-            }
-        } );
+            } );
 
-        mRemoveLocationUpdatesButton.setOnClickListener ( new View.OnClickListener () {
-            @Override
-            public void onClick(View view) {
+            mRemoveLocationUpdatesButton.setOnClickListener ( new View.OnClickListener () {
+                @Override
+                public void onClick(View view) {
 
-                mService.getLastLocation ();
-                fin = true;
-                transmision = false;
-            }
-        } );
+                    mService.getLastLocation ();
+                    fin = true;
+                    transmision = false;
+                }
+            } );
 
-        // Restore the state of the buttons when the activity (re)launches.
-        setButtonsState ( Utils.requestingLocationUpdates ( this ) );
+            // Restore the state of the buttons when the activity (re)launches.
+            setButtonsState ( Utils.requestingLocationUpdates ( this ) );
 
-        // Bind to the service. If the service is in foreground mode, this signals to the service
-        // that since this activity is in the foreground, the service can exit foreground mode.
-        bindService ( new Intent ( this, MyService.class ), mServiceConnection,
-                Context.BIND_AUTO_CREATE );
+            // Bind to the service. If the service is in foreground mode, this signals to the service
+            // that since this activity is in the foreground, the service can exit foreground mode.
+            bindService ( new Intent ( this, MyService.class ), mServiceConnection,
+                    Context.BIND_AUTO_CREATE );
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MapaActivity" ).child ( "onStart" ).child ( current_user_id ).updateChildren ( error );
+        }
     }
 
     @Override
     protected void onResume() {
-        super.onResume ();
-        LocalBroadcastManager.getInstance ( this ).registerReceiver ( myReceiver,
-                new IntentFilter ( MyService.ACTION_BROADCAST ) );
+        try {
+            super.onResume ();
+            LocalBroadcastManager.getInstance ( this ).registerReceiver ( myReceiver,
+                    new IntentFilter ( MyService.ACTION_BROADCAST ) );
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MapaActivity" ).child ( "onResume" ).child ( current_user_id ).updateChildren ( error );
+        }
     }
 
     @Override
@@ -267,184 +286,228 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     protected void onStop() {
-        if (mBound) {
-            // Unbind from the service. This signals to the service that this activity is no longer
-            // in the foreground, and the service can respond by promoting itself to a foreground
-            // service.
-            unbindService ( mServiceConnection );
+        try {
+            if (mBound) {
+                // Unbind from the service. This signals to the service that this activity is no longer
+                // in the foreground, and the service can respond by promoting itself to a foreground
+                // service.
+                unbindService ( mServiceConnection );
 
-            mBound = false;
+                mBound = false;
+            }
+            //LocalBroadcastManager.getInstance ( this ).unregisterReceiver ( myReceiver );
+            PreferenceManager.getDefaultSharedPreferences ( this )
+                    .unregisterOnSharedPreferenceChangeListener ( this );
+            super.onStop ();
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MapaActivity" ).child ( "onStop" ).child ( current_user_id ).updateChildren ( error );
         }
-        //LocalBroadcastManager.getInstance ( this ).unregisterReceiver ( myReceiver );
-        PreferenceManager.getDefaultSharedPreferences ( this )
-                .unregisterOnSharedPreferenceChangeListener ( this );
-        super.onStop ();
     }
 
 
     @Override
     protected void onDestroy() {
-        super.onDestroy ();
-        LocalBroadcastManager.getInstance ( this ).unregisterReceiver ( myReceiver );
-        if (wakelock.isHeld ()) {
-            wakelock.release ();
+        try {
+            super.onDestroy ();
+            LocalBroadcastManager.getInstance ( this ).unregisterReceiver ( myReceiver );
+            if (wakelock.isHeld ()) {
+                wakelock.release ();
+            }
+            fin = false;
+            transmision = false;
+            mService.removeLocationUpdates ();
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MapaActivity" ).child ( "onDestroy" ).child ( current_user_id ).updateChildren ( error );
         }
-        fin = false;
-        transmision = false;
-        mService.removeLocationUpdates ();
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
+        try {
+            if (keyCode == KeyEvent.KEYCODE_BACK) {
+                if (transmision) {
+                    new AlertDialog.Builder ( this )
+                            .setIcon ( android.R.drawable.ic_dialog_alert )
+                            .setTitle ( "Salir" )
+                            .setMessage ( "Si fuerza la finalizacion del monitoreo es posible que se pierdan datos. Esta seguro?" )
+                            .setNegativeButton ( android.R.string.cancel, null )// sin listener
+                            .setPositiveButton ( android.R.string.ok, new DialogInterface.OnClickListener () {// un listener que al pulsar, cierre la aplicacion
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    fin = false;
+                                    transmision = false;
+                                    LocalBroadcastManager.getInstance ( MapsActivity.this ).unregisterReceiver ( myReceiver );
+                                    mService.removeLocationUpdates ();
+                                    if (wakelock.isHeld ()) {
+                                        wakelock.release ();
+                                    }
+                                    MapsActivity.this.finish ();
 
-            if (transmision) {
-                new AlertDialog.Builder ( this )
-                        .setIcon ( android.R.drawable.ic_dialog_alert )
-                        .setTitle ( "Salir" )
-                        .setMessage ( "Si fuerza la finalizacion del monitoreo es posible que se pierdan datos. Esta seguro?" )
-                        .setNegativeButton ( android.R.string.cancel, null )// sin listener
-                        .setPositiveButton ( android.R.string.ok, new DialogInterface.OnClickListener () {// un listener que al pulsar, cierre la aplicacion
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                fin = false;
-                                transmision = false;
-                                LocalBroadcastManager.getInstance ( MapsActivity.this ).unregisterReceiver ( myReceiver );
-                                mService.removeLocationUpdates ();
-                                if (wakelock.isHeld ()) {
-                                    wakelock.release ();
                                 }
-                                MapsActivity.this.finish ();
+                            } )
+                            .show ();
+                    return true;
+                } else {
+                    new AlertDialog.Builder ( this )
+                            .setIcon ( android.R.drawable.ic_dialog_alert )
+                            .setTitle ( "Salir" )
+                            .setMessage ( "Estás seguro?" )
+                            .setNegativeButton ( android.R.string.cancel, null )// sin listener
+                            .setPositiveButton ( android.R.string.ok, new DialogInterface.OnClickListener () {// un listener que al pulsar, cierre la aplicacion
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    fin = false;
+                                    transmision = false;
+                                    LocalBroadcastManager.getInstance ( MapsActivity.this ).unregisterReceiver ( myReceiver );
+                                    mService.removeLocationUpdates ();
+                                    if (wakelock.isHeld ()) {
+                                        wakelock.release ();
+                                    }
+                                    MapsActivity.this.finish ();
 
-                            }
-                        } )
-                        .show ();
-                return true;
-            } else {
-                new AlertDialog.Builder ( this )
-                        .setIcon ( android.R.drawable.ic_dialog_alert )
-                        .setTitle ( "Salir" )
-                        .setMessage ( "Estás seguro?" )
-                        .setNegativeButton ( android.R.string.cancel, null )// sin listener
-                        .setPositiveButton ( android.R.string.ok, new DialogInterface.OnClickListener () {// un listener que al pulsar, cierre la aplicacion
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                fin = false;
-                                transmision = false;
-                                LocalBroadcastManager.getInstance ( MapsActivity.this ).unregisterReceiver ( myReceiver );
-                                mService.removeLocationUpdates ();
-                                if (wakelock.isHeld ()) {
-                                    wakelock.release ();
                                 }
-                                MapsActivity.this.finish ();
+                            } )
+                            .show ();
+                    return true;
+                }
 
-                            }
-                        } )
-                        .show ();
-                return true;
             }
+            return super.onKeyDown ( keyCode, event );
 
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MapaActivity" ).child ( "onKeyDown" ).child ( current_user_id ).updateChildren ( error );
+            return false;
         }
-        return super.onKeyDown ( keyCode, event );
     }
 
     private boolean checkPermissions() {
-        return PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission ( this,
-                Manifest.permission.ACCESS_FINE_LOCATION );
+        try {
+            return PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission ( this,
+                    Manifest.permission.ACCESS_FINE_LOCATION );
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MapaActivity" ).child ( "checkPermissions" ).child ( current_user_id ).updateChildren ( error );
+            return false;
+        }
     }
 
     private void requestPermissions() {
-        boolean shouldProvideRationale =
-                ActivityCompat.shouldShowRequestPermissionRationale ( this,
-                        Manifest.permission.ACCESS_FINE_LOCATION );
+        try {
+            boolean shouldProvideRationale =
+                    ActivityCompat.shouldShowRequestPermissionRationale ( this,
+                            Manifest.permission.ACCESS_FINE_LOCATION );
 
-        // Provide an additional rationale to the user. This would happen if the user denied the
-        // request previously, but didn't check the "Don't ask again" checkbox.
-        if (shouldProvideRationale) {
-            Log.i ( TAG, "Displaying permission rationale to provide additional context." );
-            Snackbar.make (
-                    findViewById ( R.id.activity_maps ),
-                    R.string.permission_rationale,
-                    Snackbar.LENGTH_INDEFINITE )
-                    .setAction ( R.string.ok, new View.OnClickListener () {
-                        @Override
-                        public void onClick(View view) {
-                            // Request permission
-                            ActivityCompat.requestPermissions ( MapsActivity.this,
-                                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                                    REQUEST_PERMISSIONS_REQUEST_CODE );
-                        }
-                    } )
-                    .show ();
-        } else {
-            Log.i ( TAG, "Requesting permission" );
-            // Request permission. It's possible this can be auto answered if device policy
-            // sets the permission in a given state or the user denied the permission
-            // previously and checked "Never ask again".
-            ActivityCompat.requestPermissions ( MapsActivity.this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    REQUEST_PERMISSIONS_REQUEST_CODE );
+            // Provide an additional rationale to the user. This would happen if the user denied the
+            // request previously, but didn't check the "Don't ask again" checkbox.
+            if (shouldProvideRationale) {
+                Log.i ( TAG, "Displaying permission rationale to provide additional context." );
+                Snackbar.make (
+                        findViewById ( R.id.activity_maps ),
+                        R.string.permission_rationale,
+                        Snackbar.LENGTH_INDEFINITE )
+                        .setAction ( R.string.ok, new View.OnClickListener () {
+                            @Override
+                            public void onClick(View view) {
+                                // Request permission
+                                ActivityCompat.requestPermissions ( MapsActivity.this,
+                                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                                        REQUEST_PERMISSIONS_REQUEST_CODE );
+                            }
+                        } )
+                        .show ();
+            } else {
+                Log.i ( TAG, "Requesting permission" );
+                // Request permission. It's possible this can be auto answered if device policy
+                // sets the permission in a given state or the user denied the permission
+                // previously and checked "Never ask again".
+                ActivityCompat.requestPermissions ( MapsActivity.this,
+                        new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                        REQUEST_PERMISSIONS_REQUEST_CODE );
+            }
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MapaActivity" ).child ( "requestPermissions" ).child ( current_user_id ).updateChildren ( error );
         }
     }
 
     /**
      * Callback received when a permissions request has been completed.
      */
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults) {
-        Log.i ( TAG, "onRequestPermissionResult" );
-        if (requestCode == REQUEST_PERMISSIONS_REQUEST_CODE) {
-            if (grantResults.length <= 0) {
-                // If user interaction was interrupted, the permission request is cancelled and you
-                // receive empty arrays.
-                Log.i ( TAG, "User interaction was cancelled." );
-            } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permission was granted.
-                transmision = true;
-                if (!wakelock.isHeld ()) {
-                    wakelock.acquire ();
+        try {
+            Log.i ( TAG, "onRequestPermissionResult" );
+            if (requestCode == REQUEST_PERMISSIONS_REQUEST_CODE) {
+                if (grantResults.length <= 0) {
+                    // If user interaction was interrupted, the permission request is cancelled and you
+                    // receive empty arrays.
+                    Log.i ( TAG, "User interaction was cancelled." );
+                } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission was granted.
+                    transmision = true;
+                    if (!wakelock.isHeld ()) {
+                        wakelock.acquire ();
+                    }
+                    cronometro.setBase ( SystemClock.elapsedRealtime () );
+                    cronometro.start ();
+                    distanciatotal = 0.0;
+                    velocidadtotal = 0.0;
+                    mService.requestLocationUpdates ();
+                } else {
+                    // Permission denied.
+                    setButtonsState ( false );
+                    Snackbar.make (
+                            findViewById ( R.id.activity_maps ),
+                            R.string.permission_denied_explanation,
+                            Snackbar.LENGTH_INDEFINITE )
+                            .setAction ( R.string.settings, new View.OnClickListener () {
+                                @Override
+                                public void onClick(View view) {
+                                    // Build intent that displays the App settings screen.
+                                    Intent intent = new Intent ();
+                                    intent.setAction (
+                                            Settings.ACTION_APPLICATION_DETAILS_SETTINGS );
+                                    Uri uri = Uri.fromParts ( "package",
+                                            BuildConfig.APPLICATION_ID, null );
+                                    intent.setData ( uri );
+                                    intent.setFlags ( Intent.FLAG_ACTIVITY_NEW_TASK );
+                                    startActivity ( intent );
+                                }
+                            } )
+                            .show ();
                 }
-                cronometro.setBase ( SystemClock.elapsedRealtime () );
-                cronometro.start ();
-                distanciatotal = 0.0;
-                velocidadtotal = 0.0;
-                mService.requestLocationUpdates ();
-            } else {
-                // Permission denied.
-                setButtonsState ( false );
-                Snackbar.make (
-                        findViewById ( R.id.activity_maps ),
-                        R.string.permission_denied_explanation,
-                        Snackbar.LENGTH_INDEFINITE )
-                        .setAction ( R.string.settings, new View.OnClickListener () {
-                            @Override
-                            public void onClick(View view) {
-                                // Build intent that displays the App settings screen.
-                                Intent intent = new Intent ();
-                                intent.setAction (
-                                        Settings.ACTION_APPLICATION_DETAILS_SETTINGS );
-                                Uri uri = Uri.fromParts ( "package",
-                                        BuildConfig.APPLICATION_ID, null );
-                                intent.setData ( uri );
-                                intent.setFlags ( Intent.FLAG_ACTIVITY_NEW_TASK );
-                                startActivity ( intent );
-                            }
-                        } )
-                        .show ();
             }
+
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MapaActivity" ).child ( "onRequestPermissionsResult" ).child ( current_user_id ).updateChildren ( error );
         }
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
-
+        try {
+            mMap = googleMap;
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MapaActivity" ).child ( "OnMapReady" ).child ( current_user_id ).updateChildren ( error );
+        }
     }
 
     public void agrerarMarcador(Location location) {
         try {
-
             inicio = "true";
             LatLng coordenada = new LatLng ( location.getLatitude (), location.getLongitude () );
             CameraUpdate miUbicacion = CameraUpdateFactory.newLatLngZoom ( coordenada, 15 );
@@ -494,121 +557,154 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 GuardarFinal ();
             }
         } catch (Exception e) {
-            String error = "ERROR";
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MapaActivity" ).child ( "AgregarMarcador" ).child ( current_user_id ).updateChildren ( error );
         }
-
     }
 
     private void GuardarFinal() {
-        String hora = currentTime.format ( calFordTime.getTime () );
-        String tiempo = getDifferenceBetwenDates ( horacarrera, hora );
-        String tiempot;
-        if (horainicio == null) {
-            tiempot = "0:0:0";
-        } else {
-            tiempot = getDifferenceBetwenDates ( horainicio, hora );
+        try {
+            String hora = currentTime.format ( calFordTime.getTime () );
+            String tiempo = getDifferenceBetwenDates ( horacarrera, hora );
+            String tiempot;
+            if (horainicio == null) {
+                tiempot = "0:0:0";
+            } else {
+                tiempot = getDifferenceBetwenDates ( horainicio, hora );
+            }
+            String[] fin = tiempo.split ( ":" );
+            String[] fint = tiempot.split ( ":" );
+            double min = Integer.parseInt ( fin[0] ) * 60 + Integer.parseInt ( fin[1] ) + Integer.parseInt ( fin[2] ) / 60;
+            double mint = Integer.parseInt ( fint[0] ) * 60 + Integer.parseInt ( fint[1] ) + Integer.parseInt ( fint[2] ) / 60;
+
+            calFordTime = Calendar.getInstance ();
+            tiempo = getDifferenceBetwenDates ( Common.carrera.getMaratontime (), hora );
+            fin = tiempo.split ( ":" );
+            min = Integer.parseInt ( fin[0] ) * 60 + Integer.parseInt ( fin[1] ) + Integer.parseInt ( fin[2] ) / 60;
+            if (horainiciofija == null) {
+                tiempot = "0:0:0";
+            } else {
+                tiempot = getDifferenceBetwenDates ( horainiciofija, hora );
+            }
+            fint = tiempot.split ( ":" );
+            mint = Integer.parseInt ( fint[0] ) * 60 + Integer.parseInt ( fint[1] ) + Integer.parseInt ( fint[2] ) / 60;
+
+            String calorias = formato1.format ( 8 * mint * 0.0175 * Double.valueOf ( Common.loggedUser.getPeso () ) );
+
+            LocalBroadcastManager.getInstance ( getApplicationContext () ).unregisterReceiver ( myReceiver );
+            transmision = false;
+            if (wakelock.isHeld ()) {
+                wakelock.release ();
+            }
+            mService.removeLocationUpdates ();
+
+
+            String pas = formato1.format ( (distanciatotal * 100) / factorpaso );
+            String velmed = formato1.format ( velocidadtotal / contregistro );
+            String velprom = formato1.format ( distanciatotal / (min * 60) );
+            String velpromt = formato1.format ( distanciatotal / (mint * 60) );
+            HashMap puntos = new HashMap ();
+
+            puntos.put ( "distancia", formato1.format ( distanciatotal ) );
+            puntos.put ( "velmed", velmed );
+            puntos.put ( "velocidadmed", velprom );
+            puntos.put ( "velocidad", velpromt );
+            puntos.put ( "tiempomed", formato1.format ( min ) );
+            puntos.put ( "tiempo", formato1.format ( mint ) );
+            puntos.put ( "calorias", calorias );
+            puntos.put ( "pasos", pas );
+            puntos.put ( "genero", Common.loggedUser.getGenero () );
+            puntos.put ( "rango", Common.loggedUser.getRango () );
+            puntos.put ( "usuario", Common.loggedUser.getUsername () );
+            puntos.put ( "uid", current_user_id );
+            CarreraResInfo.updateChildren ( puntos );
+            CarreraUserInfRes.updateChildren ( puntos );
+            GuardarResList ();
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MapaActivity" ).child ( "GuardarFinal" ).child ( current_user_id ).updateChildren ( error );
         }
-        String[] fin = tiempo.split ( ":" );
-        String[] fint = tiempot.split ( ":" );
-        double min = Integer.parseInt ( fin[0] ) * 60 + Integer.parseInt ( fin[1] ) + Integer.parseInt ( fin[2] ) / 60;
-        double mint = Integer.parseInt ( fint[0] ) * 60 + Integer.parseInt ( fint[1] ) + Integer.parseInt ( fint[2] ) / 60;
 
-        calFordTime = Calendar.getInstance ();
-        tiempo = getDifferenceBetwenDates ( Common.carrera.getMaratontime (), hora );
-        fin = tiempo.split ( ":" );
-        min = Integer.parseInt ( fin[0] ) * 60 + Integer.parseInt ( fin[1] ) + Integer.parseInt ( fin[2] ) / 60;
-        if (horainiciofija == null) {
-            tiempot = "0:0:0";
-        } else {
-            tiempot = getDifferenceBetwenDates ( horainiciofija, hora );
-        }
-        fint = tiempot.split ( ":" );
-        mint = Integer.parseInt ( fint[0] ) * 60 + Integer.parseInt ( fint[1] ) + Integer.parseInt ( fint[2] ) / 60;
-
-        String calorias = formato1.format ( 8 * mint * 0.0175 * Double.valueOf ( Common.loggedUser.getPeso () ) );
-
-        LocalBroadcastManager.getInstance ( getApplicationContext () ).unregisterReceiver ( myReceiver );
-        transmision = false;
-        if (wakelock.isHeld ()) {
-            wakelock.release ();
-        }
-        mService.removeLocationUpdates ();
-
-
-        String pas = formato1.format ( (distanciatotal * 100) / factorpaso );
-        String velmed = formato1.format ( velocidadtotal / contregistro );
-        String velprom = formato1.format ( distanciatotal / (min * 60) );
-        String velpromt = formato1.format ( distanciatotal / (mint * 60) );
-        HashMap puntos = new HashMap ();
-
-        puntos.put ( "distancia", formato1.format ( distanciatotal ) );
-        puntos.put ( "velmed", velmed );
-        puntos.put ( "velocidadmed", velprom );
-        puntos.put ( "velocidad", velpromt );
-        puntos.put ( "tiempomed", formato1.format ( min ) );
-        puntos.put ( "tiempo", formato1.format ( mint ) );
-        puntos.put ( "calorias", calorias );
-        puntos.put ( "pasos", pas );
-        puntos.put ( "genero", Common.loggedUser.getGenero () );
-        puntos.put ( "rango", Common.loggedUser.getRango () );
-        puntos.put ( "usuario", Common.loggedUser.getUsername () );
-        puntos.put ( "uid", current_user_id );
-        CarreraResInfo.updateChildren ( puntos );
-        CarreraUserInfRes.updateChildren ( puntos );
-        GuardarResList ();
     }
 
     private void GuardarInformacion(Location location, String distguar, String hora, String tiempo, String timet) {
-        if (!tiempo.equals ( "0:0:0" )) {
-            HashMap puntos = new HashMap ();
+        try {
+            if (!tiempo.equals ( "0:0:0" )) {
+                HashMap puntos = new HashMap ();
 
-            puntos.put ( "latitud", String.valueOf ( location.getLatitude () ) );
-            puntos.put ( "longitud", String.valueOf ( location.getLongitude () ) );
-            puntos.put ( "velocidad", formato1.format ( location.getSpeed () ) );
-            puntos.put ( "hora", hora );
-            puntos.put ( "distancia", distguar );
-            puntos.put ( "tiempo", tiempo );
-            puntos.put ( "timp", timet );
+                puntos.put ( "latitud", String.valueOf ( location.getLatitude () ) );
+                puntos.put ( "longitud", String.valueOf ( location.getLongitude () ) );
+                puntos.put ( "velocidad", formato1.format ( location.getSpeed () ) );
+                puntos.put ( "hora", hora );
+                puntos.put ( "distancia", distguar );
+                puntos.put ( "tiempo", tiempo );
+                puntos.put ( "timp", timet );
 
-            CarreraUserInf.child ( String.valueOf ( contregistro ) ).updateChildren ( puntos );
+                CarreraUserInf.child ( String.valueOf ( contregistro ) ).updateChildren ( puntos );
+            }
+
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MapaActivity" ).child ( "GuardarInfromacion" ).child ( current_user_id ).updateChildren ( error );
+
         }
     }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
         // Update the buttons state depending on whether location updates are being requested.
-        if (s.equals ( Utils.KEY_REQUESTING_LOCATION_UPDATES )) {
-            setButtonsState ( sharedPreferences.getBoolean ( Utils.KEY_REQUESTING_LOCATION_UPDATES,
-                    false ) );
+        try {
+            if (s.equals ( Utils.KEY_REQUESTING_LOCATION_UPDATES )) {
+                setButtonsState ( sharedPreferences.getBoolean ( Utils.KEY_REQUESTING_LOCATION_UPDATES,
+                        false ) );
+            }
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MapaActivity" ).child ( "onSharedPreferenceChanged" ).child ( current_user_id ).updateChildren ( error );
         }
     }
 
     private void setButtonsState(boolean requestingLocationUpdates) {
-        if (!fin) {
-            if (requestingLocationUpdates) {
-                mRequestLocationUpdatesButton.setEnabled ( false );
-                mRemoveLocationUpdatesButton.setEnabled ( true );
+        try {
+            if (!fin) {
+                if (requestingLocationUpdates) {
+                    mRequestLocationUpdatesButton.setEnabled ( false );
+                    mRemoveLocationUpdatesButton.setEnabled ( true );
+                } else {
+                    mRequestLocationUpdatesButton.setEnabled ( true );
+                    mRemoveLocationUpdatesButton.setEnabled ( false );
+                }
             } else {
-                mRequestLocationUpdatesButton.setEnabled ( true );
+                mRequestLocationUpdatesButton.setEnabled ( false );
                 mRemoveLocationUpdatesButton.setEnabled ( false );
             }
-        } else {
-            mRequestLocationUpdatesButton.setEnabled ( false );
-            mRemoveLocationUpdatesButton.setEnabled ( false );
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MapaActivity" ).child ( "SetButtonState" ).child ( current_user_id ).updateChildren ( error );
         }
-
     }
 
     private void Monitoreo(Location location, String username, String hora) {
+        try {
+            HashMap puntos = new HashMap ();
 
-        HashMap puntos = new HashMap ();
+            puntos.put ( "latitud", String.valueOf ( location.getLatitude () ) );
+            puntos.put ( "longitud", String.valueOf ( location.getLongitude () ) );
+            puntos.put ( "usuario", username );
+            puntos.put ( "hora", hora );
 
-        puntos.put ( "latitud", String.valueOf ( location.getLatitude () ) );
-        puntos.put ( "longitud", String.valueOf ( location.getLongitude () ) );
-        puntos.put ( "usuario", username );
-        puntos.put ( "hora", hora );
+            CarreraUserMon.child ( current_user_id ).updateChildren ( puntos );
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MapaActivity" ).child ( "Monitoreo" ).child ( current_user_id ).updateChildren ( error );
+        }
 
-        CarreraUserMon.child ( current_user_id ).updateChildren ( puntos );
     }
 
     private void GuardarResList() {
@@ -623,19 +719,29 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             crear.put ( "uid", Common.carrera.uid );
             RegistrarResUsuario.updateChildren ( crear );
         } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MapaActivity" ).child ( "GuardarReList" ).child ( current_user_id ).updateChildren ( error );
         }
     }
 
     public String getDifferenceBetwenDates(String dateInicio, String dateFinal) {
-        String[] inicio = dateInicio.split ( ":" );
-        String[] fin = dateFinal.split ( ":" );
-        int start = Integer.parseInt ( inicio[0] ) * 3600 + Integer.parseInt ( inicio[1] ) * 60 + Integer.parseInt ( inicio[2] );
-        int end = Integer.parseInt ( fin[0] ) * 3600 + Integer.parseInt ( fin[1] ) * 60 + Integer.parseInt ( fin[2] );
-        int result = end - start;
-        int hour = result / 3600;
-        int minu = (result % 3600) / 60;
-        int segu = ((result % 3600) % 60) % 60;
-        return hour + ":" + minu + ":" + segu;
+        try {
+            String[] inicio = dateInicio.split ( ":" );
+            String[] fin = dateFinal.split ( ":" );
+            int start = Integer.parseInt ( inicio[0] ) * 3600 + Integer.parseInt ( inicio[1] ) * 60 + Integer.parseInt ( inicio[2] );
+            int end = Integer.parseInt ( fin[0] ) * 3600 + Integer.parseInt ( fin[1] ) * 60 + Integer.parseInt ( fin[2] );
+            int result = end - start;
+            int hour = result / 3600;
+            int minu = (result % 3600) / 60;
+            int segu = ((result % 3600) % 60) % 60;
+            return hour + ":" + minu + ":" + segu;
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MapaActivity" ).child ( "getDifferenceBetwenDates" ).child ( current_user_id ).updateChildren ( error );
+            return "";
+        }
     }
 
     /**
@@ -644,11 +750,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     public class MyReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-
-            Location location = intent.getParcelableExtra ( MyService.EXTRA_LOCATION );
-            if (location != null) {
-                agrerarMarcador ( location );
-                if (fin) GuardarFinal ();
+            try {
+                Location location = intent.getParcelableExtra ( MyService.EXTRA_LOCATION );
+                if (location != null) {
+                    agrerarMarcador ( location );
+                    if (fin) GuardarFinal ();
+                }
+            } catch (Exception e) {
+                HashMap error = new HashMap ();
+                error.put ( "error", e.getMessage () );
+                FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MapaActivity" ).child ( "OnReceive" ).child ( current_user_id ).updateChildren ( error );
             }
         }
     }

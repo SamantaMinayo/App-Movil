@@ -28,6 +28,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 /*import lecho.lib.hellocharts.model.Axis;
@@ -131,104 +132,122 @@ public class ProfileActivity extends AppCompatActivity {
             CargarDatos ();
 
         } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "ProfileActivity" ).child ( "OnCreate" ).child ( currentUserId ).updateChildren ( error );
         }
     }
 
     private void CargarDatos() {
-
-        MaratonDatosUser.addValueEventListener ( new ValueEventListener () {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
-                    miresultado.add ( postSnapshot.getValue ( Dato.class ) );
+        try {
+            MaratonDatosUser.addValueEventListener ( new ValueEventListener () {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
+                        miresultado.add ( postSnapshot.getValue ( Dato.class ) );
+                    }
+                    GenerarDatos ();
                 }
-                GenerarDatos ();
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
 
-            }
-        } );
-
-
+                }
+            } );
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "ProfileActivity" ).child ( "CargarDaros" ).child ( currentUserId ).updateChildren ( error );
+        }
     }
 
     private void GenerarDatos() {
-        ArrayList<Entry> TValues = new ArrayList<> ();
-        TValues.add ( new Entry ( 0, 0 ) );
-        ArrayList<Entry> VValues = new ArrayList<> ();
-        VValues.add ( new Entry ( 0, 0 ) );
-        ArrayList<Entry> CValues = new ArrayList<> ();
-        CValues.add ( new Entry ( 0, 0 ) );
-        ArrayList<Entry> DValues = new ArrayList<> ();
-        DValues.add ( new Entry ( 0, 0 ) );
-        int cont = 0;
-        float velprom = 0;
-        float timprom = 0;
-        float distotal = 0;
-        float caltotal = 0;
-        float pastotal = 0;
+        try {
+            ArrayList<Entry> TValues = new ArrayList<> ();
+            TValues.add ( new Entry ( 0, 0 ) );
+            ArrayList<Entry> VValues = new ArrayList<> ();
+            VValues.add ( new Entry ( 0, 0 ) );
+            ArrayList<Entry> CValues = new ArrayList<> ();
+            CValues.add ( new Entry ( 0, 0 ) );
+            ArrayList<Entry> DValues = new ArrayList<> ();
+            DValues.add ( new Entry ( 0, 0 ) );
+            int cont = 0;
+            float velprom = 0;
+            float timprom = 0;
+            float distotal = 0;
+            float caltotal = 0;
+            float pastotal = 0;
 
-        for (Dato dato : miresultado) {
-            cont = cont + 1;
-            if (cont == 1) {
-                velpromult.setText ( String.valueOf ( dato.velocidad ) );
-                tiempromult.setText ( String.valueOf ( Float.valueOf ( dato.getTiempo () ) / (Float.valueOf ( dato.getDistancia () ) / 1000) ) );
-                distult.setText ( String.valueOf ( Float.valueOf ( dato.distancia ) / 1000 ) );
-                calult.setText ( String.valueOf ( Float.valueOf ( dato.calorias ) / 1000 ) );
-                pasult.setText ( String.valueOf ( dato.pasos ) );
+            for (Dato dato : miresultado) {
+                cont = cont + 1;
+                if (cont == 1) {
+                    velpromult.setText ( String.valueOf ( dato.velocidad ) );
+                    tiempromult.setText ( String.valueOf ( Float.valueOf ( dato.getTiempo () ) / (Float.valueOf ( dato.getDistancia () ) / 1000) ) );
+                    distult.setText ( String.valueOf ( Float.valueOf ( dato.distancia ) / 1000 ) );
+                    calult.setText ( String.valueOf ( Float.valueOf ( dato.calorias ) / 1000 ) );
+                    pasult.setText ( String.valueOf ( dato.pasos ) );
+                }
+                TValues.add ( new Entry ( cont, Float.valueOf ( dato.getTiempo () ) / (Float.valueOf ( dato.getDistancia () ) / 1000) ) );
+                VValues.add ( new Entry ( cont, Float.valueOf ( dato.getVelocidad () ) ) );
+                velprom = Float.valueOf ( dato.getVelocidad () ) + velprom;
+                timprom = Float.valueOf ( dato.getTiempo () ) / (Float.valueOf ( dato.getDistancia () ) / 1000) + timprom;
+                distotal = distotal + Float.valueOf ( dato.distancia );
+                caltotal = caltotal + Float.valueOf ( dato.calorias );
+                pastotal = pastotal + Float.valueOf ( dato.pasos );
+                CValues.add ( new Entry ( cont, caltotal / 1000 ) );
+                DValues.add ( new Entry ( cont, distotal / 1000 ) );
             }
-            TValues.add ( new Entry ( cont, Float.valueOf ( dato.getTiempo () ) / (Float.valueOf ( dato.getDistancia () ) / 1000) ) );
-            VValues.add ( new Entry ( cont, Float.valueOf ( dato.getVelocidad () ) ) );
-            velprom = Float.valueOf ( dato.getVelocidad () ) + velprom;
-            timprom = Float.valueOf ( dato.getTiempo () ) / (Float.valueOf ( dato.getDistancia () ) / 1000) + timprom;
-            distotal = distotal + Float.valueOf ( dato.distancia );
-            caltotal = caltotal + Float.valueOf ( dato.calorias );
-            pastotal = pastotal + Float.valueOf ( dato.pasos );
-            CValues.add ( new Entry ( cont, caltotal / 1000 ) );
-            DValues.add ( new Entry ( cont, distotal / 1000 ) );
+
+            velpromtot.setText ( String.valueOf ( velprom / cont ) );
+            tiempromtot.setText ( String.valueOf ( timprom / cont ) );
+            disttot.setText ( String.valueOf ( distotal / 1000 ) );
+            caltot.setText ( String.valueOf ( caltotal / 1000 ) );
+            pastot.setText ( String.valueOf ( pastotal ) );
+            Graficar ( TValues, TChart, "Tiempo x km [min] vs Carrera" );
+            Graficar ( VValues, VChart, "Velocidad media [m/s] vs Carrera" );
+            Graficar ( CValues, CChart, "Calorias [kcal] vs Carrera" );
+            Graficar ( DValues, DChart, "Distancia [km] vs Carrera" );
+
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "ProfileActivity" ).child ( "GenerarDatos" ).child ( currentUserId ).updateChildren ( error );
         }
-
-        velpromtot.setText ( String.valueOf ( velprom / cont ) );
-        tiempromtot.setText ( String.valueOf ( timprom / cont ) );
-        disttot.setText ( String.valueOf ( distotal / 1000 ) );
-        caltot.setText ( String.valueOf ( caltotal / 1000 ) );
-        pastot.setText ( String.valueOf ( pastotal ) );
-        Graficar ( TValues, TChart, "Tiempo x km [min] vs Carrera" );
-        Graficar ( VValues, VChart, "Velocidad media [m/s] vs Carrera" );
-        Graficar ( CValues, CChart, "Calorias [kcal] vs Carrera" );
-        Graficar ( DValues, DChart, "Distancia [km] vs Carrera" );
-
-
     }
 
     private void Graficar(ArrayList<Entry> yValues, LineChart chart, String label) {
-        chart.setDragEnabled ( true );
-        chart.setScaleEnabled ( true );
-        LineDataSet set1 = new LineDataSet ( yValues, label );
-        set1.setFillAlpha ( 110 );
-        set1.setLineWidth ( 3f );
-        set1.setColor ( Color.parseColor ( "#23BAC4" ) );
-        set1.setDrawIcons ( false );
-        set1.enableDashedLine ( 15f, 10f, 0f );
-        set1.enableDashedHighlightLine ( 15f, 10f, 0f );
-        set1.setCircleColor ( Color.DKGRAY );
-        set1.setLineWidth ( 2f );
-        set1.setCircleRadius ( 4f );
-        set1.setDrawCircleHole ( false );
-        set1.setValueTextSize ( 9f );
-        //set1.setDrawFilled(true);
-        set1.setFormLineWidth ( 1f );
-        set1.setFormLineDashEffect ( new DashPathEffect ( new float[]{10f, 5f}, 0f ) );
-        set1.setFormSize ( 15.f );
+        try {
+            chart.setDragEnabled ( true );
+            chart.setScaleEnabled ( true );
+            LineDataSet set1 = new LineDataSet ( yValues, label );
+            set1.setFillAlpha ( 110 );
+            set1.setLineWidth ( 3f );
+            set1.setColor ( Color.parseColor ( "#23BAC4" ) );
+            set1.setDrawIcons ( false );
+            set1.enableDashedLine ( 15f, 10f, 0f );
+            set1.enableDashedHighlightLine ( 15f, 10f, 0f );
+            set1.setCircleColor ( Color.DKGRAY );
+            set1.setLineWidth ( 2f );
+            set1.setCircleRadius ( 4f );
+            set1.setDrawCircleHole ( false );
+            set1.setValueTextSize ( 9f );
+            //set1.setDrawFilled(true);
+            set1.setFormLineWidth ( 1f );
+            set1.setFormLineDashEffect ( new DashPathEffect ( new float[]{10f, 5f}, 0f ) );
+            set1.setFormSize ( 15.f );
 
-        ArrayList<ILineDataSet> dataSets = new ArrayList<> ();
-        dataSets.add ( set1 );
+            ArrayList<ILineDataSet> dataSets = new ArrayList<> ();
+            dataSets.add ( set1 );
 
-        LineData data = new LineData ( dataSets );
+            LineData data = new LineData ( dataSets );
 
-        chart.setData ( data );
+            chart.setData ( data );
+
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "ProfileActivity" ).child ( "Graficar" ).child ( currentUserId ).updateChildren ( error );
+        }
 
     }
 
@@ -237,6 +256,9 @@ public class ProfileActivity extends AppCompatActivity {
             Intent loginIntent = new Intent ( ProfileActivity.this, SettingsActivity.class );
             startActivity ( loginIntent );
         } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "ProfileActivity" ).child ( "SendUserToSettingsActivity" ).child ( currentUserId ).updateChildren ( error );
         }
     }
 

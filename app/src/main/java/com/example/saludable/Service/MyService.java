@@ -222,7 +222,6 @@ public class MyService extends Service {
         try {
             mFusedLocationClient.removeLocationUpdates ( mLocationCallback );
             Utils.setRequestingLocationUpdates ( this, false );
-
             stopSelf ();
         } catch (SecurityException unlikely) {
             Utils.setRequestingLocationUpdates ( this, true );

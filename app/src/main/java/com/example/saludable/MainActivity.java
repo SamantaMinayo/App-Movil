@@ -33,6 +33,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
+import java.util.HashMap;
+
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class MainActivity extends AppCompatActivity {
@@ -148,14 +150,17 @@ public class MainActivity extends AppCompatActivity {
                     }
                 } );
             }
-            DisplayAllUsersPosts ();
+            DisplayAllPosts ();
 
         } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MainActivity" ).child ( "OnCreate" ).child ( Common.loggedUser.getUid () ).updateChildren ( error );
         }
     }
 
 
-    protected void DisplayAllUsersPosts() {
+    protected void DisplayAllPosts() {
         try {
 
             FirebaseRecyclerOptions<Post> options = new FirebaseRecyclerOptions.Builder<Post> ()
@@ -183,6 +188,9 @@ public class MainActivity extends AppCompatActivity {
                     };
             postList.setAdapter ( firebaseRecyclerAdapter );
         } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MainActivity" ).child ( "DisplayAllPosts" ).child ( Common.loggedUser.getUid () ).updateChildren ( error );
         }
     }
 
@@ -194,6 +202,9 @@ public class MainActivity extends AppCompatActivity {
             }
             return super.onOptionsItemSelected ( item );
         } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MainActivity" ).child ( "onOptionsItemSelected" ).child ( Common.loggedUser.getUid () ).updateChildren ( error );
             return false;
         }
     }
@@ -226,6 +237,9 @@ public class MainActivity extends AppCompatActivity {
                     break;
             }
         } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MainActivity" ).child ( "UserMenuSelected" ).child ( Common.loggedUser.getUid () ).updateChildren ( error );
         }
     }
 
@@ -236,6 +250,9 @@ public class MainActivity extends AppCompatActivity {
             startActivity ( setupIntent );
             finish ();
         } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MainActivity" ).child ( "SendUserToSetupActivity" ).child ( Common.loggedUser.getUid () ).updateChildren ( error );
         }
     }
 
@@ -247,6 +264,9 @@ public class MainActivity extends AppCompatActivity {
             startActivity ( loginIntent );
             finish ();
         } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MainActivity" ).child ( "SendUserToLoginActivity" ).child ( Common.loggedUser.getUid () ).updateChildren ( error );
         }
     }
 
@@ -255,6 +275,9 @@ public class MainActivity extends AppCompatActivity {
             Intent loginIntent = new Intent ( MainActivity.this, ProfileActivity.class );
             startActivity ( loginIntent );
         } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MainActivity" ).child ( "SendUserToProfileActivity" ).child ( Common.loggedUser.getUid () ).updateChildren ( error );
         }
     }
 
@@ -263,6 +286,9 @@ public class MainActivity extends AppCompatActivity {
             Intent addNewPostIntent = new Intent ( MainActivity.this, MaratonActivity.class );
             startActivity ( addNewPostIntent );
         } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MainActivity" ).child ( "SendUserToMaratonActivity" ).child ( Common.loggedUser.getUid () ).updateChildren ( error );
         }
     }
 
@@ -271,6 +297,9 @@ public class MainActivity extends AppCompatActivity {
             Intent addNewPostIntent = new Intent ( MainActivity.this, MiMaratonActivity.class );
             startActivity ( addNewPostIntent );
         } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MainActivity" ).child ( "SendUserToMiMaratonActivity" ).child ( Common.loggedUser.getUid () ).updateChildren ( error );
         }
     }
 
@@ -279,6 +308,9 @@ public class MainActivity extends AppCompatActivity {
             Intent addNewPostIntent = new Intent ( MainActivity.this, MiInscripcionActivity.class );
             startActivity ( addNewPostIntent );
         } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MainActivity" ).child ( "SendUserToMiInscripcionActivity" ).child ( Common.loggedUser.getUid () ).updateChildren ( error );
         }
     }
 
