@@ -251,21 +251,18 @@ public class MyService extends Service {
 
         Uri soundUri = RingtoneManager.getDefaultUri ( RingtoneManager.TYPE_ALL );
 
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder ( this )
                 //.addAction ( R.drawable.ic_launch, getString ( R.string.launch_activity ),
                 //      activityPendingIntent )
                 //.addAction ( R.drawable.ic_cancel, getString ( R.string.remove_location_updates ),
                 //      servicePendingIntent )
                 .setContentText ( text )
-                .setContentTitle ( Utils.getLocationTitle ( this ) )
                 .setOngoing ( true )
+                .setContentTitle ( "Saludable" )
                 .setPriority ( Notification.PRIORITY_HIGH )
                 .setSmallIcon ( R.mipmap.ic_launcher )
-                .setTicker ( text )
-                .setSound ( Uri.parse ( "android.resource://" + getPackageName () + "/" + R.raw.vacio ) )
                 .setWhen ( System.currentTimeMillis () );
-
-
         // Set the Channel ID for Android O.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             builder.setChannelId ( CHANNEL_ID ); // Channel ID

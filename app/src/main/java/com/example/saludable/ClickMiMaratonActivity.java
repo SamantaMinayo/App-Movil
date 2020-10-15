@@ -9,6 +9,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.saludable.Model.Dato;
 import com.example.saludable.Model.Maraton;
 import com.example.saludable.Model.Punto;
@@ -19,8 +24,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.PolygonOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -29,8 +33,14 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 //import lecho.lib.hellocharts.model.Axis;
@@ -41,9 +51,12 @@ import de.hdodenhof.circleimageview.CircleImageView;
 //import lecho.lib.hellocharts.model.Viewport;
 //import lecho.lib.hellocharts.view.LineChartView;
 
-public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener {
 
     private GoogleMap mMap;
+    private JsonObjectRequest jsonObjectRequest;
+    private RequestQueue requestQueue;
+    private List<HashMap<String, String>> path;
     //  private LineChartView chartvel, charttime;
     private String PostKey, current_user_id;
     private DatabaseReference CarreraUserInf, CarreraInf, DatosCarreraResult, ResultadoCarrera, MaratonDatosRef, MaratonPointsRef;
@@ -75,6 +88,8 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager ()
                 .findFragmentById ( R.id.mapmi );
         mapFragment.getMapAsync ( this );
+
+        requestQueue = Volley.newRequestQueue ( getApplicationContext () );
 
         //  chartvel = findViewById ( R.id.chartvel );
         //    charttime = findViewById ( R.id.charttime );
@@ -142,7 +157,7 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
     }
 
     private void GraficarTrayectoria() {
-
+        path = new ArrayList<HashMap<String, String>> ();
         Location locationa = null;
         for (Punto point : listadatosloc) {
             if (locationa == null) {
@@ -162,14 +177,92 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
                 Double longi = Double.valueOf ( point.longitud );
                 locationb.setLatitude ( lat );
                 locationb.setLongitude ( longi );
-                Polyline line = mMap.addPolyline ( new PolylineOptions ()
-                        .add ( new LatLng ( locationa.getLatitude (), locationa.getLongitude () ), new LatLng ( locationb.getLatitude (), locationb.getLongitude () ) )
-                        .width ( 5 )
-                        .color ( Color.BLUE ) );
+                String url = "https://maps.googleapis.com/maps/api/directions/json?origin=" +
+                        locationa.getLatitude () + "," + locationa.getLongitude () + "&destination="
+                        + locationb.getLatitude () + "," + locationb.getLongitude ()
+                        + "&key=AIzaSyCscuNV7BK67lSaV1g8k0QW_pqR-4goYBk&mode=drive";
+                jsonObjectRequest = new JsonObjectRequest ( Request.Method.GET, url, null,
+                        new Response.Listener<JSONObject> () {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                JSONArray jRoutes = null;
+                                JSONArray jLegs = null;
+                                JSONArray jSteps = null;
+                                try {
+                                    jRoutes = response.getJSONArray ( "routes" );
+                                    for (int i = 0; i < jRoutes.length (); i++) {
+                                        jSteps = ((JSONObject) jRoutes.get ( i )).getJSONArray ( "legs" );
+                                        for (int j = 0; j < jLegs.length (); j++) {
+                                            jSteps = ((JSONObject) jLegs.get ( j )).getJSONArray ( "steps" );
+                                            for (int k = 0; k < jSteps.length (); k++) {
+                                                String polyline = "";
+                                                polyline = (String) ((JSONObject) ((JSONObject) jSteps.get ( k )).get ( "polylines" )).get ( "points" );
+                                                List<LatLng> list = decodePoly ( polyline );
+                                                for (int l = 0; l < list.size (); l++) {
+                                                    HashMap<String, String> hm = new HashMap<String, String> ();
+                                                    hm.put ( "lat", Double.toString ( list.get ( l ).latitude ) );
+                                                    hm.put ( "lng", Double.toString ( list.get ( l ).longitude ) );
+                                                    path.add ( hm );
+                                                }
+                                            }
+                                        }
+                                    }
+                                } catch (JSONException e) {
+                                    e.printStackTrace ();
+                                }
+                            }
+                        }, null
+                );
                 locationa = locationb;
             }
 
         }
+        ArrayList<LatLng> points = new ArrayList<LatLng> ();
+        PolygonOptions lineOptions = new PolygonOptions ();
+        for (int i = 0; i < path.size (); i++) {
+            HashMap<String, String> point = path.get ( i );
+            double lat = Double.parseDouble ( point.get ( "lat" ) );
+            double lng = Double.parseDouble ( point.get ( "lng" ) );
+            LatLng position = new LatLng ( lat, lng );
+            points.add ( position );
+        }
+
+
+        lineOptions.addAll ( points );
+        lineOptions.strokeWidth ( 9 );
+        lineOptions.fillColor ( Color.BLUE );
+
+    }
+
+    private List<LatLng> decodePoly(String encoded) {
+        List<LatLng> poly = new ArrayList<LatLng> ();
+        int index = 0, len = encoded.length ();
+        int lat = 0, lng = 0;
+
+        while (index < len) {
+            int b, shift = 0, result = 0;
+            do {
+                b = encoded.charAt ( index++ ) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            } while (b >= 0x20);
+            int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+            lat += dlat;
+
+            shift = 0;
+            result = 0;
+            do {
+                b = encoded.charAt ( index++ ) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            } while (b >= 0x20);
+            int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+            lng += dlng;
+
+            LatLng p = new LatLng ( (((double) lat / 1E5)), (((double) lng / 1E5)) );
+            poly.add ( p );
+        }
+        return poly;
     }
 
     private void CargarResultadosCarrera() {
@@ -416,5 +509,10 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
+    }
+
+    @Override
+    public void onMapClick(LatLng latLng) {
+
     }
 }

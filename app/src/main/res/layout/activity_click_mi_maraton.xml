@@ -374,18 +374,6 @@
             </LinearLayout>
 
             <TextView
-                android:id="@+id/tittray"
-                android:layout_width="match_parent"
-                android:layout_height="20dp"
-                android:layout_below="@+id/resultadostcglobales"
-                android:layout_alignParentStart="true"
-                android:layout_marginTop="10dp"
-                android:text="Trayectoria"
-                android:textAlignment="center"
-                android:textColor="@android:color/black"
-                android:textSize="15dp" />
-
-            <TextView
                 android:id="@+id/graf_tiempo"
                 android:layout_width="match_parent"
                 android:layout_height="20dp"
@@ -435,11 +423,22 @@
                 android:textColor="@android:color/black"
                 android:textSize="15dp" />
 
+            <TextView
+                android:id="@+id/tittray"
+                android:layout_width="match_parent"
+                android:layout_height="20dp"
+                android:layout_below="@+id/resultadostcglobales"
+                android:layout_alignParentStart="true"
+                android:layout_marginTop="10dp"
+                android:text="Trayectoria"
+                android:textAlignment="center"
+                android:textColor="@android:color/black"
+                android:textSize="15dp" />
             <fragment
                 android:id="@+id/mapmi"
                 class="com.google.android.gms.maps.SupportMapFragment"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
+                android:layout_height="400dp"
                 android:layout_below="@+id/tittray"
                 android:layout_margin="10dp" />
 
