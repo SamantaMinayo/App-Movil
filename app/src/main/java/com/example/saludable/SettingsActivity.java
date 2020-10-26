@@ -5,7 +5,9 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
@@ -17,15 +19,18 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.saludable.Service.Utils;
 import com.example.saludable.Utils.Common;
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.example.saludable.localdatabase.DaoUsers;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -57,15 +62,15 @@ public class SettingsActivity extends AppCompatActivity {
     private CircleImageView userProfileImage;
     private ProgressDialog loadingBar;
     private RecyclerView postList;
-    private DatabaseReference SettingsUserRef, PostRef;
+    private static final int CODIGO_PERMISO = 22;
     private FirebaseAuth mAuth;
     private StorageReference UserProfileImageRef;
-    private FirebaseRecyclerAdapter firebaseRecyclerAdapter;
+    private DatabaseReference SettingsUserRef;
     private String currentUserId, updateprofilename, updateprofileimage;
     private RadioButton radioButton, fem, mas;
     private RadioGroup radioGroup;
+    private DaoUsers daoUsers;
     private final int REQUEST_STORAGE = 0;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,21 +78,23 @@ public class SettingsActivity extends AppCompatActivity {
             super.onCreate ( savedInstanceState );
             setContentView ( R.layout.activity_settings );
 
-
-            if (ActivityCompat.checkSelfPermission ( this, Manifest.permission.READ_EXTERNAL_STORAGE ) != PackageManager.PERMISSION_GRANTED)
-                ActivityCompat.requestPermissions ( this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_STORAGE );
+            if (Utils.requestingLocationUpdates ( this )) {
+                if (!checkPermissions ()) {
+                    requestPermissions ();
+                }
+            }
 
             mAuth = FirebaseAuth.getInstance ();
             currentUserId = mAuth.getCurrentUser ().getUid ();
             SettingsUserRef = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( currentUserId ).child ( "Informacion" );
             UserProfileImageRef = FirebaseStorage.getInstance ().getReference ().child ( "ProfileImages" );
-            PostRef = FirebaseDatabase.getInstance ().getReference ().child ( "Posts" );
 
             mToolbar = findViewById ( R.id.settings_toolbar );
             setSupportActionBar ( mToolbar );
             getSupportActionBar ().setTitle ( "Account Settings" );
             getSupportActionBar ().setDisplayHomeAsUpEnabled ( true );
 
+            daoUsers = new DaoUsers ( this );
             fem = findViewById ( R.id.setradFeMale );
             mas = findViewById ( R.id.setradMale );
             userName = findViewById ( R.id.settings_username );
@@ -102,9 +109,9 @@ public class SettingsActivity extends AppCompatActivity {
             userProfileImage = findViewById ( R.id.settings_profile_image );
             UpdateAccountSettingsButton = findViewById ( R.id.update_account_settings_button );
             loadingBar = new ProgressDialog ( this );
-
+            Common.loggedUser = daoUsers.ObtenerUsuario ();
             if (Common.loggedUser != null) {
-                Picasso.with ( SettingsActivity.this ).load ( Common.loggedUser.getProfileimage () ).placeholder ( R.drawable.profile ).into ( userProfileImage );
+                Picasso.with ( SettingsActivity.this ).load ( "file://" + Common.loggedUser.getProfileimage () ).placeholder ( R.drawable.profile ).into ( userProfileImage );
                 userName.setText ( Common.loggedUser.getUsername () );
                 userProfName.setText ( Common.loggedUser.getFullname () );
                 userStatus.setText ( Common.loggedUser.getStatus () );
@@ -122,7 +129,7 @@ public class SettingsActivity extends AppCompatActivity {
                 userEdad.setText ( Common.loggedUser.getEdad () );
 
             } else {
-                SettingsUserRef.addValueEventListener ( new ValueEventListener () {
+                SettingsUserRef.addListenerForSingleValueEvent ( new ValueEventListener () {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
@@ -364,10 +371,23 @@ public class SettingsActivity extends AppCompatActivity {
             userMap.put ( "rango", rangos );
             userMap.put ( "paso", factorpaso );
 
+            Common.loggedUser.setUsername ( username );
+            Common.loggedUser.setFullname ( profilename );
+            Common.loggedUser.setStatus ( status );
+            Common.loggedUser.setCountry ( country );
+            Common.loggedUser.setGenero ( genero );
+            Common.loggedUser.setEdad ( edad );
+            Common.loggedUser.setAltura ( altura );
+            Common.loggedUser.setPeso ( peso );
+            Common.loggedUser.setImc ( imc );
+            Common.loggedUser.setRango ( rangos );
+            Common.loggedUser.setPaso ( factorpaso );
+
             SettingsUserRef.updateChildren ( userMap ).addOnCompleteListener ( new OnCompleteListener () {
                 @Override
                 public void onComplete(@NonNull Task task) {
                     if (task.isSuccessful ()) {
+                        daoUsers.Editar ( Common.loggedUser );
                         SendUserToProfile ();
                         Toast.makeText ( SettingsActivity.this, "Usuario actualizado correctamente", Toast.LENGTH_SHORT ).show ();
                         loadingBar.dismiss ();
@@ -385,6 +405,23 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
+    private boolean checkPermissions() {
+        try {
+            return PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission ( this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE );
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private void requestPermissions() {
+        try {
+            ActivityCompat.requestPermissions ( SettingsActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, CODIGO_PERMISO );
+        } catch (Exception e) {
+
+        }
+    }
+
     private void SendUserToProfile() {
         try {
             Intent mainIntent = new Intent ( SettingsActivity.this, ProfileActivity.class );
@@ -399,23 +436,41 @@ public class SettingsActivity extends AppCompatActivity {
         }
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResult) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
         try {
-            super.onRequestPermissionsResult ( requestCode, permissions, grantResult );
+            if (requestCode == CODIGO_PERMISO) {
+                if (grantResults.length <= 0) {
 
-            if (requestCode == REQUEST_STORAGE) {
-                if (grantResult.length > 0 && grantResult[0] == PackageManager.PERMISSION_GRANTED) {
-                    Toast.makeText ( this, "Permission granted", Toast.LENGTH_SHORT ).show ();
+                } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Toast.makeText ( this, "Permiso Concedido", Toast.LENGTH_SHORT );
                 } else {
-                    Toast.makeText ( this, "Permission denied", Toast.LENGTH_SHORT ).show ();
+                    Toast.makeText ( this, "Permiso Negado", Toast.LENGTH_SHORT );
+                    Snackbar.make (
+                            findViewById ( R.id.activity_login ),
+                            R.string.permission_denied_explanation,
+                            Snackbar.LENGTH_INDEFINITE )
+                            .setAction ( R.string.settings, new View.OnClickListener () {
+                                @Override
+                                public void onClick(View view) {
+                                    // Build intent that displays the App settings screen.
+                                    Intent intent = new Intent ();
+                                    intent.setAction (
+                                            Settings.ACTION_APPLICATION_DETAILS_SETTINGS );
+                                    Uri uri = Uri.fromParts ( "package",
+                                            BuildConfig.APPLICATION_ID, null );
+                                    intent.setData ( uri );
+                                    intent.setFlags ( Intent.FLAG_ACTIVITY_NEW_TASK );
+                                    startActivity ( intent );
+                                }
+                            } )
+                            .show ();
                 }
             }
-        } catch (Exception e) {
-            HashMap error = new HashMap ();
-            error.put ( "error", e.getMessage () );
-            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "SettingsActivity" ).child ( "onRequestPermissionsResult" ).child ( currentUserId ).updateChildren ( error );
-        }
 
+        } catch (Exception e) {
+        }
     }
 }

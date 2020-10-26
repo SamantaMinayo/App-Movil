@@ -36,6 +36,9 @@ public class User {
         this.paso = paso;
     }
 
+    public User() {
+    }
+
     public String getRango() {
         return rango;
     }
@@ -46,10 +49,6 @@ public class User {
 
     public String getPaso() {
         return paso;
-    }
-
-
-    public User() {
     }
 
     public void setPaso(String paso) {

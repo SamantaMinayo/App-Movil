@@ -113,7 +113,8 @@ public class MyService extends Service {
         };
 
         createLocationRequest ();
-        getLastLocation ();
+
+        getLocation ();
 
         HandlerThread handlerThread = new HandlerThread ( TAG );
         handlerThread.start ();
@@ -205,6 +206,7 @@ public class MyService extends Service {
         Utils.setRequestingLocationUpdates ( this, true );
         startService ( new Intent ( getApplicationContext (), MyService.class ) );
         try {
+            mFusedLocationClient.removeLocationUpdates ( mLocationCallback );
             mFusedLocationClient.requestLocationUpdates ( mLocationRequest,
                     mLocationCallback, Looper.myLooper () );
         } catch (SecurityException unlikely) {
@@ -291,9 +293,18 @@ public class MyService extends Service {
         }
     }
 
+    public void getLocation() {
+        try {
+            mFusedLocationClient.requestLocationUpdates ( mLocationRequest,
+                    mLocationCallback, Looper.myLooper () );
+        } catch (SecurityException unlikely) {
+            Utils.setRequestingLocationUpdates ( this, false );
+            Log.e ( TAG, "Lost location permission. Could not request updates. " + unlikely );
+        }
+    }
+
     public void onNewLocation(Location location) {
         Log.i ( TAG, "New location: " + location );
-
 
         mLocation = location;
         if (mLocationant == null) {

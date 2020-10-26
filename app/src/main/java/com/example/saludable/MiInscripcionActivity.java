@@ -18,8 +18,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.saludable.Interfaces.IFirebaseLoadDone;
 import com.example.saludable.Interfaces.IRecyclerItemClickListener;
+import com.example.saludable.Model.Maraton;
 import com.example.saludable.Model.MiMaraton;
+import com.example.saludable.ViewHolder.MaratonAdapter;
 import com.example.saludable.ViewHolder.MiMaratonViewHolder;
+import com.example.saludable.localdatabase.DaoUsrMrtn;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
@@ -41,13 +44,16 @@ public class MiInscripcionActivity extends AppCompatActivity implements IFirebas
 
 
     FirebaseRecyclerAdapter<MiMaraton, MiMaratonViewHolder> adapter, searchAdapter;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager layoutManager;
     RecyclerView recycler_all_mi_maraton;
     IFirebaseLoadDone firebaseLoadDone;
     MaterialSearchBar searchBar;
     List<String> suggestList = new ArrayList<> ();
     private FirebaseAuth mAuth;
     private String current_user_id;
-
+    private ArrayList<Maraton> lista;
+    private DaoUsrMrtn daoUsrMrtn;
     private Toolbar mToolbar;
 
 
@@ -65,6 +71,7 @@ public class MiInscripcionActivity extends AppCompatActivity implements IFirebas
             getSupportActionBar ().setTitle ( "Mis Proximas Carreras" );
             getSupportActionBar ().setDisplayHomeAsUpEnabled ( true );
 
+            daoUsrMrtn = new DaoUsrMrtn ( this );
             searchBar = findViewById ( R.id.my_inscripcion_search_bar );
             searchBar.setCardViewElevation ( 10 );
             searchBar.addTextChangeListener ( new TextWatcher () {
@@ -117,6 +124,7 @@ public class MiInscripcionActivity extends AppCompatActivity implements IFirebas
             recycler_all_mi_maraton.setLayoutManager ( layoutManager );
             recycler_all_mi_maraton.addItemDecoration ( new DividerItemDecoration ( this, ((LinearLayoutManager) layoutManager).getOrientation () ) );
 
+            lista = daoUsrMrtn.ObtenerMaratonList ( "ins" );
 
             firebaseLoadDone = this;
 
@@ -135,7 +143,7 @@ public class MiInscripcionActivity extends AppCompatActivity implements IFirebas
             final List<String> lstMiMaratonName = new ArrayList<> ();
             DatabaseReference MiMaratonList = FirebaseDatabase.getInstance ()
                     .getReference ( "Users" ).child ( current_user_id ).child ( "Inscripcion" );
-            MiMaratonList.addListenerForSingleValueEvent ( new ValueEventListener () {
+            MiMaratonList.addValueEventListener ( new ValueEventListener () {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     for (DataSnapshot MaratonSnapshot : dataSnapshot.getChildren ()) {
@@ -159,6 +167,8 @@ public class MiInscripcionActivity extends AppCompatActivity implements IFirebas
 
     private void loadInsList() {
         try {
+
+
             Query query = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( current_user_id ).child ( "Inscripcion" );
 
             FirebaseRecyclerOptions<MiMaraton> options = new FirebaseRecyclerOptions.Builder<MiMaraton> ()
@@ -168,7 +178,6 @@ public class MiInscripcionActivity extends AppCompatActivity implements IFirebas
             adapter = new FirebaseRecyclerAdapter<MiMaraton, MiMaratonViewHolder> ( options ) {
                 @Override
                 protected void onBindViewHolder(@NonNull MiMaratonViewHolder maratonViewHolder, int position, @NonNull MiMaraton maraton) {
-
                     maratonViewHolder.maratonname.setText ( maraton.maratonname );
                     maratonViewHolder.maratondate.setText ( maraton.date );
                     Picasso.with ( getApplication () ).load ( maraton.maratonimagen ).into ( maratonViewHolder.maratonimage );
@@ -196,6 +205,12 @@ public class MiInscripcionActivity extends AppCompatActivity implements IFirebas
 
             adapter.startListening ();
             recycler_all_mi_maraton.setAdapter ( adapter );
+            if (lista != null) {
+                mAdapter = new MaratonAdapter ( lista, getApplication (), "ins" );
+                layoutManager = new LinearLayoutManager ( this );
+                recycler_all_mi_maraton.setLayoutManager ( layoutManager );
+                recycler_all_mi_maraton.setAdapter ( mAdapter );
+            }
         } catch (Exception e) {
             HashMap error = new HashMap ();
             error.put ( "error", e.getMessage () );

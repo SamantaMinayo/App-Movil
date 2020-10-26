@@ -119,7 +119,7 @@ public class MaratonActivity extends AppCompatActivity implements IFirebaseLoadD
         } catch (Exception e) {
             HashMap error = new HashMap ();
             error.put ( "error", e.getMessage () );
-            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MaratonActivity" ).child ( "LoadSearchData" ).child ( Common.loggedUser.getUid () ).updateChildren ( error );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MaratonActivity" ).child ( "OnCreate" ).child ( Common.loggedUser.getUid () ).updateChildren ( error );
         }
     }
 
@@ -128,7 +128,7 @@ public class MaratonActivity extends AppCompatActivity implements IFirebaseLoadD
             final List<String> lstMaratonName = new ArrayList<> ();
             DatabaseReference MaratonList = FirebaseDatabase.getInstance ()
                     .getReference ( "Carreras" ).child ( "Nuevas" );
-            MaratonList.addListenerForSingleValueEvent ( new ValueEventListener () {
+            MaratonList.addValueEventListener ( new ValueEventListener () {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     for (DataSnapshot MaratonSnapshot : dataSnapshot.getChildren ()) {

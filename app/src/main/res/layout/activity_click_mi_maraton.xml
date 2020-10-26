@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/colorAccent"
     tools:context=".ClickMiMaratonActivity">
 
     <ScrollView
@@ -20,71 +20,34 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/mi_maraton_name"
-                android:layout_marginLeft="10dp"
-                android:layout_marginRight="10dp"
-                android:background="@drawable/tableborder"
-                android:orientation="horizontal"
+                android:layout_marginTop="6dp"
+                android:orientation="vertical"
                 android:padding="5dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="5dp"
-                        android:orientation="horizontal"
-                        android:padding="2dp">
-
-                        <TextView
-                            android:id="@+id/text"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Fecha de la Carrera : "
-                            android:textAlignment="center"
-                            android:textColor="@android:color/darker_gray"
-                            android:textSize="10sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/carrerahora"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="2"
-                            android:text="hora"
-                            android:textAlignment="center"
-                            android:textColor="@android:color/black"
-                            android:textSize="11sp" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
                         android:orientation="horizontal">
-
                         <LinearLayout
-                            android:layout_width="match_parent"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="2">
+                            android:layout_weight="1">
 
                             <de.hdodenhof.circleimageview.CircleImageView
                                 android:id="@+id/carreraimage"
                                 android:layout_width="100dp"
                                 android:layout_height="100dp"
-                                android:layout_marginLeft="4dp"
                                 android:scaleType="centerCrop"
                                 android:src="@drawable/profile" />
 
                         </LinearLayout>
 
                         <LinearLayout
-                            android:layout_width="match_parent"
+                            android:layout_width="0dp"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1"
+                            android:layout_weight="2"
                             android:orientation="vertical">
 
                             <TextView
@@ -119,11 +82,20 @@
                                 android:textAlignment="center"
                                 android:textColor="@android:color/black"
                                 android:textSize="12sp" />
+
+                            <TextView
+                                android:id="@+id/carrerahora"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:layout_weight="2"
+                                android:text="hora"
+                                android:textAlignment="center"
+                                android:textColor="@android:color/black"
+                                android:textSize="12sp" />
                         </LinearLayout>
 
-                    </LinearLayout>
                 </LinearLayout>
-
             </LinearLayout>
 
             <LinearLayout
@@ -132,7 +104,6 @@
                 android:layout_height="match_parent"
                 android:layout_below="@+id/misres"
                 android:layout_marginLeft="10dp"
-                android:layout_marginTop="5dp"
                 android:layout_marginRight="10dp"
                 android:orientation="horizontal">
 
@@ -140,50 +111,69 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:background="@drawable/tableborder"
+                    android:background="@drawable/datostable"
+                    android:padding="10dp"
                     android:orientation="vertical">
 
                     <TextView
+                        android:id="@+id/tiempototal"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Velocidad"
-                        android:textAlignment="center"
-                        android:textColor="@android:color/black"
+                        android:text="0 "
                         android:textSize="15dp" />
-
                     <TextView
-                        android:id="@+id/velocidadprom"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_margin="5dp"
-                        android:text="0.0 m/s"
-                        android:textAlignment="center"
-                        android:textSize="15dp" />
+                        android:layout_height="wrap_content"
+                        android:text="Duración"
+                        android:textColor="@android:color/black"
+                        android:textSize="13dp" />
+
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:background="@drawable/tableborder"
-                    android:orientation="vertical">
+                    android:background="@drawable/datostable"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+                    <TextView
+                        android:id="@+id/distanciatot"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="0 "
+                        android:textSize="15dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Distancia"
+                        android:textColor="@android:color/black"
+                        android:textSize="13dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/datostable"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:id="@+id/pasostotal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="0 "
+                        android:textSize="15dp" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="Pasos"
-                        android:textAlignment="center"
                         android:textColor="@android:color/black"
-                        android:textSize="15dp" />
+                        android:textSize="13dp" />
 
-                    <TextView
-                        android:id="@+id/pasostotal"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_margin="5dp"
-                        android:text="0 "
-                        android:textAlignment="center"
-                        android:textSize="15dp" />
                 </LinearLayout>
 
             </LinearLayout>
@@ -195,58 +185,245 @@
                 android:layout_below="@+id/resultados"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
-                android:layout_marginBottom="5dp"
                 android:orientation="horizontal">
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:background="@drawable/tableborder"
-                    android:orientation="vertical">
+                    android:background="@drawable/datostable"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:id="@+id/velocidadmax"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="0.0 m/s"
+                        android:textSize="15dp" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Tiempo"
-                        android:textAlignment="center"
+                        android:text="Velocidad max."
                         android:textColor="@android:color/black"
-                        android:textSize="15dp" />
+                        android:textSize="13dp" />
 
-                    <TextView
-                        android:id="@+id/tiempototal"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_margin="5dp"
-                        android:text="0 "
-                        android:textAlignment="center"
-                        android:textSize="15dp" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:background="@drawable/tableborder"
+                    android:background="@drawable/datostable"
+                    android:padding="10dp"
                     android:orientation="vertical">
+                    <TextView
+                        android:id="@+id/velocidadprom"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="0.0 m/s"
+                        android:textSize="15dp" />
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Calorias"
-                        android:textAlignment="center"
+                        android:text="Velocidad med."
                         android:textColor="@android:color/black"
+                        android:textSize="13dp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/datostable"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:id="@+id/velocidadmin"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="0.0 m/s"
                         android:textSize="15dp" />
 
                     <TextView
-                        android:id="@+id/caltotal"
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_margin="5dp"
-                        android:text="0 "
-                        android:textAlignment="center"
-                        android:textSize="15dp" />
+                        android:layout_height="wrap_content"
+                        android:text="Velocidad min"
+                        android:textColor="@android:color/black"
+                        android:textSize="13dp" />
                 </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/resultadostcvel"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/resultadostc"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@drawable/datostable"
+                        android:orientation="vertical"
+                        android:padding="10dp">
+
+                        <TextView
+                            android:id="@+id/caltotal"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="0 "
+                            android:textSize="15dp" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Calorias"
+                            android:textColor="@android:color/black"
+                            android:textSize="13dp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@drawable/datostable"
+                        android:orientation="vertical"
+                        android:padding="10dp">
+
+                        <TextView
+                            android:id="@+id/poinalto"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="0 "
+                            android:textSize="15dp" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Punto más alto"
+                            android:textColor="@android:color/black"
+                            android:textSize="13dp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@drawable/datostable"
+                        android:orientation="vertical"
+                        android:padding="10dp">
+
+                        <TextView
+                            android:id="@+id/pointmin"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="0 "
+                            android:textSize="15dp" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Punto más bajo"
+                            android:textColor="@android:color/black"
+                            android:textSize="13dp" />
+
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@drawable/datostable"
+                        android:orientation="vertical"
+                        android:padding="10dp">
+
+                        <TextView
+                            android:id="@+id/ritmo"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="0"
+                            android:textSize="15dp" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Ritmo Prom."
+                            android:textColor="@android:color/black"
+                            android:textSize="13dp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@drawable/datostable"
+                        android:orientation="vertical"
+                        android:padding="10dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textSize="15dp" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textColor="@android:color/black"
+                            android:textSize="13dp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@drawable/datostable"
+                        android:orientation="vertical"
+                        android:padding="10dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textSize="15dp" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textColor="@android:color/black"
+                            android:textSize="13dp" />
+
+                    </LinearLayout>
+                </LinearLayout>
+
 
             </LinearLayout>
 
@@ -263,22 +440,22 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:background="@drawable/tableborder"
+                    android:background="@drawable/datostable"
+                    android:padding="5dp"
                     android:orientation="vertical">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Velocidad Promedio"
+                        android:text="Vel Med. Max."
                         android:textAlignment="center"
                         android:textColor="@android:color/black"
-                        android:textSize="15dp" />
+                        android:textSize="13dp" />
 
                     <TextView
-                        android:id="@+id/velocidadpromglo"
+                        android:id="@+id/maxvelo"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_margin="5dp"
                         android:text="0.0 m/s"
                         android:textAlignment="center"
                         android:textSize="15dp" />
@@ -288,27 +465,51 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:background="@drawable/tableborder"
+                    android:background="@drawable/datostable"
+                    android:orientation="vertical"
+                    android:padding="5dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Vel Med."
+                        android:textAlignment="center"
+                        android:textColor="@android:color/black"
+                        android:textSize="13dp" />
+
+                    <TextView
+                        android:id="@+id/velocidadpromglo"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:text="0.0 m/s"
+                        android:textAlignment="center"
+                        android:textSize="15dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@drawable/datostable"
+                    android:padding="5dp"
                     android:orientation="vertical">
 
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Pasos Promedio"
+                        android:text="Vel Med. Min."
                         android:textAlignment="center"
                         android:textColor="@android:color/black"
-                        android:textSize="15dp" />
+                        android:textSize="13dp" />
 
                     <TextView
-                        android:id="@+id/pasostotalglob"
+                        android:id="@+id/minvel"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_margin="5dp"
-                        android:text="0 "
+                        android:text="0.0 m/s"
                         android:textAlignment="center"
                         android:textSize="15dp" />
                 </LinearLayout>
-
             </LinearLayout>
 
             <LinearLayout
@@ -318,70 +519,279 @@
                 android:layout_below="@+id/resultadosglob"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
-                android:layout_marginBottom="5dp"
-                android:orientation="horizontal">
+                android:orientation="vertical">
 
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:background="@drawable/tableborder"
-                    android:orientation="vertical">
+                    android:orientation="horizontal">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Tiempo Promedio"
-                        android:textAlignment="center"
-                        android:textColor="@android:color/black"
-                        android:textSize="15dp" />
-
-                    <TextView
-                        android:id="@+id/tiempototalglob"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_margin="5dp"
-                        android:text="0 "
-                        android:textAlignment="center"
-                        android:textSize="15dp" />
+                        android:layout_weight="1"
+                        android:background="@drawable/datostable"
+                        android:orientation="vertical"
+                        android:padding="5dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Mejor Tiempo"
+                            android:textAlignment="center"
+                            android:textColor="@android:color/black"
+                            android:textSize="13dp" />
+
+                        <TextView
+                            android:id="@+id/tiempomejor"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text="0 "
+                            android:textAlignment="center"
+                            android:textSize="15dp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@drawable/datostable"
+                        android:orientation="vertical"
+                        android:padding="5dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Tiempo Prom"
+                            android:textAlignment="center"
+                            android:textColor="@android:color/black"
+                            android:textSize="13dp" />
+
+                        <TextView
+                            android:id="@+id/tiempototalglob"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text="0 "
+                            android:textAlignment="center"
+                            android:textSize="15dp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@drawable/datostable"
+                        android:orientation="vertical"
+                        android:padding="5dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Peor Tiempo"
+                            android:textAlignment="center"
+                            android:textColor="@android:color/black"
+                            android:textSize="13dp" />
+
+                        <TextView
+                            android:id="@+id/tiempopeor"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text="0 "
+                            android:textAlignment="center"
+                            android:textSize="15dp" />
+                    </LinearLayout>
                 </LinearLayout>
 
                 <LinearLayout
-                    android:layout_width="0dp"
+                    android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:background="@drawable/tableborder"
-                    android:orientation="vertical">
+                    android:orientation="horizontal">
 
-                    <TextView
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:text="Calorias Promedio"
-                        android:textAlignment="center"
-                        android:textColor="@android:color/black"
-                        android:textSize="15dp" />
-
-                    <TextView
-                        android:id="@+id/caltotalglob"
-                        android:layout_width="match_parent"
+                    <LinearLayout
+                        android:layout_width="0dp"
                         android:layout_height="match_parent"
-                        android:layout_margin="5dp"
-                        android:text="0 "
-                        android:textAlignment="center"
-                        android:textSize="15dp" />
+                        android:layout_weight="1"
+                        android:background="@drawable/datostable"
+                        android:orientation="vertical"
+                        android:padding="5dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Mejor ritmo"
+                            android:textAlignment="center"
+                            android:textColor="@android:color/black"
+                            android:textSize="13dp" />
+
+                        <TextView
+                            android:id="@+id/mejorritmo"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text="0 "
+                            android:textAlignment="center"
+                            android:textSize="15dp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@drawable/datostable"
+                        android:orientation="vertical"
+                        android:padding="5dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Ritmo Prom"
+                            android:textAlignment="center"
+                            android:textColor="@android:color/black"
+                            android:textSize="13dp" />
+
+                        <TextView
+                            android:id="@+id/ritmoprom"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text="0"
+                            android:textAlignment="center"
+                            android:textSize="15dp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@drawable/datostable"
+                        android:orientation="vertical"
+                        android:padding="5dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Peor ritmo"
+                            android:textAlignment="center"
+                            android:textColor="@android:color/black"
+                            android:textSize="13dp" />
+
+                        <TextView
+                            android:id="@+id/peorritmo"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text="0 "
+                            android:textAlignment="center"
+                            android:textSize="15dp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@drawable/datostable"
+                        android:orientation="vertical"
+                        android:padding="5dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Calorias Promedio"
+                            android:textAlignment="center"
+                            android:textColor="@android:color/black"
+                            android:textSize="13dp" />
+
+                        <TextView
+                            android:id="@+id/caltotalglob"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text="0 "
+                            android:textAlignment="center"
+                            android:textSize="15dp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@drawable/datostable"
+                        android:orientation="vertical"
+                        android:padding="5dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Pasos Promedio"
+                            android:textAlignment="center"
+                            android:textColor="@android:color/black"
+                            android:textSize="13dp" />
+
+                        <TextView
+                            android:id="@+id/pasostotalglob"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text="0 "
+                            android:textAlignment="center"
+                            android:textSize="15dp" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:background="@drawable/datostable"
+                        android:orientation="vertical"
+                        android:padding="5dp">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text=""
+                            android:textAlignment="center"
+                            android:textColor="@android:color/black"
+                            android:textSize="13dp" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:text=""
+                            android:textAlignment="center"
+                            android:textSize="15dp" />
+                    </LinearLayout>
                 </LinearLayout>
 
             </LinearLayout>
 
             <TextView
-                android:id="@+id/graf_tiempo"
+                android:id="@+id/graf_distancia"
                 android:layout_width="match_parent"
-                android:layout_height="20dp"
+                android:layout_height="wrap_content"
                 android:layout_below="@id/mapmi"
                 android:layout_alignParentStart="true"
+                android:background="@drawable/tableborder"
+                android:padding="5dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
-                android:text="Grafica distancia-tiempo"
+                android:text="Distancia vs Tiempo"
+                android:textAlignment="center"
+                android:textColor="@android:color/black"
+                android:textSize="15dp" />
+
+            <TextView
+                android:id="@+id/graf_velocidad"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/chart_preview"
+                android:layout_alignParentStart="true"
+                android:background="@drawable/tableborder"
+                android:padding="5dp"
+                android:text="Velocidad vs Tiempo"
                 android:textAlignment="center"
                 android:textColor="@android:color/black"
                 android:textSize="15dp" />
@@ -389,10 +799,9 @@
             <TextView
                 android:id="@+id/mi_maraton_name"
                 android:layout_width="match_parent"
-                android:layout_height="30dp"
+                android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"
+                android:paddingTop="5dp"
                 android:text="Nombre Carrera"
                 android:textAlignment="center"
                 android:textColor="@android:color/black"
@@ -401,11 +810,11 @@
             <TextView
                 android:id="@+id/misres"
                 android:layout_width="match_parent"
-                android:layout_height="20dp"
+                android:layout_height="wrap_content"
                 android:layout_below="@+id/micarrera"
                 android:layout_alignParentStart="true"
-                android:layout_marginTop="5dp"
-                android:layout_marginBottom="5dp"
+                android:background="@drawable/tableborder"
+                android:padding="5dp"
                 android:text="Mis resultados"
                 android:textAlignment="center"
                 android:textColor="@android:color/black"
@@ -414,36 +823,88 @@
             <TextView
                 android:id="@+id/glores"
                 android:layout_width="match_parent"
-                android:layout_height="20dp"
-                android:layout_below="@+id/resultadostc"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/resultadostcvel"
                 android:layout_alignParentStart="true"
-                android:layout_marginBottom="10dp"
+                android:background="@drawable/tableborder"
+                android:padding="5dp"
                 android:text="Resultados Globales"
                 android:textAlignment="center"
                 android:textColor="@android:color/black"
                 android:textSize="15dp" />
-
             <TextView
-                android:id="@+id/tittray"
+                android:id="@+id/tray"
                 android:layout_width="match_parent"
-                android:layout_height="20dp"
+                android:layout_height="wrap_content"
                 android:layout_below="@+id/resultadostcglobales"
                 android:layout_alignParentStart="true"
-                android:layout_marginTop="10dp"
+                android:background="@drawable/tableborder"
+                android:padding="5dp"
                 android:text="Trayectoria"
                 android:textAlignment="center"
                 android:textColor="@android:color/black"
                 android:textSize="15dp" />
+
+            <View
+                android:id="@+id/view"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_below="@+id/chart"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:background="@android:color/darker_gray" />
+
+            <View
+                android:id="@+id/viewvel"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_below="@+id/chartvel"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+                android:background="@android:color/darker_gray" />
+
             <fragment
                 android:id="@+id/mapmi"
                 class="com.google.android.gms.maps.SupportMapFragment"
                 android:layout_width="match_parent"
-                android:layout_height="400dp"
-                android:layout_below="@+id/tittray"
-                android:layout_margin="10dp" />
+                android:layout_height="200dp"
+                android:layout_below="@+id/tray" />
 
+            <lecho.lib.hellocharts.view.LineChartView
+                android:id="@+id/chart"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_below="@+id/graf_distancia"
+                android:layout_margin="5dp"
+                android:layout_weight="1"
+                android:padding="5dp"></lecho.lib.hellocharts.view.LineChartView>
 
+            <lecho.lib.hellocharts.view.LineChartView
+                android:id="@+id/chartvel"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_below="@+id/graf_velocidad"
+                android:layout_margin="5dp"
+                android:layout_weight="1"
+                android:padding="5dp"></lecho.lib.hellocharts.view.LineChartView>
 
+            <lecho.lib.hellocharts.view.PreviewLineChartView
+                android:id="@+id/chart_preview"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_below="@+id/view"
+                android:layout_margin="5dp"
+                android:layout_weight="1"
+                android:padding="5dp"></lecho.lib.hellocharts.view.PreviewLineChartView>
+
+            <lecho.lib.hellocharts.view.PreviewLineChartView
+                android:id="@+id/chart_previewvel"
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_below="@+id/viewvel"
+                android:layout_margin="5dp"
+                android:layout_weight="1"
+                android:padding="5dp"></lecho.lib.hellocharts.view.PreviewLineChartView>
         </RelativeLayout>
     </ScrollView>
 

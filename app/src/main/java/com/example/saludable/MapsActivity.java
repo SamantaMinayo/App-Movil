@@ -28,6 +28,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -35,18 +36,17 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.example.saludable.Model.UsrMrtn;
 import com.example.saludable.Service.MyService;
 import com.example.saludable.Service.Utils;
 import com.example.saludable.Utils.Common;
+import com.example.saludable.localdatabase.DaoUsrMrtn;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.material.snackbar.Snackbar;
@@ -66,7 +66,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         SharedPreferences.OnSharedPreferenceChangeListener {
 
     private GoogleMap mMap;
-    private Marker marcador;
 
     private FirebaseAuth mAuth;
     double factorpaso;
@@ -104,6 +103,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     // A reference to the service used to get location updates.
     private MyService mService = null;
     private DecimalFormat formato1;
+    private DaoUsrMrtn usrMrtn;
 
     // Tracks the bound state of the service.
     private boolean mBound = false;
@@ -144,6 +144,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             wakelock = powerManager.newWakeLock ( PowerManager.PARTIAL_WAKE_LOCK,
                     "MyApp::MyWakelockTag" );
 
+            usrMrtn = new DaoUsrMrtn ( this );
             mAuth = FirebaseAuth.getInstance ();
             current_user_id = mAuth.getCurrentUser ().getUid ();
             PostKey = getIntent ().getExtras ().get ( "PostKey" ).toString ();
@@ -170,13 +171,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     child ( "Nuevas" ).child ( PostKey ).child ( "estado" );
 
             horacarrera = Common.carrera.getMaratontime ();
+
             // Check that the user hasn't revoked permissions by going to Settings.
             if (Utils.requestingLocationUpdates ( this )) {
                 if (!checkPermissions ()) {
                     requestPermissions ();
                 }
             }
-
             Carrera.addValueEventListener ( new ValueEventListener () {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -462,7 +463,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     cronometro.start ();
                     distanciatotal = 0.0;
                     velocidadtotal = 0.0;
-                    mService.requestLocationUpdates ();
                 } else {
                     // Permission denied.
                     setButtonsState ( false );
@@ -512,13 +512,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             LatLng coordenada = new LatLng ( location.getLatitude (), location.getLongitude () );
             CameraUpdate miUbicacion = CameraUpdateFactory.newLatLngZoom ( coordenada, 15 );
 
-            if (marcador != null) marcador.remove ();
-            marcador = mMap.addMarker ( new MarkerOptions ()
-                    .position ( coordenada )
-                    .title ( "Mi posision actual" )
-                    .icon ( BitmapDescriptorFactory.defaultMarker ( 2 ) )
-            );
+            // if (marcador != null) marcador.remove ();
+            //marcador = mMap.addMarker ( new MarkerOptions ()
+            //      .position ( coordenada )
+            //    .title ( "Mi posision actual" )
+            //  .icon ( BitmapDescriptorFactory.defaultMarker ( 2 ) )
+            //);
             mMap.animateCamera ( miUbicacion );
+            mMap.setMyLocationEnabled ( true );
             //hora
             calFordTime = Calendar.getInstance ();
             String hora = currentTime.format ( calFordTime.getTime () );
@@ -599,7 +600,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
             mService.removeLocationUpdates ();
 
-
             String pas = formato1.format ( (distanciatotal * 100) / factorpaso );
             String velmed = formato1.format ( velocidadtotal / contregistro );
             String velprom = formato1.format ( distanciatotal / (min * 60) );
@@ -618,9 +618,13 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             puntos.put ( "rango", Common.loggedUser.getRango () );
             puntos.put ( "usuario", Common.loggedUser.getUsername () );
             puntos.put ( "uid", current_user_id );
-            CarreraResInfo.updateChildren ( puntos );
-            CarreraUserInfRes.updateChildren ( puntos );
-            GuardarResList ();
+            if (distanciatotal > 10 && mint > 0) {
+                CarreraResInfo.updateChildren ( puntos );
+                CarreraUserInfRes.updateChildren ( puntos );
+                GuardarResList ();
+            } else {
+                Toast.makeText ( this, "Ha ocurrido un error. No se ha podido guardar informacion de la carrera para este usuario", Toast.LENGTH_SHORT ).show ();
+            }
         } catch (Exception e) {
             HashMap error = new HashMap ();
             error.put ( "error", e.getMessage () );
@@ -636,7 +640,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 puntos.put ( "latitud", String.valueOf ( location.getLatitude () ) );
                 puntos.put ( "longitud", String.valueOf ( location.getLongitude () ) );
-                puntos.put ( "velocidad", formato1.format ( location.getSpeed () ) );
+                puntos.put ( "altitud", String.valueOf ( location.getAltitude () ) );
+                if (location.getSpeed () < 0.01) {
+                    puntos.put ( "velocidad", "0.00" );
+                } else {
+                    puntos.put ( "velocidad", formato1.format ( location.getSpeed () ) );
+                }
                 puntos.put ( "hora", hora );
                 puntos.put ( "distancia", distguar );
                 puntos.put ( "tiempo", tiempo );
@@ -709,6 +718,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void GuardarResList() {
         try {
+            UsrMrtn usrM = usrMrtn.Obtener ( PostKey );
+            if (usrM == null) {
+                usrM = new UsrMrtn ( 1, PostKey, "fin" );
+                usrMrtn.Insert ( usrM );
+            } else {
+                usrM = new UsrMrtn ( 1, PostKey, "fin" );
+                usrMrtn.Editar ( usrM );
+            }
             RegistrarUsuario.removeValue ();
 
             HashMap crear = new HashMap ();

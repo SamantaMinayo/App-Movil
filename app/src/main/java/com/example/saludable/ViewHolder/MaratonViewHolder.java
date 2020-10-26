@@ -12,7 +12,7 @@ import com.example.saludable.R;
 
 public class MaratonViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-    public TextView username, contactname, contactnumber, maratontime, maratondate, maratonplace, maratonname, admindate, admintime, maratondescription;
+    public TextView username, maratontime, maratondate, maratonplace, maratonname, admindate, admintime, maratondescription;
     public ImageView maratonimage;
     IRecyclerItemClickListener iRecyclerItemClickListener;
 

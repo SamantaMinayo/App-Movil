@@ -2,6 +2,8 @@ package com.example.saludable;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.view.View;
 import android.webkit.WebSettings;
@@ -17,9 +19,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.example.saludable.Model.Maraton;
+import com.example.saludable.Model.Punto;
+import com.example.saludable.Model.UsrMrtn;
 import com.example.saludable.Service.Utils;
 import com.example.saludable.Utils.Common;
+import com.example.saludable.localdatabase.DaoMaraton;
+import com.example.saludable.localdatabase.DaoPuntos;
+import com.example.saludable.localdatabase.DaoUsrMrtn;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -27,8 +35,11 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
 import com.squareup.picasso.Picasso;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ClickMaratonActivity extends AppCompatActivity {
@@ -39,13 +50,17 @@ public class ClickMaratonActivity extends AppCompatActivity {
     private Button registermaratonButton, cancelregistermaratonButton, monitorearmaratonButton;
     private WebView maratontrayectoria;
 
+    DaoMaraton daoMaraton;
+    DaoUsrMrtn daousrMrtn;
     private DatabaseReference RegistrarUsuario, RegistrarCarrera, MaratonDatosRef, ResultadoUsuario, UsuarioMon;
     private FirebaseAuth mAuth;
 
     private String PostKey, current_user_id;
-
+    Bitmap bitmap;
     private ProgressDialog loadingBar;
     private Toolbar mToolbar;
+    private DaoPuntos daoPuntos;
+
 
 
     @Override
@@ -59,7 +74,6 @@ public class ClickMaratonActivity extends AppCompatActivity {
 
             PostKey = getIntent ().getExtras ().get ( "PostKey" ).toString ();
             MaratonDatosRef = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( "Nuevas" ).child ( PostKey );
-
             RegistrarUsuario = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( current_user_id ).child ( "Inscripcion" ).child ( PostKey );
             ResultadoUsuario = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( current_user_id ).child ( "Resultados" ).child ( "Lista" ).child ( PostKey );
             RegistrarCarrera = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( "Inscripcion" ).child ( PostKey ).child ( current_user_id );
@@ -69,6 +83,10 @@ public class ClickMaratonActivity extends AppCompatActivity {
             maratondescription = findViewById ( R.id.maraton_description_principal );
             maratonPlace = findViewById ( R.id.maraton_place_principal );
             maratondist = findViewById ( R.id.maraton_distance );
+
+            daoMaraton = new DaoMaraton ( this );
+            daousrMrtn = new DaoUsrMrtn ( this );
+            daoPuntos = new DaoPuntos ( this );
 
             maratontrayectoria = findViewById ( R.id.maraton_trayectoria );
             final WebSettings ajustesVisorWeb = maratontrayectoria.getSettings ();
@@ -94,8 +112,6 @@ public class ClickMaratonActivity extends AppCompatActivity {
             //registermaratonButton.setVisibility ( View.VISIBLE );
             //cancelregistermaratonButton.setVisibility ( View.INVISIBLE );
             //monitorearmaratonButton.setVisibility ( View.INVISIBLE );
-
-            Common.carrera = null;
 
             CargarDatosCarrera ();
             VerificarResultados ();
@@ -149,30 +165,51 @@ public class ClickMaratonActivity extends AppCompatActivity {
 
     private void CargarDatosCarrera() {
         try {
-            MaratonDatosRef.addValueEventListener ( new ValueEventListener () {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.exists ()) {
-                        Common.carrera = dataSnapshot.getValue ( Maraton.class );
-                        Picasso.with ( ClickMaratonActivity.this ).load ( Common.carrera.maratonimage ).into ( maratonImage );
-                        maratondescription.setText ( Common.carrera.description );
-                        maratoncontactname.setText ( Common.carrera.contactname );
-                        maratoncontactnumber.setText ( Common.carrera.contactnumber );
-                        maratontime.setText ( Common.carrera.maratontime );
-                        maratondate.setText ( Common.carrera.maratondate + " " );
-                        maratonPlace.setText ( "Lugar: " + Common.carrera.place );
-                        maratonName.setText ( Common.carrera.maratonname );
-                        maratondist.setText ( "Distancia: " + Common.carrera.maratondist + " km" );
-                        maratontrayectoria.loadUrl ( Common.carrera.maratontrayectoriaweb );
-                        maratontrayectoria.setWebViewClient ( new WebViewClient () );
+
+            Common.carrera = daoMaraton.ObtenerMaraton ( PostKey );
+            if (Common.carrera == null) {
+                MaratonDatosRef.addValueEventListener ( new ValueEventListener () {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists ()) {
+                            Common.carrera = dataSnapshot.getValue ( Maraton.class );
+                            Picasso.with ( ClickMaratonActivity.this ).load ( Common.carrera.maratonimage ).into ( maratonImage );
+                            maratondescription.setText ( Common.carrera.description );
+                            maratoncontactname.setText ( Common.carrera.contactname );
+                            maratoncontactnumber.setText ( Common.carrera.contactnumber );
+                            maratontime.setText ( Common.carrera.maratontime );
+                            maratondate.setText ( Common.carrera.maratondate + " " );
+                            maratonPlace.setText ( "Lugar: " + Common.carrera.place );
+                            maratonName.setText ( Common.carrera.maratonname );
+                            maratondist.setText ( "Distancia: " + Common.carrera.maratondist + " km" );
+                            maratontrayectoria.loadUrl ( Common.carrera.maratontrayectoriaweb );
+                            maratontrayectoria.setWebViewClient ( new WebViewClient () );
+                            maratonImage.buildDrawingCache ();
+                            bitmap = maratonImage.getDrawingCache ();
+                        }
                     }
-                }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                }
-            } );
+                    }
+                } );
+            } else {
+
+                Picasso.with ( ClickMaratonActivity.this ).load ( "file://" + Common.carrera.maratonimage ).into ( maratonImage );
+                maratondescription.setText ( Common.carrera.description );
+                maratoncontactname.setText ( Common.carrera.contactname );
+                maratoncontactnumber.setText ( Common.carrera.contactnumber );
+                maratontime.setText ( Common.carrera.maratontime );
+                maratondate.setText ( Common.carrera.maratondate + " " );
+                maratonPlace.setText ( "Lugar: " + Common.carrera.place );
+                maratonName.setText ( Common.carrera.maratonname );
+                maratondist.setText ( "Distancia: " + Common.carrera.maratondist + " km" );
+                maratontrayectoria.loadUrl ( Common.carrera.maratontrayectoriaweb );
+                maratontrayectoria.setWebViewClient ( new WebViewClient () );
+            }
+
+
         } catch (Exception e) {
             HashMap error = new HashMap ();
             error.put ( "error", e.getMessage () );
@@ -183,27 +220,34 @@ public class ClickMaratonActivity extends AppCompatActivity {
 
     private void VerificarResultados() {
         try {
-            ResultadoUsuario.addValueEventListener ( new ValueEventListener () {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.exists ()) {
-                        registermaratonButton.setEnabled ( false );
-                        cancelregistermaratonButton.setEnabled ( false );
-                        monitorearmaratonButton.setEnabled ( true );
-                        registermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
-                        cancelregistermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
-                        monitorearmaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.button ) );
-                        mensaje.setText ( "Usted ya registro datos en esta carrera. Dirigase a mis Resultados" );
-                    } else {
-                        VerificarInscripcion ();
+
+            ArrayList<Punto> puntos = daoPuntos.ObtenerPuntos ( PostKey );
+            if (puntos == null) {
+                VerificarInscripcion ();
+                ResultadoUsuario.addListenerForSingleValueEvent ( new ValueEventListener () {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists ()) {
+                            registermaratonButton.setEnabled ( false );
+                            cancelregistermaratonButton.setEnabled ( false );
+                            monitorearmaratonButton.setEnabled ( true );
+                            registermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
+                            cancelregistermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
+                            monitorearmaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.button ) );
+                            mensaje.setText ( "Usted ya registro datos en esta carrera. Dirigase a mis Resultados" );
+                        } else {
+                            VerificarInscripcion ();
+                        }
                     }
-                }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                }
-            } );
+                    }
+                } );
+            } else {
+                mensaje.setText ( "Usted ya registro datos en esta carrera. Dirigase a mis Resultados" );
+            }
         } catch (Exception e) {
             HashMap error = new HashMap ();
             error.put ( "error", e.getMessage () );
@@ -213,34 +257,46 @@ public class ClickMaratonActivity extends AppCompatActivity {
 
     private void VerificarInscripcion() {
         try {
-            RegistrarCarrera.addValueEventListener ( new ValueEventListener () {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.exists ()) {
-                        registermaratonButton.setEnabled ( false );
-                        cancelregistermaratonButton.setEnabled ( true );
-                        monitorearmaratonButton.setEnabled ( true );
-                        registermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
-                        cancelregistermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.button ) );
-                        //       monitorearmaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.button ) );
-                        mensaje.setText ( "Ingrese el codigo de la carrera para iniciar el monitoreo" );
-                    } else {
-                        registermaratonButton.setEnabled ( true );
-                        cancelregistermaratonButton.setEnabled ( false );
-                        monitorearmaratonButton.setEnabled ( false );
-                        registermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.button ) );
-                        cancelregistermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
-                        //   monitorearmaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
-                        mensaje.setText ( "INSCRIBETE!!" );
+            Maraton mar = daoMaraton.ObtenerMaraton ( PostKey );
+            if (mar == null) {
+                RegistrarCarrera.addListenerForSingleValueEvent ( new ValueEventListener () {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists ()) {
+                            registermaratonButton.setEnabled ( false );
+                            cancelregistermaratonButton.setEnabled ( true );
+                            monitorearmaratonButton.setEnabled ( true );
+                            registermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
+                            cancelregistermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.button ) );
+                            //       monitorearmaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.button ) );
+                            mensaje.setText ( "Ingrese el codigo de la carrera para iniciar el monitoreo" );
+                        } else {
+                            registermaratonButton.setEnabled ( true );
+                            cancelregistermaratonButton.setEnabled ( false );
+                            monitorearmaratonButton.setEnabled ( false );
+                            registermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.button ) );
+                            cancelregistermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
+                            //   monitorearmaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
+                            mensaje.setText ( "INSCRIBETE!!" );
+
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
 
                     }
-                }
+                } );
+            } else {
+                registermaratonButton.setEnabled ( false );
+                cancelregistermaratonButton.setEnabled ( true );
+                monitorearmaratonButton.setEnabled ( true );
+                registermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
+                cancelregistermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.button ) );
+                //       monitorearmaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.button ) );
+                mensaje.setText ( "Ingrese el codigo de la carrera para iniciar el monitoreo" );
+            }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            } );
         } catch (Exception e) {
             HashMap error = new HashMap ();
             error.put ( "error", e.getMessage () );
@@ -268,8 +324,9 @@ public class ClickMaratonActivity extends AppCompatActivity {
                             cancelregistermaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
                             //          monitorearmaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.backbutton ) );
                             mensaje.setText ( "INSCRIBETE!" );
-
                             Toast.makeText ( ClickMaratonActivity.this, "Ha cancelado su inscripcion correctamente.", Toast.LENGTH_SHORT ).show ();
+                            daoMaraton.Eliminar ( PostKey );
+                            daousrMrtn.Eliminar ( PostKey );
                             loadingBar.dismiss ();
                         } else {
                             String message = task.getException ().getMessage ();
@@ -311,6 +368,32 @@ public class ClickMaratonActivity extends AppCompatActivity {
                             //     monitorearmaratonButton.setBackground ( getResources ().getDrawable ( R.drawable.button ) );
                             mensaje.setText ( "Ingrese el codigo de la carrera para iniciar el monitoreo" );
                             Toast.makeText ( ClickMaratonActivity.this, "Su inscripcion se realizo exitosamente", Toast.LENGTH_SHORT ).show ();
+
+                            final long ONE_MEGABYTE = 1024 * 1024;
+                            FirebaseStorage.getInstance ().getReference ().child ( "MarathonImages" )
+                                    .child ( PostKey ).getBytes ( ONE_MEGABYTE )
+                                    .addOnSuccessListener ( new OnSuccessListener<byte[]> () {
+                                        @Override
+                                        public void onSuccess(byte[] bytes) {
+                                            Bitmap bitmap = BitmapFactory.decodeByteArray ( bytes, 0, bytes.length );
+
+                                            try {
+                                                daoMaraton.InsertImagen ( PostKey, bitmap, getApplication () );
+                                            } catch (IOException e) {
+                                                e.printStackTrace ();
+                                            }
+
+                                        }
+                                    } );
+                            daoMaraton.InsertEditar ( Common.carrera );
+                            UsrMrtn usrM = daousrMrtn.Obtener ( PostKey );
+                            if (usrM == null) {
+                                usrM = new UsrMrtn ( 1, PostKey, "ins" );
+                                daousrMrtn.Insert ( usrM );
+                            } else {
+                                usrM = new UsrMrtn ( 1, PostKey, "ins" );
+                                daousrMrtn.Editar ( usrM );
+                            }
                             loadingBar.dismiss ();
                         } else {
                             String message = task.getException ().getMessage ();

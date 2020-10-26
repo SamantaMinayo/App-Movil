@@ -1,6 +1,9 @@
 package com.example.saludable.Model;
 
 public class Punto {
+    public int id;
+    public String uid;
+    public String carrera;
     public String distancia;
     public String hora;
     public String latitud;
@@ -8,6 +11,44 @@ public class Punto {
     public String tiempo;
     public String timp;
     public String velocidad;
+
+
+    public Punto(int id, String uid, String carrera, String distancia, String hora, String latitud, String longitud, String tiempo, String timp, String velocidad) {
+        this.id = id;
+        this.uid = uid;
+        this.carrera = carrera;
+        this.distancia = distancia;
+        this.hora = hora;
+        this.latitud = latitud;
+        this.longitud = longitud;
+        this.tiempo = tiempo;
+        this.timp = timp;
+        this.velocidad = velocidad;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
+
+    public String getCarrera() {
+        return carrera;
+    }
+
+    public void setCarrera(String carrera) {
+        this.carrera = carrera;
+    }
 
     public Punto() {
     }

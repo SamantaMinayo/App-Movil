@@ -1,12 +1,11 @@
 package com.example.saludable;
 
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.DashPathEffect;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,11 +13,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.example.saludable.Model.Dato;
 import com.example.saludable.Utils.Common;
-import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.data.LineData;
-import com.github.mikephil.charting.data.LineDataSet;
-import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
+import com.example.saludable.localdatabase.DaoUsers;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -29,34 +24,33 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
-/*import lecho.lib.hellocharts.model.Axis;
-import lecho.lib.hellocharts.model.AxisValue;
+import lecho.lib.hellocharts.listener.LineChartOnValueSelectListener;
+import lecho.lib.hellocharts.model.Axis;
 import lecho.lib.hellocharts.model.Line;
 import lecho.lib.hellocharts.model.LineChartData;
 import lecho.lib.hellocharts.model.PointValue;
-import lecho.lib.hellocharts.model.Viewport;
-import lecho.lib.hellocharts.view.LineChartView;*/
+import lecho.lib.hellocharts.util.ChartUtils;
+import lecho.lib.hellocharts.view.LineChartView;
 
 public class ProfileActivity extends AppCompatActivity {
 
 
     private TextView userName, userStatus, userFullname, userCountry, userEdad, userPeso, userAltura, userGenero, velpromtot, velpromult, tiempromtot, tiempromult, disttot, distult, userimc, caltot, calult, pastot, pasult, pesotot, pesoult;
     private CircleImageView userProfileImage;
+    private DaoUsers daoUsers;
     private Toolbar mToolbar;
     private Button settings;
 
-    private DatabaseReference profileuserRef, MaratonDatosUser;
+    private DatabaseReference MaratonDatosUser;
     private FirebaseAuth mAuth;
 
     private String currentUserId;
-    //private LineChartView chartcalorias, charttime, chartvelocidad;
-    private ArrayList xDato = new ArrayList ();
-    private ArrayList yDato = new ArrayList ();
     private ArrayList<Dato> miresultado = new ArrayList<Dato> ();
 
-    private LineChart TChart, VChart, CChart, DChart;
+    private LineChartView TChart, VChart, CChart, DChart;
 
 
     @Override
@@ -66,24 +60,26 @@ public class ProfileActivity extends AppCompatActivity {
             super.onCreate ( savedInstanceState );
             setContentView ( R.layout.activity_profile );
 
+
             TChart = findViewById ( R.id.timechart );
             VChart = findViewById ( R.id.velchart );
             CChart = findViewById ( R.id.calchart );
             DChart = findViewById ( R.id.distchart );
-            //     mChart.setOnChartGestureListener ( ProfileActivity.this );
-            //   mChart.setOnChartValueSelectedListener ( ProfileActivity.this );
+            TChart.setOnValueTouchListener ( new ValueTouchListener ( "tiempo" ) );
+            VChart.setOnValueTouchListener ( new ValueTouchListener ( "velocidad" ) );
+            CChart.setOnValueTouchListener ( new ValueTouchListener ( "calorias" ) );
+            DChart.setOnValueTouchListener ( new ValueTouchListener ( "distancia" ) );
 
             mAuth = FirebaseAuth.getInstance ();
             currentUserId = mAuth.getCurrentUser ().getUid ();
-            profileuserRef = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( currentUserId );
             MaratonDatosUser = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( currentUserId )
                     .child ( "Resultados" ).child ( "Resultado" );
-
             mToolbar = findViewById ( R.id.mi_perfil_toolbar );
             setSupportActionBar ( mToolbar );
             getSupportActionBar ().setTitle ( "Mi Perfil" );
             getSupportActionBar ().setDisplayHomeAsUpEnabled ( true );
 
+            daoUsers = new DaoUsers ( this );
             settings = findViewById ( R.id.profile_settings );
             userName = findViewById ( R.id.my_profile_username );
             userimc = findViewById ( R.id.my_profile_IMC );
@@ -106,8 +102,8 @@ public class ProfileActivity extends AppCompatActivity {
             pasult = findViewById ( R.id.profile_pasosultimo );
             userProfileImage = findViewById ( R.id.my_profile_pic );
 
-            String myProfileImage = Common.loggedUser.getProfileimage ();
-            Picasso.with ( ProfileActivity.this ).load ( myProfileImage ).placeholder ( R.drawable.profile ).into ( userProfileImage );
+            Common.loggedUser = daoUsers.ObtenerUsuario ();
+            Picasso.with ( ProfileActivity.this ).load ( "file://" + Common.loggedUser.getProfileimage () ).placeholder ( R.drawable.profile ).into ( userProfileImage );
             userName.setText ( "@" + Common.loggedUser.getUsername () );
             userFullname.setText ( Common.loggedUser.getFullname () );
             userStatus.setText ( Common.loggedUser.getStatus () );
@@ -125,10 +121,6 @@ public class ProfileActivity extends AppCompatActivity {
                 }
             } );
 
-            ArrayList axisData = new ArrayList ();
-            ArrayList yAxisData = new ArrayList ();
-            axisData.add ( "0" );
-            yAxisData.add ( (float) 0.0 );
             CargarDatos ();
 
         } catch (Exception e) {
@@ -140,7 +132,8 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void CargarDatos() {
         try {
-            MaratonDatosUser.addValueEventListener ( new ValueEventListener () {
+
+            MaratonDatosUser.addListenerForSingleValueEvent ( new ValueEventListener () {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
@@ -163,14 +156,14 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void GenerarDatos() {
         try {
-            ArrayList<Entry> TValues = new ArrayList<> ();
-            TValues.add ( new Entry ( 0, 0 ) );
-            ArrayList<Entry> VValues = new ArrayList<> ();
-            VValues.add ( new Entry ( 0, 0 ) );
-            ArrayList<Entry> CValues = new ArrayList<> ();
-            CValues.add ( new Entry ( 0, 0 ) );
-            ArrayList<Entry> DValues = new ArrayList<> ();
-            DValues.add ( new Entry ( 0, 0 ) );
+            List<PointValue> TValues = new ArrayList<PointValue> ();
+            TValues.add ( new PointValue ( 0, 0 ) );
+            List<PointValue> VValues = new ArrayList<PointValue> ();
+            VValues.add ( new PointValue ( 0, 0 ) );
+            List<PointValue> CValues = new ArrayList<PointValue> ();
+            CValues.add ( new PointValue ( 0, 0 ) );
+            ArrayList<PointValue> DValues = new ArrayList<PointValue> ();
+            DValues.add ( new PointValue ( 0, 0 ) );
             int cont = 0;
             float velprom = 0;
             float timprom = 0;
@@ -187,15 +180,15 @@ public class ProfileActivity extends AppCompatActivity {
                     calult.setText ( String.valueOf ( Float.valueOf ( dato.calorias ) / 1000 ) );
                     pasult.setText ( String.valueOf ( dato.pasos ) );
                 }
-                TValues.add ( new Entry ( cont, Float.valueOf ( dato.getTiempo () ) / (Float.valueOf ( dato.getDistancia () ) / 1000) ) );
-                VValues.add ( new Entry ( cont, Float.valueOf ( dato.getVelocidad () ) ) );
+                TValues.add ( new PointValue ( cont, Float.valueOf ( dato.getTiempo () ) / (Float.valueOf ( dato.getDistancia () ) / 1000) ) );
+                VValues.add ( new PointValue ( cont, Float.valueOf ( dato.getVelocidad () ) ) );
                 velprom = Float.valueOf ( dato.getVelocidad () ) + velprom;
                 timprom = Float.valueOf ( dato.getTiempo () ) / (Float.valueOf ( dato.getDistancia () ) / 1000) + timprom;
                 distotal = distotal + Float.valueOf ( dato.distancia );
                 caltotal = caltotal + Float.valueOf ( dato.calorias );
                 pastotal = pastotal + Float.valueOf ( dato.pasos );
-                CValues.add ( new Entry ( cont, caltotal / 1000 ) );
-                DValues.add ( new Entry ( cont, distotal / 1000 ) );
+                CValues.add ( new PointValue ( cont, Float.valueOf ( dato.calorias ) / 1000 ) );
+                DValues.add ( new PointValue ( cont, Float.valueOf ( dato.distancia ) / 1000 ) );
             }
 
             velpromtot.setText ( String.valueOf ( velprom / cont ) );
@@ -203,10 +196,10 @@ public class ProfileActivity extends AppCompatActivity {
             disttot.setText ( String.valueOf ( distotal / 1000 ) );
             caltot.setText ( String.valueOf ( caltotal / 1000 ) );
             pastot.setText ( String.valueOf ( pastotal ) );
-            Graficar ( TValues, TChart, "Tiempo x km [min] vs Carrera" );
-            Graficar ( VValues, VChart, "Velocidad media [m/s] vs Carrera" );
-            Graficar ( CValues, CChart, "Calorias [kcal] vs Carrera" );
-            Graficar ( DValues, DChart, "Distancia [km] vs Carrera" );
+            Graficar ( TValues, TChart, "Tiempo x km [min]", " Carrera" );
+            Graficar ( VValues, VChart, "Velocidad media [m/s]", " Carrera" );
+            Graficar ( CValues, CChart, "Calorias [kcal]", "Carrera" );
+            Graficar ( DValues, DChart, "Distancia [km]", " Carrera" );
 
         } catch (Exception e) {
             HashMap error = new HashMap ();
@@ -215,34 +208,26 @@ public class ProfileActivity extends AppCompatActivity {
         }
     }
 
-    private void Graficar(ArrayList<Entry> yValues, LineChart chart, String label) {
+    private void Graficar(List<PointValue> yValues, LineChartView chart, String labely, String labelx) {
         try {
-            chart.setDragEnabled ( true );
-            chart.setScaleEnabled ( true );
-            LineDataSet set1 = new LineDataSet ( yValues, label );
-            set1.setFillAlpha ( 110 );
-            set1.setLineWidth ( 3f );
-            set1.setColor ( Color.parseColor ( "#23BAC4" ) );
-            set1.setDrawIcons ( false );
-            set1.enableDashedLine ( 15f, 10f, 0f );
-            set1.enableDashedHighlightLine ( 15f, 10f, 0f );
-            set1.setCircleColor ( Color.DKGRAY );
-            set1.setLineWidth ( 2f );
-            set1.setCircleRadius ( 4f );
-            set1.setDrawCircleHole ( false );
-            set1.setValueTextSize ( 9f );
-            //set1.setDrawFilled(true);
-            set1.setFormLineWidth ( 1f );
-            set1.setFormLineDashEffect ( new DashPathEffect ( new float[]{10f, 5f}, 0f ) );
-            set1.setFormSize ( 15.f );
-
-            ArrayList<ILineDataSet> dataSets = new ArrayList<> ();
-            dataSets.add ( set1 );
-
-            LineData data = new LineData ( dataSets );
-
-            chart.setData ( data );
-
+            Line line = new Line ( yValues ).setColor ( ChartUtils.COLORS[0] ).setCubic ( true );
+            line.setCubic ( false );
+            List<Line> lines = new ArrayList<Line> ();
+            lines.add ( line );
+            LineChartData data = new LineChartData ();
+            data.setLines ( lines );
+            Axis axisX = new Axis ();
+            Axis axisY = new Axis ().setHasLines ( true );
+            axisX.setName ( labelx );
+            axisY.setName ( labely );
+            axisY.setTextColor ( ChartUtils.COLOR_BLUE );
+            axisX.setTextColor ( ChartUtils.COLOR_BLUE );
+            data.setAxisXBottom ( axisX );
+            data.setAxisYLeft ( axisY );
+            data.setBaseValue ( Float.NEGATIVE_INFINITY );
+            chart.setZoomEnabled ( false );
+            chart.setScrollEnabled ( false );
+            chart.setLineChartData ( data );
         } catch (Exception e) {
             HashMap error = new HashMap ();
             error.put ( "error", e.getMessage () );
@@ -260,6 +245,25 @@ public class ProfileActivity extends AppCompatActivity {
             error.put ( "error", e.getMessage () );
             FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "ProfileActivity" ).child ( "SendUserToSettingsActivity" ).child ( currentUserId ).updateChildren ( error );
         }
+    }
+
+    private class ValueTouchListener implements LineChartOnValueSelectListener {
+        String values;
+
+        public ValueTouchListener(String tiempo) {
+            values = tiempo;
+        }
+
+        @Override
+        public void onValueSelected(int lineIndex, int pointIndex, PointValue value) {
+            Toast.makeText ( ProfileActivity.this, "Carrera #: " + value.getX () + " " + values + ": " + value.getY (), Toast.LENGTH_SHORT ).show ();
+        }
+
+        @Override
+        public void onValueDeselected() {
+            // TODO Auto-generated method stub
+        }
+
     }
 
 }
