@@ -313,12 +313,6 @@ public class MainActivity extends AppCompatActivity {
                                         Dato dato = dataSnapshot.getValue ( Dato.class );
                                         float distance = Float.valueOf ( dato.getDistancia () ) / 1000;
                                         float time = Float.valueOf ( dato.getTiempo () );
-                                        float segundos = time % 1;
-                                        float mintotales = time - segundos;
-                                        float calculo = mintotales / 60;
-                                        float decimales = calculo % 1;
-                                        float horas = calculo - decimales;
-                                        float minutos = mintotales - horas * 60;
                                         float ritmo = time / distance;
                                         float rsegundos = ritmo % 1;
                                         float rmintotales = ritmo - rsegundos;
@@ -327,7 +321,7 @@ public class MainActivity extends AppCompatActivity {
                                         float rhoras = rcalculo - rdecimales;
                                         float rminutos = rmintotales - rhoras * 60;
 
-                                        Resultado nuevo = new Resultado ( mar.getUid (), (int) horas + ":" + (int) minutos + ":" + (int) (segundos * 60),
+                                        Resultado nuevo = new Resultado ( mar.getUid (), dato.getTiempo (),
                                                 String.valueOf ( distance ), dato.getPasos (), "", dato.getVelocidad (), "", dato.getCalorias (),
                                                 "", "", (int) rminutos + "'" + (int) (rsegundos * 60) + "''" );
                                         Resultado resultado = daoResultados.ObtenerResultado ( mar.getUid () );
@@ -345,7 +339,7 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             } );
                             FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( "Datos" ).child ( mar.getUid () ).child ( current_user_id )
-                                    .orderByChild ( "velocidad" ).addListenerForSingleValueEvent ( new ValueEventListener () {
+                                    .orderByChild ( "velocidad" ).limitToLast ( 1 ).addListenerForSingleValueEvent ( new ValueEventListener () {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataxSnapshot) {
                                     for (DataSnapshot postSnapshot : dataxSnapshot.getChildren ()) {
@@ -353,7 +347,11 @@ public class MainActivity extends AppCompatActivity {
                                                 formato1.format ( Double.valueOf ( postSnapshot.getValue ( Punto.class ).getVelocidad () ) ), "",
                                                 "", "", "", "", "" );
                                         Resultado resultado = daoResultados.ObtenerResultado ( mar.getUid () );
-
+                                        if (resultado == null) {
+                                            daoResultados.Insert ( nuevo );
+                                        } else {
+                                            daoResultados.Editar ( nuevo );
+                                        }
                                     }
                                 }
 

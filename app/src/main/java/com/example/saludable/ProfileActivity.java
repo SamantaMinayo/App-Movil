@@ -13,6 +13,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import com.example.saludable.Model.Dato;
 import com.example.saludable.Utils.Common;
+import com.example.saludable.localdatabase.DaoResultados;
 import com.example.saludable.localdatabase.DaoUsers;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -46,6 +47,7 @@ public class ProfileActivity extends AppCompatActivity {
 
     private DatabaseReference MaratonDatosUser;
     private FirebaseAuth mAuth;
+    private DaoResultados daoResultados;
 
     private String currentUserId;
     private ArrayList<Dato> miresultado = new ArrayList<Dato> ();
@@ -69,6 +71,8 @@ public class ProfileActivity extends AppCompatActivity {
             VChart.setOnValueTouchListener ( new ValueTouchListener ( "velocidad" ) );
             CChart.setOnValueTouchListener ( new ValueTouchListener ( "calorias" ) );
             DChart.setOnValueTouchListener ( new ValueTouchListener ( "distancia" ) );
+
+            daoResultados = new DaoResultados ( this );
 
             mAuth = FirebaseAuth.getInstance ();
             currentUserId = mAuth.getCurrentUser ().getUid ();
@@ -136,6 +140,7 @@ public class ProfileActivity extends AppCompatActivity {
             MaratonDatosUser.addListenerForSingleValueEvent ( new ValueEventListener () {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    miresultado.clear ();
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
                         miresultado.add ( postSnapshot.getValue ( Dato.class ) );
                     }
@@ -147,6 +152,11 @@ public class ProfileActivity extends AppCompatActivity {
 
                 }
             } );
+
+            if (daoResultados.ObtenerDatos () != null) {
+                miresultado = daoResultados.ObtenerDatos ();
+                GenerarDatos ();
+            }
         } catch (Exception e) {
             HashMap error = new HashMap ();
             error.put ( "error", e.getMessage () );
@@ -171,24 +181,24 @@ public class ProfileActivity extends AppCompatActivity {
             float caltotal = 0;
             float pastotal = 0;
 
-            for (Dato dato : miresultado) {
+            for (int i = miresultado.size (); i > 0; i -= 1) {
                 cont = cont + 1;
-                if (cont == 1) {
-                    velpromult.setText ( String.valueOf ( dato.velocidad ) );
-                    tiempromult.setText ( String.valueOf ( Float.valueOf ( dato.getTiempo () ) / (Float.valueOf ( dato.getDistancia () ) / 1000) ) );
-                    distult.setText ( String.valueOf ( Float.valueOf ( dato.distancia ) / 1000 ) );
-                    calult.setText ( String.valueOf ( Float.valueOf ( dato.calorias ) / 1000 ) );
-                    pasult.setText ( String.valueOf ( dato.pasos ) );
+                if (i == 1) {
+                    velpromult.setText ( String.valueOf ( miresultado.get ( i - 1 ).velocidad ) );
+                    tiempromult.setText ( String.valueOf ( Float.valueOf ( miresultado.get ( i - 1 ).getTiempo () ) / (Float.valueOf ( miresultado.get ( i - 1 ).getDistancia () ) / 1000) ) );
+                    distult.setText ( String.valueOf ( Float.valueOf ( miresultado.get ( i - 1 ).distancia ) / 1000 ) );
+                    calult.setText ( String.valueOf ( Float.valueOf ( miresultado.get ( i - 1 ).calorias ) / 1000 ) );
+                    pasult.setText ( String.valueOf ( miresultado.get ( i - 1 ).pasos ) );
                 }
-                TValues.add ( new PointValue ( cont, Float.valueOf ( dato.getTiempo () ) / (Float.valueOf ( dato.getDistancia () ) / 1000) ) );
-                VValues.add ( new PointValue ( cont, Float.valueOf ( dato.getVelocidad () ) ) );
-                velprom = Float.valueOf ( dato.getVelocidad () ) + velprom;
-                timprom = Float.valueOf ( dato.getTiempo () ) / (Float.valueOf ( dato.getDistancia () ) / 1000) + timprom;
-                distotal = distotal + Float.valueOf ( dato.distancia );
-                caltotal = caltotal + Float.valueOf ( dato.calorias );
-                pastotal = pastotal + Float.valueOf ( dato.pasos );
-                CValues.add ( new PointValue ( cont, Float.valueOf ( dato.calorias ) / 1000 ) );
-                DValues.add ( new PointValue ( cont, Float.valueOf ( dato.distancia ) / 1000 ) );
+                TValues.add ( new PointValue ( cont, Float.valueOf ( miresultado.get ( i - 1 ).getTiempo () ) / (Float.valueOf ( miresultado.get ( i - 1 ).getDistancia () ) / 1000) ) );
+                VValues.add ( new PointValue ( cont, Float.valueOf ( miresultado.get ( i - 1 ).getVelocidad () ) ) );
+                velprom = Float.valueOf ( miresultado.get ( i - 1 ).getVelocidad () ) + velprom;
+                timprom = Float.valueOf ( miresultado.get ( i - 1 ).getTiempo () ) / (Float.valueOf ( miresultado.get ( i - 1 ).getDistancia () ) / 1000) + timprom;
+                distotal = distotal + Float.valueOf ( miresultado.get ( i - 1 ).distancia );
+                caltotal = caltotal + Float.valueOf ( miresultado.get ( i - 1 ).calorias );
+                pastotal = pastotal + Float.valueOf ( miresultado.get ( i - 1 ).pasos );
+                CValues.add ( new PointValue ( cont, Float.valueOf ( miresultado.get ( i - 1 ).calorias ) / 1000 ) );
+                DValues.add ( new PointValue ( cont, Float.valueOf ( miresultado.get ( i - 1 ).distancia ) / 1000 ) );
             }
 
             velpromtot.setText ( String.valueOf ( velprom / cont ) );

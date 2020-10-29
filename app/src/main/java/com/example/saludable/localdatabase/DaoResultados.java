@@ -5,12 +5,17 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.example.saludable.Model.Dato;
 import com.example.saludable.Model.Resultado;
+
+import java.util.ArrayList;
 
 public class DaoResultados {
 
     SQLiteDatabase db;
     Resultado resultado;
+    ArrayList<Dato> lista = new ArrayList<Dato> ();
+
     Context ctx;
     String nombredb = "SaludableDB";
     String tabla = " create table if not exists resultados(" +
@@ -104,6 +109,33 @@ public class DaoResultados {
             return null;
         }
     }
+
+    public ArrayList<Dato> ObtenerDatos() {
+        lista.clear ();
+        Cursor cursor = db.rawQuery ( "select *from resultados ", null );
+        if (cursor != null && cursor.getCount () > 0) {
+            cursor.moveToFirst ();
+            do {
+                lista.add ( new Dato (
+                        cursor.getString ( 0 ),
+                        cursor.getString ( 7 ),
+                        cursor.getString ( 2 ),
+                        "",
+                        cursor.getString ( 3 ),
+                        "",
+                        cursor.getString ( 1 ),
+                        cursor.getString ( 1 ),
+                        "",
+                        cursor.getString ( 5 ),
+                        cursor.getString ( 5 ),
+                        cursor.getString ( 5 ) ) );
+            } while (cursor.moveToNext ());
+            return lista;
+        } else {
+            return null;
+        }
+    }
+
 
 }
 

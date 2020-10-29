@@ -36,10 +36,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
+import com.example.saludable.Model.Dato;
+import com.example.saludable.Model.Punto;
+import com.example.saludable.Model.Resultado;
 import com.example.saludable.Model.UsrMrtn;
 import com.example.saludable.Service.MyService;
 import com.example.saludable.Service.Utils;
 import com.example.saludable.Utils.Common;
+import com.example.saludable.localdatabase.DaoPuntos;
+import com.example.saludable.localdatabase.DaoResultados;
 import com.example.saludable.localdatabase.DaoUsrMrtn;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -59,6 +64,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 
@@ -105,6 +111,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private DecimalFormat formato1;
     private DaoUsrMrtn usrMrtn;
 
+    private DaoResultados daoResultados;
+    private DaoPuntos daoPuntos;
     // Tracks the bound state of the service.
     private boolean mBound = false;
     private final ServiceConnection mServiceConnection = new ServiceConnection () {
@@ -127,6 +135,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Button mRemoveLocationUpdatesButton;
     private TextView velocidad, distancia, pasos;
     private Chronometer cronometro;
+    private ArrayList<Dato> miresultado = new ArrayList<Dato> ();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -171,7 +180,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     child ( "Nuevas" ).child ( PostKey ).child ( "estado" );
 
             horacarrera = Common.carrera.getMaratontime ();
-
+            daoResultados = new DaoResultados ( this );
+            daoPuntos = new DaoPuntos ( this );
             // Check that the user hasn't revoked permissions by going to Settings.
             if (Utils.requestingLocationUpdates ( this )) {
                 if (!checkPermissions ()) {
@@ -621,7 +631,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             if (distanciatotal > 10 && mint > 0) {
                 CarreraResInfo.updateChildren ( puntos );
                 CarreraUserInfRes.updateChildren ( puntos );
+
                 GuardarResList ();
+
             } else {
                 Toast.makeText ( this, "Ha ocurrido un error. No se ha podido guardar informacion de la carrera para este usuario", Toast.LENGTH_SHORT ).show ();
             }
@@ -641,16 +653,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 puntos.put ( "latitud", String.valueOf ( location.getLatitude () ) );
                 puntos.put ( "longitud", String.valueOf ( location.getLongitude () ) );
                 puntos.put ( "altitud", String.valueOf ( location.getAltitude () ) );
-                if (location.getSpeed () < 0.01) {
-                    puntos.put ( "velocidad", "0.00" );
+                if (location.getSpeed () < 0.001) {
+                    puntos.put ( "velocidad", "0.000" );
                 } else {
-                    puntos.put ( "velocidad", formato1.format ( location.getSpeed () ) );
+                    puntos.put ( "velocidad", String.valueOf ( location.getSpeed () ) );
                 }
                 puntos.put ( "hora", hora );
                 puntos.put ( "distancia", distguar );
                 puntos.put ( "tiempo", tiempo );
                 puntos.put ( "timp", timet );
-
+                daoPuntos.Insert ( new Punto ( 1, String.valueOf ( contregistro ), PostKey, distguar, hora, String.valueOf ( location.getLatitude () ),
+                        String.valueOf ( location.getLongitude () ), tiempo, timet, String.valueOf ( location.getSpeed () ) ) );
                 CarreraUserInf.child ( String.valueOf ( contregistro ) ).updateChildren ( puntos );
             }
 
@@ -735,6 +748,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             crear.put ( "maratondescription", Common.carrera.description );
             crear.put ( "uid", Common.carrera.uid );
             RegistrarResUsuario.updateChildren ( crear );
+            CargarMisResultados ();
         } catch (Exception e) {
             HashMap error = new HashMap ();
             error.put ( "error", e.getMessage () );
@@ -781,6 +795,81 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    private void CargarMisResultados() {
+        FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( current_user_id ).child ( "Resultados" ).child ( "Resultado" ).child ( PostKey ).addListenerForSingleValueEvent ( new ValueEventListener () {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                miresultado.add ( dataSnapshot.getValue ( Dato.class ) );
+                for (Dato datos : miresultado) {
+                    float distance = Float.valueOf ( datos.getDistancia () ) / 1000;
+                    float time = Float.valueOf ( datos.getTiempo () );
+                    float ritmo = time / distance;
+                    float rsegundos = ritmo % 1;
+                    float rmintotales = ritmo - rsegundos;
+                    float rcalculo = rmintotales / 60;
+                    float rdecimales = rcalculo % 1;
+                    float rhoras = rcalculo - rdecimales;
+                    float rminutos = rmintotales - rhoras * 60;
+                    Resultado nuevo = new Resultado ( PostKey, datos.getTiempo (),
+                            String.valueOf ( distance ), datos.getPasos (), "", datos.getVelocidad (), "", datos.getCalorias (),
+                            "", "", (int) rminutos + "'" + (int) (rsegundos * 60) + "''" );
+                    Resultado resultado = daoResultados.ObtenerResultado ( PostKey );
+                    if (resultado == null) {
+                        daoResultados.Insert ( nuevo );
+                    } else {
+                        daoResultados.Editar ( nuevo );
+                    }
+
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        } );
+        FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( "Datos" ).child ( PostKey ).child ( current_user_id ).orderByChild ( "velocidad" ).limitToLast ( 1 ).addListenerForSingleValueEvent ( new ValueEventListener () {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
+                    Resultado nuevo = new Resultado ( PostKey, "", "", "", formato1.format ( postSnapshot.getValue ( Punto.class ).getVelocidad () ), "",
+                            "", "", "", "", "" );
+                    Resultado resultado = daoResultados.ObtenerResultado ( PostKey );
+                    if (resultado == null) {
+                        daoResultados.Insert ( nuevo );
+                    } else {
+                        daoResultados.Editar ( nuevo );
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        } );
+        FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( "Datos" ).child ( PostKey ).child ( current_user_id ).orderByChild ( "velocidad" ).limitToFirst ( 1 ).addListenerForSingleValueEvent ( new ValueEventListener () {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
+                    Resultado nuevo = new Resultado ( PostKey, "", "", "", "", "",
+                            formato1.format ( Double.valueOf ( postSnapshot.getValue ( Punto.class ).getVelocidad () ) ), "", "", "", "" );
+                    Resultado resultado = daoResultados.ObtenerResultado ( PostKey );
+                    if (resultado == null) {
+                        daoResultados.Insert ( nuevo );
+                    } else {
+                        daoResultados.Editar ( nuevo );
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        } );
+    }
 
 }
 
