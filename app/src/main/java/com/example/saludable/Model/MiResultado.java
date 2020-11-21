@@ -1,6 +1,6 @@
 package com.example.saludable.Model;
 
-public class Dato {
+public class MiResultado {
     public String uid;
     public String calorias;
     public String distancia;
@@ -13,9 +13,11 @@ public class Dato {
     public String velocidad;
     public String velocidadmed;
     public String velmed;
+    public String velmin;
+    public String velmax;
 
 
-    public Dato(String uid, String calorias, String distancia, String genero, String pasos, String rango, String tiempo, String tiempomed, String usuario, String velocidad, String velocidadmed, String velmed) {
+    public MiResultado(String uid, String calorias, String distancia, String genero, String pasos, String rango, String tiempo, String tiempomed, String usuario, String velocidad, String velocidadmed, String velmed, String velmin, String velmax) {
         this.uid = uid;
         this.calorias = calorias;
         this.distancia = distancia;
@@ -28,9 +30,39 @@ public class Dato {
         this.velocidad = velocidad;
         this.velocidadmed = velocidadmed;
         this.velmed = velmed;
+        this.velmin = velmin;
+        this.velmax = velmax;
     }
 
-    public Dato() {
+    public MiResultado(String uid, String tiempo, String distancia, String pasos, String velmax, String velmed, String velmin, String calorias) {
+        this.uid = uid;
+        this.tiempo = tiempo;
+        this.distancia = distancia;
+        this.pasos = pasos;
+        this.velmax = velmax;
+        this.velmed = velmed;
+        this.velmin = velmin;
+        this.calorias = calorias;
+    }
+
+    public MiResultado() {
+    }
+
+
+    public String getVelmin() {
+        return velmin;
+    }
+
+    public void setVelmin(String velmin) {
+        this.velmin = velmin;
+    }
+
+    public String getVelmax() {
+        return velmax;
+    }
+
+    public void setVelmax(String velmax) {
+        this.velmax = velmax;
     }
 
     public String getCalorias() {

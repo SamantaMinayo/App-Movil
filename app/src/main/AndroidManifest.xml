@@ -47,7 +47,6 @@
             android:name=".SettingsActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:parentActivityName=".ProfileActivity" />
-        <activity android:name=".ClickPostActivity" />
         <activity android:name=".LoginActivity" />
         <activity android:name=".RegisterActivity" />
         <activity android:name=".MainActivity">

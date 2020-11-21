@@ -4,6 +4,8 @@ import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -23,8 +25,11 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
-import com.example.saludable.Service.Utils;
+import com.example.saludable.Model.User;
+import com.example.saludable.Utils.Common;
+import com.example.saludable.localdatabase.DaoUsers;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
@@ -40,6 +45,7 @@ import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.HashMap;
@@ -61,6 +67,7 @@ public class SetupActivity extends AppCompatActivity {
     final static int Gallery_pick = 1;
     private static final int CODIGO_PERMISO = 22;
     private final int REQUEST_STORAGE = 0;
+    private DaoUsers daoUsers;
     String currentUserID;
 
     @Override
@@ -69,12 +76,11 @@ public class SetupActivity extends AppCompatActivity {
             super.onCreate ( savedInstanceState );
             setContentView ( R.layout.activity_setup );
 
-            if (Utils.requestingLocationUpdates ( this )) {
                 if (!checkPermissions ()) {
                     requestPermissions ();
                 }
-            }
 
+            daoUsers = new DaoUsers ( this );
             mAuth = FirebaseAuth.getInstance ();
             currentUserID = mAuth.getCurrentUser ().getUid ();
             UserRef = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( currentUserID ).child ( "Informacion" );
@@ -110,7 +116,7 @@ public class SetupActivity extends AppCompatActivity {
                 }
             } );
 
-            UserRef.addListenerForSingleValueEvent ( new ValueEventListener () {
+            UserRef.addValueEventListener ( new ValueEventListener () {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     if (dataSnapshot.exists ()) {
@@ -244,19 +250,19 @@ public class SetupActivity extends AppCompatActivity {
 
     private void SaveAccountSetupInformation() {
         try {
-            String username = UserName.getText ().toString ();
-            String country = Country.getText ().toString ();
-            String altura = Altura.getText ().toString ();
-            String fullname = FullName.getText ().toString ();
-            String peso = Peso.getText ().toString ();
-            String edad = Edad.getText ().toString ();
+            final String username = UserName.getText ().toString ();
+            final String country = Country.getText ().toString ();
+            final String altura = Altura.getText ().toString ();
+            final String fullname = FullName.getText ().toString ();
+            final String peso = Peso.getText ().toString ();
+            final String edad = Edad.getText ().toString ();
             double rango = Double.valueOf ( edad ) / 5;
             double decimal = rango % 1;
             double entero = rango - decimal;
-            String rangos = String.valueOf ( (int) entero );
-            String genero = Genero.getText ().toString ();
+            final String rangos = String.valueOf ( (int) entero );
+            final String genero = Genero.getText ().toString ();
             double paso = Double.valueOf ( altura ) * 0.41;
-            String factorpaso = String.valueOf ( paso );
+            final String factorpaso = String.valueOf ( paso );
 
             if (TextUtils.isEmpty ( username ) || TextUtils.isEmpty ( country ) || TextUtils.isEmpty ( altura ) || TextUtils.isEmpty ( fullname ) || TextUtils.isEmpty ( peso ) || TextUtils.isEmpty ( edad ) || TextUtils.isEmpty ( genero )) {
                 Toast.makeText ( this, "Porfavor verifique que todos los campos se encuentren llenos", Toast.LENGTH_SHORT ).show ();
@@ -272,7 +278,7 @@ public class SetupActivity extends AppCompatActivity {
                 double cal = (p / (h * h)) * 10000;
                 MathContext m = new MathContext ( 4 );
                 BigDecimal imcnum = new BigDecimal ( cal );
-                String imc = String.valueOf ( imcnum.round ( m ) );
+                final String imc = String.valueOf ( imcnum.round ( m ) );
 
                 HashMap userMap = new HashMap ();
                 userMap.put ( "username", username );
@@ -291,6 +297,25 @@ public class SetupActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task task) {
                         if (task.isSuccessful ()) {
+                            daoUsers.Insert ( new User ( currentUserID, "", altura, edad,
+                                    peso, genero, fullname, username, country, imc, "", "Helo", rangos, factorpaso ) );
+                            final long ONE_MEGABYTE = 512 * 512;
+                            FirebaseStorage.getInstance ().getReference ().child ( "ProfileImages" )
+                                    .child ( currentUserID + ".jpg" ).getBytes ( ONE_MEGABYTE )
+                                    .addOnSuccessListener ( new OnSuccessListener<byte[]> () {
+                                        @Override
+                                        public void onSuccess(byte[] bytes) {
+                                            Bitmap bitmap = BitmapFactory.decodeByteArray ( bytes, 0, bytes.length );
+
+                                            try {
+                                                daoUsers.InsertImagen ( Common.loggedUser.getUid (), bitmap, getApplication () );
+                                            } catch (IOException e) {
+                                                e.printStackTrace ();
+                                            }
+
+                                        }
+                                    } );
+
                             SendUserToMainActivity ();
                             Toast.makeText ( SetupActivity.this, "Usuario creado correctamente.", Toast.LENGTH_SHORT ).show ();
                             loadingBar.dismiss ();

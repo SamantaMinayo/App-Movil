@@ -332,7 +332,6 @@
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/setuplinegenero"
                         android:layout_centerHorizontal="true">
-
                         <RadioButton
                             android:id="@+id/radMale"
                             android:layout_width="wrap_content"
@@ -343,7 +342,6 @@
                             android:text="Masculino"
                             android:textColor="@color/colorAccent"
                             android:textSize="16dp" />
-
                         <RadioButton
                             android:id="@+id/radFeMale"
                             android:layout_width="wrap_content"
@@ -354,6 +352,7 @@
                             android:text="Femenino"
                             android:textColor="@color/colorAccent"
                             android:textSize="16dp" />
+                        n
                     </RadioGroup>
 
                 </LinearLayout>

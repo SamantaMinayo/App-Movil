@@ -295,7 +295,7 @@
                                 android:background="@color/colortable"
                                 android:padding="3dp"
                                 android:textAlignment="center"
-                                android:text="Tiempo (min)"
+                                android:text="Ritmo"
                                 android:textColor="@android:color/background_light"
                                 android:textSize="12sp" />
 

@@ -11,11 +11,10 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.example.saludable.Model.Dato;
 import com.example.saludable.Model.Maraton;
 import com.example.saludable.Model.MaratonResult;
+import com.example.saludable.Model.MiResultado;
 import com.example.saludable.Model.Punto;
-import com.example.saludable.Model.Resultado;
 import com.example.saludable.Utils.Common;
 import com.example.saludable.localdatabase.DaoMarRes;
 import com.example.saludable.localdatabase.DaoMaraton;
@@ -66,7 +65,7 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
     private String PostKey, current_user_id;
     private DatabaseReference DatosCarreraResult, ResultadoCarrera, MaratonDatosRef, MaratonPointsRef;
     private FirebaseAuth mAuth;
-    private ArrayList<Dato> listaresultadosglobales = new ArrayList<Dato> ();
+    private ArrayList<MiResultado> listaresultadosglobales = new ArrayList<MiResultado> ();
     private ArrayList<Punto> listadatosloc = new ArrayList<Punto> ();
 
     private DaoMaraton daoMaraton;
@@ -74,17 +73,16 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
     private DaoMarRes daoMarRes;
     private DaoPuntos daoPuntos;
 
-    private long puntos = 0;
+
     private Toolbar mToolbar;
     private TextView velocidad, pasos, calorias, tiempo;
     private TextView velocidadprom, pasosprom, caloriasprom, tiempoprom;
     private TextView descripcion, nombre, lugar, distancia, fecha;
-    private TextView dist, mivelmas, mivelmin, altmax, altmin, miritmo;
+    private TextView dist, mivelmas, mivelmin, miritmo;
     private TextView maxvel, minvel, mejtime, peortime, mejritmo, ritmoprom, peorritmo;
-    private LineChartView timechart, velchart;
     private CircleImageView imagen;
     private DecimalFormat formato1;
-    private ArrayList<Dato> miresultado = new ArrayList<Dato> ();
+    private ArrayList<MiResultado> miresultado = new ArrayList<MiResultado> ();
     private List<PointValue> TValues = new ArrayList<PointValue> ();
     private List<PointValue> VValues = new ArrayList<PointValue> ();
 
@@ -128,6 +126,7 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
                                 lugar.setText ( "Lugar: " + Common.carrera.place );
                                 nombre.setText ( Common.carrera.maratonname );
                                 distancia.setText ( "Distancia: " + Common.carrera.maratondist + " km" );
+
                             }
                         }
 
@@ -149,6 +148,7 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
                     lugar.setText ( "Lugar: " + Common.carrera.place );
                     nombre.setText ( Common.carrera.maratonname );
                     distancia.setText ( "Distancia: " + Common.carrera.maratondist + " km" );
+
                 }
             }
 
@@ -181,8 +181,6 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
         dist = findViewById ( R.id.distanciatot );
         mivelmas = findViewById ( R.id.velocidadmax );
         mivelmin = findViewById ( R.id.velocidadmin );
-        altmax = findViewById ( R.id.poinalto );
-        altmin = findViewById ( R.id.pointmin );
         miritmo = findViewById ( R.id.ritmo );
         maxvel = findViewById ( R.id.maxvelo );
         minvel = findViewById ( R.id.minvel );
@@ -267,11 +265,14 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
             ResultadoCarrera.addListenerForSingleValueEvent ( new ValueEventListener () {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    miresultado.add ( dataSnapshot.getValue ( Dato.class ) );
-                    for (Dato datos : miresultado) {
+                    //miresultado.add ( dataSnapshot.getValue ( MiResultado.class ) );
+                    //for (MiResultado datos : miresultado) {
+                    MiResultado datos = dataSnapshot.getValue ( MiResultado.class );
+                    datos.setUid ( dataSnapshot.getKey () );
                         pasos.setText ( datos.getPasos () );
                         velocidad.setText ( datos.getVelocidad () + " m/s" );
                         calorias.setText ( datos.getCalorias () + " cal" );
+
                         float distance = Float.valueOf ( datos.getDistancia () ) / 1000;
                         dist.setText ( distance + "km" );
                         float time = Float.valueOf ( datos.getTiempo () );
@@ -301,18 +302,8 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
                         float rhoras = rcalculo - rdecimales;
                         float rminutos = rmintotales - rhoras * 60;
                         miritmo.setText ( (int) rminutos + "'" + (int) (rsegundos * 60) + "''" );
-
-                        Resultado nuevo = new Resultado ( PostKey, datos.getTiempo (),
-                                String.valueOf ( distance ), datos.getPasos (), "", datos.getVelocidad (), "", datos.getCalorias (),
-                                "", "", (int) rminutos + "'" + (int) (rsegundos * 60) + "''" );
-                        Resultado resultado = daoResultados.ObtenerResultado ( PostKey );
-                        if (resultado == null) {
-                            daoResultados.Insert ( nuevo );
-                        } else {
-                            daoResultados.Editar ( nuevo );
-                        }
-
-                    }
+                    daoResultados.Insert ( datos );
+                    //}
                 }
 
                 @Override
@@ -320,52 +311,8 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
 
                 }
             } );
-            MaratonPointsRef.orderByChild ( "velocidad" ).limitToLast ( 1 ).addListenerForSingleValueEvent ( new ValueEventListener () {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
-                        mivelmas.setText ( formato1.format ( Double.valueOf ( postSnapshot.getValue ( Punto.class ).getVelocidad () ) ) + "m/s" );
-                        Resultado nuevo = new Resultado ( PostKey, "", "", "", formato1.format ( postSnapshot.getValue ( Punto.class ).getVelocidad () ), "",
-                                "", "", "", "", "" );
-                        Resultado resultado = daoResultados.ObtenerResultado ( PostKey );
-                        if (resultado == null) {
-                            daoResultados.Insert ( nuevo );
-                        } else {
-                            daoResultados.Editar ( nuevo );
-                        }
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            } );
-            MaratonPointsRef.orderByChild ( "velocidad" ).limitToFirst ( 1 ).addListenerForSingleValueEvent ( new ValueEventListener () {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
-                        mivelmin.setText ( formato1.format ( Double.valueOf ( postSnapshot.getValue ( Punto.class ).getVelocidad () ) ) + "m/s" );
-                        Resultado nuevo = new Resultado ( PostKey, "", "", "", "", "",
-                                formato1.format ( Double.valueOf ( postSnapshot.getValue ( Punto.class ).getVelocidad () ) ), "", "", "", "" );
-                        Resultado resultado = daoResultados.ObtenerResultado ( PostKey );
-                        if (resultado == null) {
-                            daoResultados.Insert ( nuevo );
-                        } else {
-                            daoResultados.Editar ( nuevo );
-                        }
-                    }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            } );
-
         } else {
-            float time = Float.valueOf ( Common.miResult.getMduracion () );
+            float time = Float.valueOf ( Common.miResult.getTiempo () );
             float segundos = time % 1;
             float mintotales = time - segundos;
             float calculo = mintotales / 60;
@@ -383,64 +330,22 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
             } else {
                 minutosm = String.valueOf ( (int) minutos );
             }
-            pasos.setText ( Common.miResult.getMpasos () );
-            velocidad.setText ( Common.miResult.getMvelmed () + " m/s" );
-            calorias.setText ( Common.miResult.getMcalorias () + " cal" );
-            dist.setText ( Common.miResult.getMdistancia () + "km" );
+            float distance = Float.valueOf ( Common.miResult.getDistancia () ) / 1000;
+            float ritmo = time / distance;
+            float rsegundos = ritmo % 1;
+            float rmintotales = ritmo - rsegundos;
+            float rcalculo = rmintotales / 60;
+            float rdecimales = rcalculo % 1;
+            float rhoras = rcalculo - rdecimales;
+            float rminutos = rmintotales - rhoras * 60;
+            miritmo.setText ( (int) rminutos + "'" + (int) (rsegundos * 60) + "''" );
             tiempo.setText ( (int) horas + ":" + minutosm + ":" + sec );
-            miritmo.setText ( Common.miResult.getMritmo () );
-            if (Common.miResult.getMvelmin ().isEmpty ()) {
-                MaratonPointsRef.orderByChild ( "velocidad" ).limitToLast ( 1 ).addListenerForSingleValueEvent ( new ValueEventListener () {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
-                            mivelmas.setText ( formato1.format ( Double.valueOf ( postSnapshot.getValue ( Punto.class ).getVelocidad () ) ) + "m/s" );
-                            Resultado nuevo = new Resultado ( PostKey, "", "", "", formato1.format ( postSnapshot.getValue ( Punto.class ).getVelocidad () ), "",
-                                    "", "", "", "", "" );
-                            Resultado resultado = daoResultados.ObtenerResultado ( PostKey );
-                            if (resultado == null) {
-                                daoResultados.Insert ( nuevo );
-                            } else {
-                                daoResultados.Editar ( nuevo );
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                } );
-            } else {
-                mivelmas.setText ( Common.miResult.getMvelmax () + "m/s" );
-            }
-
-            if (Common.miResult.getMvelmin ().isEmpty ()) {
-                MaratonPointsRef.orderByChild ( "velocidad" ).limitToFirst ( 1 ).addListenerForSingleValueEvent ( new ValueEventListener () {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
-                            mivelmin.setText ( formato1.format ( Double.valueOf ( postSnapshot.getValue ( Punto.class ).getVelocidad () ) ) + "m/s" );
-                            Resultado nuevo = new Resultado ( PostKey, "", "", "", "", "",
-                                    formato1.format ( Double.valueOf ( postSnapshot.getValue ( Punto.class ).getVelocidad () ) ), "", "", "", "" );
-                            Resultado resultado = daoResultados.ObtenerResultado ( PostKey );
-                            if (resultado == null) {
-                                daoResultados.Insert ( nuevo );
-                            } else {
-                                daoResultados.Editar ( nuevo );
-                            }
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                    }
-                } );
-            } else {
-                mivelmin.setText ( Common.miResult.getMvelmin () + "m/s" );
-            }
+            pasos.setText ( Common.miResult.getPasos () );
+            velocidad.setText ( Common.miResult.getVelmed () + " m/s" );
+            calorias.setText ( Common.miResult.getCalorias () + " cal" );
+            dist.setText ( formato1.format ( distance ) + " km" );
+            mivelmas.setText ( formato1.format ( Float.valueOf ( Common.miResult.getVelmax () ) ) + " m/s" );
+            mivelmin.setText ( formato1.format ( Float.valueOf ( Common.miResult.getVelmin () ) ) + " m/s" );
         }
 
     }
@@ -455,8 +360,8 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
-                                maxvel.setText ( postSnapshot.getValue ( Dato.class ).getVelocidad () + "m/s" );
-                                MaratonResult nuevo = new MaratonResult ( PostKey, "", postSnapshot.getValue ( Dato.class ).getVelocidad (), "", "", "", "", "", "", "", "", "" );
+                                maxvel.setText ( postSnapshot.getValue ( MiResultado.class ).getVelocidad () + "m/s" );
+                                MaratonResult nuevo = new MaratonResult ( PostKey, "", postSnapshot.getValue ( MiResultado.class ).getVelocidad (), "", "", "", "", "", "", "", "", "" );
                                 MaratonResult resultado = daoMarRes.ObtenerMaratonRes ( PostKey );
                                 if (resultado == null) {
                                     daoMarRes.Insert ( nuevo );
@@ -475,8 +380,8 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
-                                minvel.setText ( postSnapshot.getValue ( Dato.class ).getVelocidad () + "m/s" );
-                                MaratonResult nuevo = new MaratonResult ( PostKey, "", "", "", postSnapshot.getValue ( Dato.class ).getVelocidad (), "", "", "", "", "", "", "" );
+                                minvel.setText ( postSnapshot.getValue ( MiResultado.class ).getVelocidad () + "m/s" );
+                                MaratonResult nuevo = new MaratonResult ( PostKey, "", "", "", postSnapshot.getValue ( MiResultado.class ).getVelocidad (), "", "", "", "", "", "", "" );
                                 MaratonResult resultado = daoMarRes.ObtenerMaratonRes ( PostKey );
                                 if (resultado == null) {
                                     daoMarRes.Insert ( nuevo );
@@ -495,15 +400,26 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
-                                float time = Float.valueOf ( postSnapshot.getValue ( Dato.class ).getTiempo () );
+                                float time = Float.valueOf ( postSnapshot.getValue ( MiResultado.class ).getTiempo () );
                                 float segundos = time % 1;
                                 float mintotales = time - segundos;
                                 float calculo = mintotales / 60;
                                 float decimales = calculo % 1;
                                 float horas = calculo - decimales;
                                 float minutos = mintotales - horas * 60;
-                                mejtime.setText ( (int) horas + ":" + (int) minutos + ":" + (int) (segundos * 60) );
-                                float rtime = Float.valueOf ( postSnapshot.getValue ( Dato.class ).getTiempo () ) / (Float.valueOf ( postSnapshot.getValue ( Dato.class ).getDistancia () ) / 1000);
+                                String sec, minutosm;
+                                if (segundos < 10) {
+                                    sec = "0" + (int) segundos;
+                                } else {
+                                    sec = String.valueOf ( (int) segundos );
+                                }
+                                if (minutos < 10) {
+                                    minutosm = "0" + (int) minutos;
+                                } else {
+                                    minutosm = String.valueOf ( (int) minutos );
+                                }
+                                mejtime.setText ( (int) horas + ":" + minutosm + ":" + sec );
+                                float rtime = Float.valueOf ( postSnapshot.getValue ( MiResultado.class ).getTiempo () ) / (Float.valueOf ( postSnapshot.getValue ( MiResultado.class ).getDistancia () ) / 1000);
                                 float rsegundos = rtime % 1;
                                 float rmintotales = rtime - rsegundos;
                                 float rcalculo = rmintotales / 60;
@@ -531,15 +447,27 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
-                                float time = Float.valueOf ( postSnapshot.getValue ( Dato.class ).getTiempo () );
+                                float time = Float.valueOf ( postSnapshot.getValue ( MiResultado.class ).getTiempo () );
                                 float segundos = time % 1;
                                 float mintotales = time - segundos;
                                 float calculo = mintotales / 60;
                                 float decimales = calculo % 1;
                                 float horas = calculo - decimales;
                                 float minutos = mintotales - horas * 60;
-                                peortime.setText ( (int) horas + ":" + (int) minutos + ":" + (int) (segundos * 60) );
-                                float rtime = Float.valueOf ( postSnapshot.getValue ( Dato.class ).getTiempo () ) / (Float.valueOf ( postSnapshot.getValue ( Dato.class ).getDistancia () ) / 1000);
+
+                                String sec, minutosm;
+                                if (segundos < 10) {
+                                    sec = "0" + (int) segundos;
+                                } else {
+                                    sec = String.valueOf ( (int) segundos );
+                                }
+                                if (minutos < 10) {
+                                    minutosm = "0" + (int) minutos;
+                                } else {
+                                    minutosm = String.valueOf ( (int) minutos );
+                                }
+                                peortime.setText ( (int) horas + ":" + minutosm + ":" + sec );
+                                float rtime = Float.valueOf ( postSnapshot.getValue ( MiResultado.class ).getTiempo () ) / (Float.valueOf ( postSnapshot.getValue ( MiResultado.class ).getDistancia () ) / 1000);
                                 float rsegundos = rtime % 1;
                                 float rmintotales = rtime - rsegundos;
                                 float rcalculo = rmintotales / 60;
@@ -567,7 +495,7 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
                         @Override
                         public void onDataChange(DataSnapshot snapshot) {
                             for (DataSnapshot postSnapshot : snapshot.getChildren ()) {
-                                listaresultadosglobales.add ( postSnapshot.getValue ( Dato.class ) );
+                                listaresultadosglobales.add ( postSnapshot.getValue ( MiResultado.class ) );
                             }
                             CargarDatosGlob ();
                         }
@@ -582,7 +510,7 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
-                                maxvel.setText ( postSnapshot.getValue ( Dato.class ).getVelocidad () + "m/s" );
+                                maxvel.setText ( postSnapshot.getValue ( MiResultado.class ).getVelocidad () + "m/s" );
                             }
                         }
 
@@ -595,7 +523,7 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
-                                minvel.setText ( postSnapshot.getValue ( Dato.class ).getVelocidad () + "m/s" );
+                                minvel.setText ( postSnapshot.getValue ( MiResultado.class ).getVelocidad () + "m/s" );
                             }
                         }
 
@@ -608,15 +536,26 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
-                                float time = Float.valueOf ( postSnapshot.getValue ( Dato.class ).getTiempo () );
+                                float time = Float.valueOf ( postSnapshot.getValue ( MiResultado.class ).getTiempo () );
                                 float segundos = time % 1;
                                 float mintotales = time - segundos;
                                 float calculo = mintotales / 60;
                                 float decimales = calculo % 1;
                                 float horas = calculo - decimales;
                                 float minutos = mintotales - horas * 60;
-                                mejtime.setText ( (int) horas + ":" + (int) minutos + ":" + (int) (segundos * 60) );
-                                float rtime = Float.valueOf ( postSnapshot.getValue ( Dato.class ).getTiempo () ) / (Float.valueOf ( postSnapshot.getValue ( Dato.class ).getDistancia () ) / 1000);
+                                String sec, minutosm;
+                                if (segundos < 10) {
+                                    sec = "0" + (int) segundos;
+                                } else {
+                                    sec = String.valueOf ( (int) segundos );
+                                }
+                                if (minutos < 10) {
+                                    minutosm = "0" + (int) minutos;
+                                } else {
+                                    minutosm = String.valueOf ( (int) minutos );
+                                }
+                                mejtime.setText ( (int) horas + ":" + minutosm + ":" + sec );
+                                float rtime = Float.valueOf ( postSnapshot.getValue ( MiResultado.class ).getTiempo () ) / (Float.valueOf ( postSnapshot.getValue ( MiResultado.class ).getDistancia () ) / 1000);
                                 float rsegundos = rtime % 1;
                                 float rmintotales = rtime - rsegundos;
                                 float rcalculo = rmintotales / 60;
@@ -636,15 +575,27 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
-                                float time = Float.valueOf ( postSnapshot.getValue ( Dato.class ).getTiempo () );
+                                float time = Float.valueOf ( postSnapshot.getValue ( MiResultado.class ).getTiempo () );
                                 float segundos = time % 1;
                                 float mintotales = time - segundos;
                                 float calculo = mintotales / 60;
                                 float decimales = calculo % 1;
                                 float horas = calculo - decimales;
                                 float minutos = mintotales - horas * 60;
-                                peortime.setText ( (int) horas + ":" + (int) minutos + ":" + (int) (segundos * 60) );
-                                float rtime = Float.valueOf ( postSnapshot.getValue ( Dato.class ).getTiempo () ) / (Float.valueOf ( postSnapshot.getValue ( Dato.class ).getDistancia () ) / 1000);
+                                String sec, minutosm;
+                                if (segundos < 10) {
+                                    sec = "0" + (int) segundos;
+                                } else {
+                                    sec = String.valueOf ( (int) segundos );
+                                }
+                                if (minutos < 10) {
+                                    minutosm = "0" + (int) minutos;
+                                } else {
+                                    minutosm = String.valueOf ( (int) minutos );
+                                }
+                                peortime.setText ( (int) horas + ":" + minutosm + ":" + sec );
+
+                                float rtime = Float.valueOf ( postSnapshot.getValue ( MiResultado.class ).getTiempo () ) / (Float.valueOf ( postSnapshot.getValue ( MiResultado.class ).getDistancia () ) / 1000);
                                 float rsegundos = rtime % 1;
                                 float rmintotales = rtime - rsegundos;
                                 float rcalculo = rmintotales / 60;
@@ -664,7 +615,7 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
                         @Override
                         public void onDataChange(DataSnapshot snapshot) {
                             for (DataSnapshot postSnapshot : snapshot.getChildren ()) {
-                                listaresultadosglobales.add ( postSnapshot.getValue ( Dato.class ) );
+                                listaresultadosglobales.add ( postSnapshot.getValue ( MiResultado.class ) );
                             }
                             CargarDatosGlob ();
                         }
@@ -741,7 +692,7 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
             float caloriasglo = 0;
             float ritmopro = 0;
             int cantglo = 0;
-            for (Dato dato : listaresultadosglobales) {
+            for (MiResultado dato : listaresultadosglobales) {
                 cantglo = cantglo + 1;
                 tiempoglo = tiempoglo + Float.valueOf ( dato.getTiempo () );
                 velocidadglo = velocidadglo + Float.valueOf ( dato.getVelocidad () );
@@ -757,7 +708,20 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
             float decimales = calculo % 1;
             float horas = calculo - decimales;
             float minutos = mintotales - horas * 60;
-            tiempoprom.setText ( (int) horas + ":" + (int) minutos + ":" + (int) (segundos * 60) );
+
+            String sec, minutosm;
+            if (segundos < 10) {
+                sec = "0" + (int) segundos;
+            } else {
+                sec = String.valueOf ( (int) segundos );
+            }
+            if (minutos < 10) {
+                minutosm = "0" + (int) minutos;
+            } else {
+                minutosm = String.valueOf ( (int) minutos );
+            }
+            tiempoprom.setText ( (int) horas + ":" + minutosm + ":" + sec );
+
             velocidadprom.setText ( formato1.format ( velocidadglo / cantglo ) + " m/s" );
             pasosprom.setText ( formato1.format ( pasosglo / cantglo ) );
             caloriasprom.setText ( formato1.format ( caloriasglo / cantglo ) + " cal" );
@@ -814,7 +778,7 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
                 if (conta == listadatosloc.size () / 2) {
 
                     LatLng coordenada = new LatLng ( Double.valueOf ( point.latitud ), Double.valueOf ( point.longitud ) );
-                    CameraUpdate miUbicacion = CameraUpdateFactory.newLatLngZoom ( coordenada, 16 );
+                    CameraUpdate miUbicacion = CameraUpdateFactory.newLatLngZoom ( coordenada, 14 );
 
                     mMap.animateCamera ( miUbicacion );
                 }

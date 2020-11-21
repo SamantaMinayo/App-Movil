@@ -19,7 +19,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.saludable.Interfaces.IFirebaseLoadDone;
 import com.example.saludable.Interfaces.IRecyclerItemClickListener;
 import com.example.saludable.Model.Maraton;
-import com.example.saludable.Model.MiMaraton;
 import com.example.saludable.ViewHolder.MaratonAdapter;
 import com.example.saludable.ViewHolder.MiMaratonViewHolder;
 import com.example.saludable.localdatabase.DaoUsrMrtn;
@@ -43,7 +42,7 @@ import java.util.List;
 public class MiInscripcionActivity extends AppCompatActivity implements IFirebaseLoadDone {
 
 
-    FirebaseRecyclerAdapter<MiMaraton, MiMaratonViewHolder> adapter, searchAdapter;
+    FirebaseRecyclerAdapter<Maraton, MiMaratonViewHolder> adapter, searchAdapter;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
     RecyclerView recycler_all_mi_maraton;
@@ -124,11 +123,8 @@ public class MiInscripcionActivity extends AppCompatActivity implements IFirebas
             recycler_all_mi_maraton.setLayoutManager ( layoutManager );
             recycler_all_mi_maraton.addItemDecoration ( new DividerItemDecoration ( this, ((LinearLayoutManager) layoutManager).getOrientation () ) );
 
-            lista = daoUsrMrtn.ObtenerMaratonList ( "ins" );
 
             firebaseLoadDone = this;
-
-            loadInsList ();
             loadSearchData ();
 
         } catch (Exception e) {
@@ -136,6 +132,14 @@ public class MiInscripcionActivity extends AppCompatActivity implements IFirebas
             error.put ( "error", e.getMessage () );
             FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MiInscripcionActivity" ).child ( "OnCreate" ).child ( current_user_id ).updateChildren ( error );
         }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart ();
+        lista = daoUsrMrtn.ObtenerMaratonList ( "ins" );
+        loadInsList ();
+
     }
 
     private void loadSearchData() {
@@ -147,7 +151,7 @@ public class MiInscripcionActivity extends AppCompatActivity implements IFirebas
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     for (DataSnapshot MaratonSnapshot : dataSnapshot.getChildren ()) {
-                        MiMaraton mimaraton = MaratonSnapshot.getValue ( MiMaraton.class );
+                        Maraton mimaraton = MaratonSnapshot.getValue ( Maraton.class );
                         lstMiMaratonName.add ( mimaraton.maratonname );
                     }
                 }
@@ -171,17 +175,17 @@ public class MiInscripcionActivity extends AppCompatActivity implements IFirebas
 
             Query query = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( current_user_id ).child ( "Inscripcion" );
 
-            FirebaseRecyclerOptions<MiMaraton> options = new FirebaseRecyclerOptions.Builder<MiMaraton> ()
-                    .setQuery ( query, MiMaraton.class )
+            FirebaseRecyclerOptions<Maraton> options = new FirebaseRecyclerOptions.Builder<Maraton> ()
+                    .setQuery ( query, Maraton.class )
                     .build ();
 
-            adapter = new FirebaseRecyclerAdapter<MiMaraton, MiMaratonViewHolder> ( options ) {
+            adapter = new FirebaseRecyclerAdapter<Maraton, MiMaratonViewHolder> ( options ) {
                 @Override
-                protected void onBindViewHolder(@NonNull MiMaratonViewHolder maratonViewHolder, int position, @NonNull MiMaraton maraton) {
+                protected void onBindViewHolder(@NonNull MiMaratonViewHolder maratonViewHolder, int position, @NonNull Maraton maraton) {
                     maratonViewHolder.maratonname.setText ( maraton.maratonname );
-                    maratonViewHolder.maratondate.setText ( maraton.date );
-                    Picasso.with ( getApplication () ).load ( maraton.maratonimagen ).into ( maratonViewHolder.maratonimage );
-                    maratonViewHolder.maratondescription.setText ( maraton.maratondescription );
+                    maratonViewHolder.maratondate.setText ( maraton.maratondate );
+                    Picasso.with ( getApplication () ).load ( maraton.maratonimage ).into ( maratonViewHolder.maratonimage );
+                    maratonViewHolder.maratondescription.setText ( maraton.description );
                     final String PostKey = getRef ( position ).getKey ();
                     maratonViewHolder.setiRecyclerItemClickListener ( new IRecyclerItemClickListener () {
                         @Override
@@ -229,18 +233,18 @@ public class MiInscripcionActivity extends AppCompatActivity implements IFirebas
                     .orderByChild ( "maratonname" )
                     .startAt ( text_search );
 
-            FirebaseRecyclerOptions<MiMaraton> options = new FirebaseRecyclerOptions.Builder<MiMaraton> ()
-                    .setQuery ( query, MiMaraton.class )
+            FirebaseRecyclerOptions<Maraton> options = new FirebaseRecyclerOptions.Builder<Maraton> ()
+                    .setQuery ( query, Maraton.class )
                     .build ();
 
-            searchAdapter = new FirebaseRecyclerAdapter<MiMaraton, MiMaratonViewHolder> ( options ) {
+            searchAdapter = new FirebaseRecyclerAdapter<Maraton, MiMaratonViewHolder> ( options ) {
                 @Override
-                protected void onBindViewHolder(@NonNull MiMaratonViewHolder maratonViewHolder, int position, @NonNull MiMaraton maraton) {
+                protected void onBindViewHolder(@NonNull MiMaratonViewHolder maratonViewHolder, int position, @NonNull Maraton maraton) {
 
                     maratonViewHolder.maratonname.setText ( maraton.maratonname );
-                    maratonViewHolder.maratondate.setText ( maraton.date );
-                    maratonViewHolder.maratondescription.setText ( maraton.maratondescription );
-                    Picasso.with ( getApplication () ).load ( maraton.maratonimagen ).into ( maratonViewHolder.maratonimage );
+                    maratonViewHolder.maratondate.setText ( maraton.maratondate );
+                    maratonViewHolder.maratondescription.setText ( maraton.description );
+                    Picasso.with ( getApplication () ).load ( maraton.maratonimage ).into ( maratonViewHolder.maratonimage );
                     final String PostKey = getRef ( position ).getKey ();
                     maratonViewHolder.setiRecyclerItemClickListener ( new IRecyclerItemClickListener () {
                         @Override

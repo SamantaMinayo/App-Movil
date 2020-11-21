@@ -36,7 +36,6 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
-import com.google.firebase.messaging.FirebaseMessaging;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -62,9 +61,6 @@ public class LoginActivity extends AppCompatActivity {
             if (!checkPermissions ()) {
                 requestPermissions ();
             }
-
-            FirebaseMessaging.getInstance ().subscribeToTopic ( "NewMaraton" );
-
             mAuth = FirebaseAuth.getInstance ();
             NeedNewAccountLink = findViewById ( R.id.register_account_link );
             UserEmail = findViewById ( R.id.login_email );

@@ -29,71 +29,72 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
                     android:layout_marginRight="10dp"
-                        android:orientation="horizontal">
-                        <LinearLayout
-                            android:layout_width="0dp"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1">
+
+                        <de.hdodenhof.circleimageview.CircleImageView
+                            android:id="@+id/carreraimage"
+                            android:layout_width="100dp"
+                            android:layout_height="100dp"
+                            android:scaleType="centerCrop"
+                            android:src="@drawable/profile" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="2"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/carreradescription"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_weight="1">
+                            android:layout_marginLeft="5dp"
+                            android:layout_marginTop="5dp"
+                            android:text="Descripcion"
+                            android:textAlignment="center"
+                            android:textColor="@android:color/black"
+                            android:textSize="12sp" />
 
-                            <de.hdodenhof.circleimageview.CircleImageView
-                                android:id="@+id/carreraimage"
-                                android:layout_width="100dp"
-                                android:layout_height="100dp"
-                                android:scaleType="centerCrop"
-                                android:src="@drawable/profile" />
-
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:layout_width="0dp"
+                        <TextView
+                            android:id="@+id/carreradist"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
+                            android:layout_marginLeft="5dp"
+                            android:layout_marginTop="5dp"
+                            android:text="Distancia"
+                            android:textAlignment="center"
+                            android:textColor="@android:color/black"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/carreralugar"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="5dp"
+                            android:layout_marginTop="5dp"
+                            android:text="Lugar"
+                            android:textAlignment="center"
+                            android:textColor="@android:color/black"
+                            android:textSize="12sp" />
+
+                        <TextView
+                            android:id="@+id/carrerahora"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
                             android:layout_weight="2"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:id="@+id/carreradescription"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginLeft="5dp"
-                                android:layout_marginTop="5dp"
-                                android:text="Descripcion"
-                                android:textAlignment="center"
-                                android:textColor="@android:color/black"
-                                android:textSize="12sp" />
-
-                            <TextView
-                                android:id="@+id/carreradist"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginLeft="5dp"
-                                android:layout_marginTop="5dp"
-                                android:text="Distancia"
-                                android:textAlignment="center"
-                                android:textColor="@android:color/black"
-                                android:textSize="12sp" />
-
-                            <TextView
-                                android:id="@+id/carreralugar"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginLeft="5dp"
-                                android:layout_marginTop="5dp"
-                                android:text="Lugar"
-                                android:textAlignment="center"
-                                android:textColor="@android:color/black"
-                                android:textSize="12sp" />
-
-                            <TextView
-                                android:id="@+id/carrerahora"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_marginTop="5dp"
-                                android:layout_weight="2"
-                                android:text="hora"
-                                android:textAlignment="center"
-                                android:textColor="@android:color/black"
-                                android:textSize="12sp" />
-                        </LinearLayout>
+                            android:text="hora"
+                            android:textAlignment="center"
+                            android:textColor="@android:color/black"
+                            android:textSize="12sp" />
+                    </LinearLayout>
 
                 </LinearLayout>
             </LinearLayout>
@@ -263,8 +264,8 @@
                 android:id="@+id/resultadostcvel"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_below="@+id/resultadostc"
                 android:layout_marginLeft="10dp"
+                android:layout_below="@+id/resultadostc"
                 android:layout_marginRight="10dp"
                 android:orientation="vertical">
 
@@ -297,62 +298,6 @@
                             android:textSize="13dp" />
 
                     </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:background="@drawable/datostable"
-                        android:orientation="vertical"
-                        android:padding="10dp">
-
-                        <TextView
-                            android:id="@+id/poinalto"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="0 "
-                            android:textSize="15dp" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Punto más alto"
-                            android:textColor="@android:color/black"
-                            android:textSize="13dp" />
-
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:background="@drawable/datostable"
-                        android:orientation="vertical"
-                        android:padding="10dp">
-
-                        <TextView
-                            android:id="@+id/pointmin"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="0 "
-                            android:textSize="15dp" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="Punto más bajo"
-                            android:textColor="@android:color/black"
-                            android:textSize="13dp" />
-
-                    </LinearLayout>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:orientation="horizontal">
-
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
@@ -383,47 +328,24 @@
                         android:layout_weight="1"
                         android:background="@drawable/datostable"
                         android:orientation="vertical"
-                        android:padding="10dp">
+                        android:padding="5dp">
 
                         <TextView
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text=""
-                            android:textSize="15dp" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text=""
+                            android:textAlignment="center"
                             android:textColor="@android:color/black"
                             android:textSize="13dp" />
 
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:background="@drawable/datostable"
-                        android:orientation="vertical"
-                        android:padding="10dp">
-
                         <TextView
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
+                            android:layout_height="match_parent"
                             android:text=""
+                            android:textAlignment="center"
                             android:textSize="15dp" />
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text=""
-                            android:textColor="@android:color/black"
-                            android:textSize="13dp" />
-
                     </LinearLayout>
                 </LinearLayout>
-
 
             </LinearLayout>
 
@@ -867,7 +789,7 @@
                 android:id="@+id/mapmi"
                 class="com.google.android.gms.maps.SupportMapFragment"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
+                android:layout_height="350dp"
                 android:layout_below="@+id/tray" />
 
             <lecho.lib.hellocharts.view.LineChartView

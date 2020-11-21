@@ -11,7 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import com.example.saludable.Model.Dato;
+import com.example.saludable.Model.MiResultado;
 import com.example.saludable.Utils.Common;
 import com.example.saludable.localdatabase.DaoResultados;
 import com.example.saludable.localdatabase.DaoUsers;
@@ -50,7 +50,7 @@ public class ProfileActivity extends AppCompatActivity {
     private DaoResultados daoResultados;
 
     private String currentUserId;
-    private ArrayList<Dato> miresultado = new ArrayList<Dato> ();
+    private ArrayList<MiResultado> miresultado = new ArrayList<MiResultado> ();
 
     private LineChartView TChart, VChart, CChart, DChart;
 
@@ -142,7 +142,7 @@ public class ProfileActivity extends AppCompatActivity {
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     miresultado.clear ();
                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
-                        miresultado.add ( postSnapshot.getValue ( Dato.class ) );
+                        miresultado.add ( postSnapshot.getValue ( MiResultado.class ) );
                     }
                     GenerarDatos ();
                 }

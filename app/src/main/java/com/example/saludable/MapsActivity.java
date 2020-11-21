@@ -36,10 +36,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
-import com.example.saludable.Model.Dato;
+import com.example.saludable.Model.Maraton;
+import com.example.saludable.Model.MiResultado;
 import com.example.saludable.Model.Punto;
-import com.example.saludable.Model.Resultado;
-import com.example.saludable.Model.UsrMrtn;
 import com.example.saludable.Service.MyService;
 import com.example.saludable.Service.Utils;
 import com.example.saludable.Utils.Common;
@@ -87,6 +86,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private double distanciatotal = 0.0;
     private String inicio = "false";
     private double velocidadtotal = 0.0;
+    private double velocidadmaxima = 0.5;
+    private double velocidadminima = 2;
+
     private int contregistro = 0;
     ///////////////////////////
     private String horacarrera;
@@ -115,6 +117,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private DaoPuntos daoPuntos;
     // Tracks the bound state of the service.
     private boolean mBound = false;
+
     private final ServiceConnection mServiceConnection = new ServiceConnection () {
 
         @Override
@@ -135,7 +138,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Button mRemoveLocationUpdatesButton;
     private TextView velocidad, distancia, pasos;
     private Chronometer cronometro;
-    private ArrayList<Dato> miresultado = new ArrayList<Dato> ();
+    private ArrayList<MiResultado> miresultado = new ArrayList<MiResultado> ();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -157,42 +160,41 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mAuth = FirebaseAuth.getInstance ();
             current_user_id = mAuth.getCurrentUser ().getUid ();
             PostKey = getIntent ().getExtras ().get ( "PostKey" ).toString ();
-            //Guardar Datos cada 15 a 20 seg depende del GPS
             CarreraUserInf = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" )
                     .child ( "Datos" ).child ( PostKey ).child ( current_user_id );
-            //Dato usado para el monitoreo en tiempo real desde el administrador
             CarreraUserMon = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).
                     child ( "Monitoreo" ).child ( PostKey );
-            //Cuando finalice la carrera el usuario elimina su registro de inscripcion en la carrera y lo envia a realizzada
             RegistrarUsuario = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).
                     child ( current_user_id ).child ( "Inscripcion" ).child ( PostKey );
-            //Cuando finalice la carrera el usuario elimina su registro de inscripcion en la carrera y lo envia a realizzada
             RegistrarResUsuario = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).
                     child ( current_user_id ).child ( "Resultados" ).child ( "Lista" ).child ( PostKey );
-            //Guardar resultados en el nodo del usuario
             CarreraUserInfRes = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).
                     child ( current_user_id ).child ( "Resultados" ).child ( "Resultado" ).child ( PostKey );
-            //Guardar resultados en el nodo resultados por carrera
             CarreraResInfo = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( "Resultados" ).
                     child ( PostKey ).child ( current_user_id );
-            //Verificar si la usuario a iniciado o a finalizado.
             Carrera = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).
                     child ( "Nuevas" ).child ( PostKey ).child ( "estado" );
 
             horacarrera = Common.carrera.getMaratontime ();
             daoResultados = new DaoResultados ( this );
             daoPuntos = new DaoPuntos ( this );
-            // Check that the user hasn't revoked permissions by going to Settings.
-            if (Utils.requestingLocationUpdates ( this )) {
                 if (!checkPermissions ()) {
                     requestPermissions ();
                 }
-            }
             Carrera.addValueEventListener ( new ValueEventListener () {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     inicio = (String) dataSnapshot.getValue ();
-                    if (inicio.equals ( "fin" )) fin = true;
+                    if (inicio.equals ( "fin" )) {
+                        fin = true;
+                        long crofinal = cronometro.getBase ();
+                        cronometro.stop ();
+                        cronometro.setBase ( crofinal );
+                    } else if (inicio.equals ( "true" )) {
+                        //cronometro.stop ();
+                        cronometro.setBase ( SystemClock.elapsedRealtime () );
+                        cronometro.start ();
+                    }
                 }
 
                 @Override
@@ -225,7 +227,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             cronometro = findViewById ( R.id.cronometro );
             loadingBar = new ProgressDialog ( this );
 
-
             mRequestLocationUpdatesButton.setOnClickListener ( new View.OnClickListener () {
                 @RequiresApi(api = Build.VERSION_CODES.O)
                 @Override
@@ -233,8 +234,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     if (!checkPermissions ()) {
                         requestPermissions ();
                     } else {
-                        // LocalBroadcastManager.getInstance ( getApplicationContext () ).registerReceiver ( myReceiver,
-                        //new IntentFilter ( MyService.ACTION_BROADCAST ) );
                         transmision = true;
                         if (!wakelock.isHeld ()) {
                             wakelock.acquire ();
@@ -259,14 +258,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                     mService.getLastLocation ();
                     fin = true;
                     transmision = false;
+                    long crofinal = cronometro.getBase ();
+                    cronometro.stop ();
+                    cronometro.setBase ( crofinal );
+
                 }
             } );
 
-            // Restore the state of the buttons when the activity (re)launches.
             setButtonsState ( Utils.requestingLocationUpdates ( this ) );
 
-            // Bind to the service. If the service is in foreground mode, this signals to the service
-            // that since this activity is in the foreground, the service can exit foreground mode.
             bindService ( new Intent ( this, MyService.class ), mServiceConnection,
                     Context.BIND_AUTO_CREATE );
         } catch (Exception e) {
@@ -299,14 +299,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onStop() {
         try {
             if (mBound) {
-                // Unbind from the service. This signals to the service that this activity is no longer
-                // in the foreground, and the service can respond by promoting itself to a foreground
-                // service.
                 unbindService ( mServiceConnection );
-
                 mBound = false;
             }
-            //LocalBroadcastManager.getInstance ( this ).unregisterReceiver ( myReceiver );
             PreferenceManager.getDefaultSharedPreferences ( this )
                     .unregisterOnSharedPreferenceChangeListener ( this );
             super.onStop ();
@@ -414,9 +409,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             boolean shouldProvideRationale =
                     ActivityCompat.shouldShowRequestPermissionRationale ( this,
                             Manifest.permission.ACCESS_FINE_LOCATION );
-
-            // Provide an additional rationale to the user. This would happen if the user denied the
-            // request previously, but didn't check the "Don't ask again" checkbox.
             if (shouldProvideRationale) {
                 Log.i ( TAG, "Displaying permission rationale to provide additional context." );
                 Snackbar.make (
@@ -435,9 +427,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                         .show ();
             } else {
                 Log.i ( TAG, "Requesting permission" );
-                // Request permission. It's possible this can be auto answered if device policy
-                // sets the permission in a given state or the user denied the permission
-                // previously and checked "Never ask again".
                 ActivityCompat.requestPermissions ( MapsActivity.this,
                         new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                         REQUEST_PERMISSIONS_REQUEST_CODE );
@@ -449,9 +438,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    /**
-     * Callback received when a permissions request has been completed.
-     */
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
@@ -460,21 +446,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Log.i ( TAG, "onRequestPermissionResult" );
             if (requestCode == REQUEST_PERMISSIONS_REQUEST_CODE) {
                 if (grantResults.length <= 0) {
-                    // If user interaction was interrupted, the permission request is cancelled and you
-                    // receive empty arrays.
                     Log.i ( TAG, "User interaction was cancelled." );
                 } else if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // Permission was granted.
-                    transmision = true;
-                    if (!wakelock.isHeld ()) {
-                        wakelock.acquire ();
-                    }
-                    cronometro.setBase ( SystemClock.elapsedRealtime () );
-                    cronometro.start ();
-                    distanciatotal = 0.0;
-                    velocidadtotal = 0.0;
+                    mService.getLocation ();
+
                 } else {
-                    // Permission denied.
                     setButtonsState ( false );
                     Snackbar.make (
                             findViewById ( R.id.activity_maps ),
@@ -483,7 +459,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                             .setAction ( R.string.settings, new View.OnClickListener () {
                                 @Override
                                 public void onClick(View view) {
-                                    // Build intent that displays the App settings screen.
                                     Intent intent = new Intent ();
                                     intent.setAction (
                                             Settings.ACTION_APPLICATION_DETAILS_SETTINGS );
@@ -518,16 +493,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     public void agrerarMarcador(Location location) {
         try {
-            inicio = "true";
             LatLng coordenada = new LatLng ( location.getLatitude (), location.getLongitude () );
             CameraUpdate miUbicacion = CameraUpdateFactory.newLatLngZoom ( coordenada, 15 );
 
-            // if (marcador != null) marcador.remove ();
-            //marcador = mMap.addMarker ( new MarkerOptions ()
-            //      .position ( coordenada )
-            //    .title ( "Mi posision actual" )
-            //  .icon ( BitmapDescriptorFactory.defaultMarker ( 2 ) )
-            //);
             mMap.animateCamera ( miUbicacion );
             mMap.setMyLocationEnabled ( true );
             //hora
@@ -626,15 +594,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             puntos.put ( "pasos", pas );
             puntos.put ( "genero", Common.loggedUser.getGenero () );
             puntos.put ( "rango", Common.loggedUser.getRango () );
+            puntos.put ( "velmax", formato1.format ( velocidadmaxima ) );
+            puntos.put ( "velmin", formato1.format ( velocidadminima ) );
             puntos.put ( "usuario", Common.loggedUser.getUsername () );
             puntos.put ( "uid", current_user_id );
+
+            MiResultado nuevo = new MiResultado ( PostKey, formato1.format ( mint ), formato1.format ( distanciatotal ), pas, formato1.format ( velocidadmaxima ), velmed, formato1.format ( velocidadminima ), calorias );
+            daoResultados.Insert ( nuevo );
+
             if (distanciatotal > 10 && mint > 0) {
                 CarreraResInfo.updateChildren ( puntos );
                 CarreraUserInfRes.updateChildren ( puntos );
-
                 GuardarResList ();
-
             } else {
+                daoPuntos.Eliminar ( PostKey );
+                CarreraUserInf.removeValue ();
                 Toast.makeText ( this, "Ha ocurrido un error. No se ha podido guardar informacion de la carrera para este usuario", Toast.LENGTH_SHORT ).show ();
             }
         } catch (Exception e) {
@@ -642,19 +616,26 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             error.put ( "error", e.getMessage () );
             FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MapaActivity" ).child ( "GuardarFinal" ).child ( current_user_id ).updateChildren ( error );
         }
-
     }
 
     private void GuardarInformacion(Location location, String distguar, String hora, String tiempo, String timet) {
         try {
             if (!tiempo.equals ( "0:0:0" )) {
                 HashMap puntos = new HashMap ();
-
+                if (location.getSpeed () > velocidadmaxima) {
+                    velocidadmaxima = location.getSpeed ();
+                }
+                if (location.getSpeed () < velocidadminima) {
+                    if (location.getSpeed () < 0.001) {
+                        puntos.put ( "velocidad", "0.001" );
+                    } else {
+                        velocidadminima = location.getSpeed ();
+                    }
+                }
                 puntos.put ( "latitud", String.valueOf ( location.getLatitude () ) );
                 puntos.put ( "longitud", String.valueOf ( location.getLongitude () ) );
-                puntos.put ( "altitud", String.valueOf ( location.getAltitude () ) );
                 if (location.getSpeed () < 0.001) {
-                    puntos.put ( "velocidad", "0.000" );
+                    puntos.put ( "velocidad", "0.001" );
                 } else {
                     puntos.put ( "velocidad", String.valueOf ( location.getSpeed () ) );
                 }
@@ -731,24 +712,23 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void GuardarResList() {
         try {
-            UsrMrtn usrM = usrMrtn.Obtener ( PostKey );
+            Maraton usrM = usrMrtn.Obtener ( PostKey );
             if (usrM == null) {
-                usrM = new UsrMrtn ( 1, PostKey, "fin" );
+                usrM = new Maraton ( 1, PostKey, "fin" );
                 usrMrtn.Insert ( usrM );
             } else {
-                usrM = new UsrMrtn ( 1, PostKey, "fin" );
+                usrM = new Maraton ( 1, PostKey, "fin" );
                 usrMrtn.Editar ( usrM );
             }
             RegistrarUsuario.removeValue ();
 
             HashMap crear = new HashMap ();
             crear.put ( "maratonname", Common.carrera.maratonname );
-            crear.put ( "date", Common.carrera.maratondate + " : " + Common.carrera.maratontime );
-            crear.put ( "maratonimagen", Common.carrera.maratonimage );
-            crear.put ( "maratondescription", Common.carrera.description );
+            crear.put ( "maratondate", Common.carrera.maratondate + " : " + Common.carrera.maratontime );
+            crear.put ( "maratonimage", Common.carrera.maratonimage );
+            crear.put ( "description", Common.carrera.description );
             crear.put ( "uid", Common.carrera.uid );
             RegistrarResUsuario.updateChildren ( crear );
-            CargarMisResultados ();
         } catch (Exception e) {
             HashMap error = new HashMap ();
             error.put ( "error", e.getMessage () );
@@ -794,82 +774,5 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
         }
     }
-
-    private void CargarMisResultados() {
-        FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( current_user_id ).child ( "Resultados" ).child ( "Resultado" ).child ( PostKey ).addListenerForSingleValueEvent ( new ValueEventListener () {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                miresultado.add ( dataSnapshot.getValue ( Dato.class ) );
-                for (Dato datos : miresultado) {
-                    float distance = Float.valueOf ( datos.getDistancia () ) / 1000;
-                    float time = Float.valueOf ( datos.getTiempo () );
-                    float ritmo = time / distance;
-                    float rsegundos = ritmo % 1;
-                    float rmintotales = ritmo - rsegundos;
-                    float rcalculo = rmintotales / 60;
-                    float rdecimales = rcalculo % 1;
-                    float rhoras = rcalculo - rdecimales;
-                    float rminutos = rmintotales - rhoras * 60;
-                    Resultado nuevo = new Resultado ( PostKey, datos.getTiempo (),
-                            String.valueOf ( distance ), datos.getPasos (), "", datos.getVelocidad (), "", datos.getCalorias (),
-                            "", "", (int) rminutos + "'" + (int) (rsegundos * 60) + "''" );
-                    Resultado resultado = daoResultados.ObtenerResultado ( PostKey );
-                    if (resultado == null) {
-                        daoResultados.Insert ( nuevo );
-                    } else {
-                        daoResultados.Editar ( nuevo );
-                    }
-
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        } );
-        FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( "Datos" ).child ( PostKey ).child ( current_user_id ).orderByChild ( "velocidad" ).limitToLast ( 1 ).addListenerForSingleValueEvent ( new ValueEventListener () {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
-                    Resultado nuevo = new Resultado ( PostKey, "", "", "", formato1.format ( postSnapshot.getValue ( Punto.class ).getVelocidad () ), "",
-                            "", "", "", "", "" );
-                    Resultado resultado = daoResultados.ObtenerResultado ( PostKey );
-                    if (resultado == null) {
-                        daoResultados.Insert ( nuevo );
-                    } else {
-                        daoResultados.Editar ( nuevo );
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        } );
-        FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( "Datos" ).child ( PostKey ).child ( current_user_id ).orderByChild ( "velocidad" ).limitToFirst ( 1 ).addListenerForSingleValueEvent ( new ValueEventListener () {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
-                    Resultado nuevo = new Resultado ( PostKey, "", "", "", "", "",
-                            formato1.format ( Double.valueOf ( postSnapshot.getValue ( Punto.class ).getVelocidad () ) ), "", "", "", "" );
-                    Resultado resultado = daoResultados.ObtenerResultado ( PostKey );
-                    if (resultado == null) {
-                        daoResultados.Insert ( nuevo );
-                    } else {
-                        daoResultados.Editar ( nuevo );
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        } );
-    }
-
 }
 

@@ -4,6 +4,8 @@ import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -25,10 +27,10 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.saludable.Service.Utils;
 import com.example.saludable.Utils.Common;
 import com.example.saludable.localdatabase.DaoUsers;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
@@ -44,6 +46,7 @@ import com.squareup.picasso.Picasso;
 import com.theartofdev.edmodo.cropper.CropImage;
 import com.theartofdev.edmodo.cropper.CropImageView;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.HashMap;
@@ -78,11 +81,9 @@ public class SettingsActivity extends AppCompatActivity {
             super.onCreate ( savedInstanceState );
             setContentView ( R.layout.activity_settings );
 
-            if (Utils.requestingLocationUpdates ( this )) {
                 if (!checkPermissions ()) {
                     requestPermissions ();
                 }
-            }
 
             mAuth = FirebaseAuth.getInstance ();
             currentUserId = mAuth.getCurrentUser ().getUid ();
@@ -139,6 +140,7 @@ public class SettingsActivity extends AppCompatActivity {
                                 String myProfileImage = dataSnapshot.child ( "profileimage" ).getValue ().toString ();
                                 updateprofileimage = myProfileImage;
                                 Picasso.with ( SettingsActivity.this ).load ( myProfileImage ).placeholder ( R.drawable.profile ).into ( userProfileImage );
+
                             }
                             if (dataSnapshot.hasChild ( "username" )) {
                                 String myUsername = dataSnapshot.child ( "username" ).getValue ().toString ();
@@ -277,10 +279,9 @@ public class SettingsActivity extends AppCompatActivity {
                                                     public void onComplete(@NonNull Task<Void> task) {
 
                                                         if (task.isSuccessful ()) {
-
-
                                                             Picasso.with ( SettingsActivity.this ).load ( downloadUri ).placeholder ( R.drawable.profile ).into ( userProfileImage );
                                                             Common.loggedUser.setProfileimage ( downloadUri );
+
                                                             Toast.makeText ( SettingsActivity.this, "Imagen almacenada correctamente", Toast.LENGTH_SHORT ).show ();
                                                             loadingBar.dismiss ();
                                                         } else {
@@ -388,6 +389,21 @@ public class SettingsActivity extends AppCompatActivity {
                 public void onComplete(@NonNull Task task) {
                     if (task.isSuccessful ()) {
                         daoUsers.Editar ( Common.loggedUser );
+                        final long ONE_MEGABYTE = 512 * 512;
+                        FirebaseStorage.getInstance ().getReference ().child ( "ProfileImages" )
+                                .child ( currentUserId + ".jpg" ).getBytes ( ONE_MEGABYTE )
+                                .addOnSuccessListener ( new OnSuccessListener<byte[]> () {
+                                    @Override
+                                    public void onSuccess(byte[] bytes) {
+                                        Bitmap bitmap = BitmapFactory.decodeByteArray ( bytes, 0, bytes.length );
+
+                                        try {
+                                            daoUsers.InsertImagen ( Common.loggedUser.getUid (), bitmap, getApplication () );
+                                        } catch (IOException e) {
+                                            e.printStackTrace ();
+                                        }
+                                    }
+                                } );
                         SendUserToProfile ();
                         Toast.makeText ( SettingsActivity.this, "Usuario actualizado correctamente", Toast.LENGTH_SHORT ).show ();
                         loadingBar.dismiss ();

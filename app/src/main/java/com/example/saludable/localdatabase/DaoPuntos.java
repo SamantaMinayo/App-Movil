@@ -50,7 +50,7 @@ public class DaoPuntos {
     }
 
     public boolean Eliminar(String uid) {
-        return true;
+        return (db.delete ( "puntos", "uid=" + "'" + uid + "'", null )) > 0;
     }
 
     public boolean Editar(Punto pnt) {

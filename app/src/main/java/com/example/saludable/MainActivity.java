@@ -26,15 +26,12 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.saludable.Model.Dato;
 import com.example.saludable.Model.Maraton;
 import com.example.saludable.Model.MaratonResult;
-import com.example.saludable.Model.MiMaraton;
+import com.example.saludable.Model.MiResultado;
 import com.example.saludable.Model.Post;
 import com.example.saludable.Model.Punto;
-import com.example.saludable.Model.Resultado;
 import com.example.saludable.Model.User;
-import com.example.saludable.Model.UsrMrtn;
 import com.example.saludable.Utils.Common;
 import com.example.saludable.ViewHolder.PostViewHolder;
 import com.example.saludable.localdatabase.DaoMarRes;
@@ -55,6 +52,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.storage.FirebaseStorage;
 import com.squareup.picasso.Picasso;
 
@@ -86,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
     private DaoMarRes daoMarRes;
     private DaoPuntos daoPuntos;
     private DaoUsrMrtn daoUsrMrtn;
-    private ArrayList<Dato> listaresultadosglobales = new ArrayList<Dato> ();
+    private ArrayList<MiResultado> listaresultadosglobales = new ArrayList<MiResultado> ();
     private DecimalFormat formato1;
 
     @Override
@@ -94,6 +92,8 @@ public class MainActivity extends AppCompatActivity {
         try {
             super.onCreate ( savedInstanceState );
             setContentView ( R.layout.activity_main );
+
+            FirebaseMessaging.getInstance ().subscribeToTopic ( "NewMaraton" );
 
             if (!checkPermissions ()) {
                 requestPermissions ();
@@ -247,10 +247,10 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
                     for (DataSnapshot marSnapshot : dataSnapshot.getChildren ()) {
-                        final MiMaraton mar = marSnapshot.getValue ( MiMaraton.class );
-                        UsrMrtn mimar = daoUsrMrtn.Obtener ( mar.getUid () );
+                        final Maraton mar = marSnapshot.getValue ( Maraton.class );
+                        Maraton mimar = daoUsrMrtn.Obtener ( mar.getUid () );
                         if (mimar == null) {
-                            daoUsrMrtn.Insert ( new UsrMrtn ( 1, mar.getUid (), "fin" ) );
+                            daoUsrMrtn.Insert ( new Maraton ( 1, mar.getUid (), "fin" ) );
                         }
                         if (daoPuntos.ObtenerPuntos ( mar.getUid () ) == null) {
                             FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( "Datos" )
@@ -310,69 +310,9 @@ public class MainActivity extends AppCompatActivity {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                     if (dataSnapshot.exists ()) {
-                                        Dato dato = dataSnapshot.getValue ( Dato.class );
-                                        float distance = Float.valueOf ( dato.getDistancia () ) / 1000;
-                                        float time = Float.valueOf ( dato.getTiempo () );
-                                        float ritmo = time / distance;
-                                        float rsegundos = ritmo % 1;
-                                        float rmintotales = ritmo - rsegundos;
-                                        float rcalculo = rmintotales / 60;
-                                        float rdecimales = rcalculo % 1;
-                                        float rhoras = rcalculo - rdecimales;
-                                        float rminutos = rmintotales - rhoras * 60;
-
-                                        Resultado nuevo = new Resultado ( mar.getUid (), dato.getTiempo (),
-                                                String.valueOf ( distance ), dato.getPasos (), "", dato.getVelocidad (), "", dato.getCalorias (),
-                                                "", "", (int) rminutos + "'" + (int) (rsegundos * 60) + "''" );
-                                        Resultado resultado = daoResultados.ObtenerResultado ( mar.getUid () );
-                                        if (resultado == null) {
-                                            daoResultados.Insert ( nuevo );
-                                        } else {
-                                            daoResultados.Editar ( nuevo );
-                                        }
-                                    }
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                }
-                            } );
-                            FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( "Datos" ).child ( mar.getUid () ).child ( current_user_id )
-                                    .orderByChild ( "velocidad" ).limitToLast ( 1 ).addListenerForSingleValueEvent ( new ValueEventListener () {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot dataxSnapshot) {
-                                    for (DataSnapshot postSnapshot : dataxSnapshot.getChildren ()) {
-                                        Resultado nuevo = new Resultado ( mar.getUid (), "", "", "",
-                                                formato1.format ( Double.valueOf ( postSnapshot.getValue ( Punto.class ).getVelocidad () ) ), "",
-                                                "", "", "", "", "" );
-                                        Resultado resultado = daoResultados.ObtenerResultado ( mar.getUid () );
-                                        if (resultado == null) {
-                                            daoResultados.Insert ( nuevo );
-                                        } else {
-                                            daoResultados.Editar ( nuevo );
-                                        }
-                                    }
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                }
-                            } );
-                            FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( "Datos" ).child ( mar.getUid () ).child ( current_user_id )
-                                    .orderByChild ( "velocidad" ).limitToFirst ( 1 ).addListenerForSingleValueEvent ( new ValueEventListener () {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
-                                        Resultado nuevo = new Resultado ( mar.getUid (), "", "", "", "", "",
-                                                formato1.format ( Double.valueOf ( postSnapshot.getValue ( Punto.class ).getVelocidad () ) ), "", "", "", "" );
-                                        Resultado resultado = daoResultados.ObtenerResultado ( mar.getUid () );
-                                        if (resultado == null) {
-                                            daoResultados.Insert ( nuevo );
-                                        } else {
-                                            daoResultados.Editar ( nuevo );
-                                        }
+                                        MiResultado dato = dataSnapshot.getValue ( MiResultado.class );
+                                        dato.setUid ( dataSnapshot.getKey () );
+                                        daoResultados.Insert ( dato );
                                     }
                                 }
 
@@ -388,7 +328,7 @@ public class MainActivity extends AppCompatActivity {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
-                                        MaratonResult nuevo = new MaratonResult ( mar.getUid (), "", postSnapshot.getValue ( Dato.class ).getVelocidad (), "", "", "", "", "", "", "", "", "" );
+                                        MaratonResult nuevo = new MaratonResult ( mar.getUid (), "", postSnapshot.getValue ( MiResultado.class ).getVelocidad (), "", "", "", "", "", "", "", "", "" );
                                         MaratonResult resultado = daoMarRes.ObtenerMaratonRes ( mar.getUid () );
                                         if (resultado == null) {
                                             daoMarRes.Insert ( nuevo );
@@ -408,7 +348,7 @@ public class MainActivity extends AppCompatActivity {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
-                                        MaratonResult nuevo = new MaratonResult ( mar.getUid (), "", "", "", postSnapshot.getValue ( Dato.class ).getVelocidad (), "", "", "", "", "", "", "" );
+                                        MaratonResult nuevo = new MaratonResult ( mar.getUid (), "", "", "", postSnapshot.getValue ( MiResultado.class ).getVelocidad (), "", "", "", "", "", "", "" );
                                         MaratonResult resultado = daoMarRes.ObtenerMaratonRes ( mar.getUid () );
                                         if (resultado == null) {
                                             daoMarRes.Insert ( nuevo );
@@ -428,14 +368,14 @@ public class MainActivity extends AppCompatActivity {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
-                                        float time = Float.valueOf ( postSnapshot.getValue ( Dato.class ).getTiempo () );
+                                        float time = Float.valueOf ( postSnapshot.getValue ( MiResultado.class ).getTiempo () );
                                         float segundos = time % 1;
                                         float mintotales = time - segundos;
                                         float calculo = mintotales / 60;
                                         float decimales = calculo % 1;
                                         float horas = calculo - decimales;
                                         float minutos = mintotales - horas * 60;
-                                        float rtime = Float.valueOf ( postSnapshot.getValue ( Dato.class ).getTiempo () ) / (Float.valueOf ( postSnapshot.getValue ( Dato.class ).getDistancia () ) / 1000);
+                                        float rtime = Float.valueOf ( postSnapshot.getValue ( MiResultado.class ).getTiempo () ) / (Float.valueOf ( postSnapshot.getValue ( MiResultado.class ).getDistancia () ) / 1000);
                                         float rsegundos = rtime % 1;
                                         float rmintotales = rtime - rsegundos;
                                         float rcalculo = rmintotales / 60;
@@ -463,14 +403,14 @@ public class MainActivity extends AppCompatActivity {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
-                                        float time = Float.valueOf ( postSnapshot.getValue ( Dato.class ).getTiempo () );
+                                        float time = Float.valueOf ( postSnapshot.getValue ( MiResultado.class ).getTiempo () );
                                         float segundos = time % 1;
                                         float mintotales = time - segundos;
                                         float calculo = mintotales / 60;
                                         float decimales = calculo % 1;
                                         float horas = calculo - decimales;
                                         float minutos = mintotales - horas * 60;
-                                        float rtime = Float.valueOf ( postSnapshot.getValue ( Dato.class ).getTiempo () ) / (Float.valueOf ( postSnapshot.getValue ( Dato.class ).getDistancia () ) / 1000);
+                                        float rtime = Float.valueOf ( postSnapshot.getValue ( MiResultado.class ).getTiempo () ) / (Float.valueOf ( postSnapshot.getValue ( MiResultado.class ).getDistancia () ) / 1000);
                                         float rsegundos = rtime % 1;
                                         float rmintotales = rtime - rsegundos;
                                         float rcalculo = rmintotales / 60;
@@ -498,7 +438,7 @@ public class MainActivity extends AppCompatActivity {
                                         @Override
                                         public void onDataChange(DataSnapshot snapshot) {
                                             for (DataSnapshot postSnapshot : snapshot.getChildren ()) {
-                                                listaresultadosglobales.add ( postSnapshot.getValue ( Dato.class ) );
+                                                listaresultadosglobales.add ( postSnapshot.getValue ( MiResultado.class ) );
                                             }
                                             CargarDatosGlob ( mar.getUid () );
                                         }
@@ -529,7 +469,7 @@ public class MainActivity extends AppCompatActivity {
             float caloriasglo = 0;
             float ritmopro = 0;
             int cantglo = 0;
-            for (Dato dato : listaresultadosglobales) {
+            for (MiResultado dato : listaresultadosglobales) {
                 cantglo = cantglo + 1;
                 tiempoglo = tiempoglo + Float.valueOf ( dato.getTiempo () );
                 velocidadglo = velocidadglo + Float.valueOf ( dato.getVelocidad () );
@@ -577,9 +517,9 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onDataChange(@NonNull final DataSnapshot dataSnapshot) {
                     for (DataSnapshot marSnapshot : dataSnapshot.getChildren ()) {
-                        final MiMaraton mar = marSnapshot.getValue ( MiMaraton.class );
+                        final Maraton mar = marSnapshot.getValue ( Maraton.class );
                         if (daoUsrMrtn.Obtener ( mar.getUid () ) == null) {
-                            daoUsrMrtn.Insert ( new UsrMrtn ( 1, mar.getUid (), "ins" ) );
+                            daoUsrMrtn.Insert ( new Maraton ( 1, mar.getUid (), "ins" ) );
                         }
                         if (daoMaraton.ObtenerMaraton ( mar.getUid () ) == null) {
                             FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( "Nuevas" )

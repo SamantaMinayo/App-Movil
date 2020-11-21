@@ -1,6 +1,7 @@
 package com.example.saludable.Model;
 
 public class Maraton {
+    int id;
     public String uid;
     public String time;
     public String date;
@@ -34,6 +35,23 @@ public class Maraton {
         this.estado = estado;
         this.maratondist = distancia;
         this.maratontrayectoriaweb = maratontrayectoriaweb;
+    }
+
+    public Maraton() {
+    }
+
+    public Maraton(String maratonname, String maratonimagen, String maratondescription, String date, String uid) {
+        this.maratonname = maratonname;
+        this.maratonimage = maratonimagen;
+        this.description = maratondescription;
+        this.maratondate = date;
+        this.uid = uid;
+    }
+
+    public Maraton(int id, String uid, String estado) {
+        this.id = id;
+        this.uid = uid;
+        this.estado = estado;
     }
 
     public String getMaratondist() {
@@ -148,9 +166,6 @@ public class Maraton {
         this.estado = estado;
     }
 
-    public Maraton() {
-    }
-
     public String getCodigo() {
         return codigo;
     }
@@ -158,4 +173,15 @@ public class Maraton {
     public void setCodigo(String codigo) {
         this.codigo = codigo;
     }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
 }
+
+
+

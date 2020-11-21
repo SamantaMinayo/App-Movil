@@ -19,7 +19,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.saludable.Interfaces.IFirebaseLoadDone;
 import com.example.saludable.Interfaces.IRecyclerItemClickListener;
 import com.example.saludable.Model.Maraton;
-import com.example.saludable.Model.MiMaraton;
 import com.example.saludable.Model.Punto;
 import com.example.saludable.ViewHolder.MaratonAdapter;
 import com.example.saludable.ViewHolder.MiMaratonViewHolder;
@@ -46,7 +45,7 @@ import static androidx.recyclerview.widget.RecyclerView.LayoutManager;
 public class MiMaratonActivity extends AppCompatActivity implements IFirebaseLoadDone {
 
 
-    FirebaseRecyclerAdapter<MiMaraton, MiMaratonViewHolder> adapter, searchAdapter;
+    FirebaseRecyclerAdapter<Maraton, MiMaratonViewHolder> adapter, searchAdapter;
 
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager layoutManager;
@@ -157,7 +156,7 @@ public class MiMaratonActivity extends AppCompatActivity implements IFirebaseLoa
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     for (DataSnapshot MaratonSnapshot : dataSnapshot.getChildren ()) {
-                        MiMaraton mimaraton = MaratonSnapshot.getValue ( MiMaraton.class );
+                        Maraton mimaraton = MaratonSnapshot.getValue ( Maraton.class );
                         lstMiMaratonName.add ( mimaraton.maratonname );
                     }
                 }
@@ -179,17 +178,17 @@ public class MiMaratonActivity extends AppCompatActivity implements IFirebaseLoa
         try {
             Query query = FirebaseDatabase.getInstance ().getReference ().child ( "Users" ).child ( current_user_id ).child ( "Resultados" ).child ( "Lista" );
 
-            FirebaseRecyclerOptions<MiMaraton> options = new FirebaseRecyclerOptions.Builder<MiMaraton> ()
-                    .setQuery ( query, MiMaraton.class )
+            FirebaseRecyclerOptions<Maraton> options = new FirebaseRecyclerOptions.Builder<Maraton> ()
+                    .setQuery ( query, Maraton.class )
                     .build ();
 
-            adapter = new FirebaseRecyclerAdapter<MiMaraton, MiMaratonViewHolder> ( options ) {
+            adapter = new FirebaseRecyclerAdapter<Maraton, MiMaratonViewHolder> ( options ) {
                 @Override
-                protected void onBindViewHolder(@NonNull MiMaratonViewHolder maratonViewHolder, int position, @NonNull MiMaraton maraton) {
+                protected void onBindViewHolder(@NonNull MiMaratonViewHolder maratonViewHolder, int position, @NonNull Maraton maraton) {
                     maratonViewHolder.maratonname.setText ( maraton.maratonname );
-                    maratonViewHolder.maratondate.setText ( maraton.date );
-                    Picasso.with ( getApplication () ).load ( maraton.maratonimagen ).into ( maratonViewHolder.maratonimage );
-                    maratonViewHolder.maratondescription.setText ( maraton.maratondescription );
+                    maratonViewHolder.maratondate.setText ( maraton.maratondate );
+                    Picasso.with ( getApplication () ).load ( maraton.maratonimage ).into ( maratonViewHolder.maratonimage );
+                    maratonViewHolder.maratondescription.setText ( maraton.description );
                     final String PostKey = getRef ( position ).getKey ();
                     maratonViewHolder.setiRecyclerItemClickListener ( new IRecyclerItemClickListener () {
                         @Override
@@ -236,18 +235,18 @@ public class MiMaratonActivity extends AppCompatActivity implements IFirebaseLoa
                     .orderByChild ( "maratonname" )
                     .startAt ( text_search );
 
-            FirebaseRecyclerOptions<MiMaraton> options = new FirebaseRecyclerOptions.Builder<MiMaraton> ()
-                    .setQuery ( query, MiMaraton.class )
+            FirebaseRecyclerOptions<Maraton> options = new FirebaseRecyclerOptions.Builder<Maraton> ()
+                    .setQuery ( query, Maraton.class )
                     .build ();
 
-            searchAdapter = new FirebaseRecyclerAdapter<MiMaraton, MiMaratonViewHolder> ( options ) {
+            searchAdapter = new FirebaseRecyclerAdapter<Maraton, MiMaratonViewHolder> ( options ) {
                 @Override
-                protected void onBindViewHolder(@NonNull MiMaratonViewHolder maratonViewHolder, int position, @NonNull MiMaraton maraton) {
+                protected void onBindViewHolder(@NonNull MiMaratonViewHolder maratonViewHolder, int position, @NonNull Maraton maraton) {
 
                     maratonViewHolder.maratonname.setText ( maraton.maratonname );
-                    maratonViewHolder.maratondate.setText ( maraton.date );
-                    Picasso.with ( getApplication () ).load ( maraton.maratonimagen ).into ( maratonViewHolder.maratonimage );
-                    maratonViewHolder.maratondescription.setText ( maraton.maratondescription );
+                    maratonViewHolder.maratondate.setText ( maraton.maratondate );
+                    Picasso.with ( getApplication () ).load ( maraton.maratonimage ).into ( maratonViewHolder.maratonimage );
+                    maratonViewHolder.maratondescription.setText ( maraton.description );
                     final String PostKey = getRef ( position ).getKey ();
                     maratonViewHolder.setiRecyclerItemClickListener ( new IRecyclerItemClickListener () {
                         @Override

@@ -5,23 +5,21 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.example.saludable.Model.Dato;
-import com.example.saludable.Model.Resultado;
+import com.example.saludable.Model.MiResultado;
 
 import java.util.ArrayList;
 
 public class DaoResultados {
 
     SQLiteDatabase db;
-    Resultado resultado;
-    ArrayList<Dato> lista = new ArrayList<Dato> ();
+    MiResultado resultado;
+    ArrayList<MiResultado> lista = new ArrayList<MiResultado> ();
 
     Context ctx;
     String nombredb = "SaludableDB";
     String tabla = " create table if not exists resultados(" +
             "uid text primary key,mduracion text,mdistancia text,mpasos text," +
-            "mvelmax text,mvelmed text,mvelmin text,mcalorias text," +
-            "mpuntomax text,mpuntomin text,mritmo text)";
+            "mvelmax text,mvelmed text,mvelmin text,mcalorias text)";
 
     public DaoResultados(Context c) {
         this.ctx = c;
@@ -29,19 +27,16 @@ public class DaoResultados {
         db.execSQL ( tabla );
     }
 
-    public boolean Insert(Resultado res) {
+    public boolean Insert(MiResultado res) {
         ContentValues contenedor = new ContentValues ();
         contenedor.put ( "uid", res.getUid () );
-        contenedor.put ( "mduracion", res.getMduracion () );
-        contenedor.put ( "mdistancia", res.getMdistancia () );
-        contenedor.put ( "mpasos", res.getMpasos () );
-        contenedor.put ( "mvelmax", res.getMvelmax () );
-        contenedor.put ( "mvelmed", res.getMvelmed () );
-        contenedor.put ( "mvelmin", res.getMvelmin () );
-        contenedor.put ( "mcalorias", res.getMcalorias () );
-        contenedor.put ( "mpuntomax", res.getMpuntomax () );
-        contenedor.put ( "mpuntomin", res.getMpuntomin () );
-        contenedor.put ( "mritmo", res.getMritmo () );
+        contenedor.put ( "mduracion", res.getTiempo () );
+        contenedor.put ( "mdistancia", res.getDistancia () );
+        contenedor.put ( "mpasos", res.getPasos () );
+        contenedor.put ( "mvelmax", res.getVelmax () );
+        contenedor.put ( "mvelmed", res.getVelmed () );
+        contenedor.put ( "mvelmin", res.getVelmin () );
+        contenedor.put ( "mcalorias", res.getCalorias () );
         return (db.insert ( "resultados", null, contenedor )) > 0;
     }
 
@@ -49,60 +44,45 @@ public class DaoResultados {
         return true;
     }
 
-    public boolean Editar(Resultado res) {
+    public boolean Editar(MiResultado res) {
         ContentValues contenedor = new ContentValues ();
         contenedor.put ( "uid", res.getUid () );
-        if (!res.getMduracion ().isEmpty ()) {
-            contenedor.put ( "mduracion", res.getMduracion () );
+        if (!res.getTiempo ().isEmpty ()) {
+            contenedor.put ( "mduracion", res.getTiempo () );
         }
-        if (!res.getMdistancia ().isEmpty ()) {
-            contenedor.put ( "mdistancia", res.getMdistancia () );
+        if (!res.getDistancia ().isEmpty ()) {
+            contenedor.put ( "mdistancia", res.getDistancia () );
         }
-        if (!res.getMpasos ().isEmpty ()) {
-            contenedor.put ( "mpasos", res.getMpasos () );
+        if (!res.getPasos ().isEmpty ()) {
+            contenedor.put ( "mpasos", res.getPasos () );
         }
-        if (!res.getMvelmax ().isEmpty ()) {
-            contenedor.put ( "mvelmax", res.getMvelmax () );
+        if (!res.getVelmax ().isEmpty ()) {
+            contenedor.put ( "mvelmax", res.getVelmax () );
         }
-        if (!res.getMvelmed ().isEmpty ()) {
-            contenedor.put ( "mvelmed", res.getMvelmed () );
+        if (!res.getVelmed ().isEmpty ()) {
+            contenedor.put ( "mvelmed", res.getVelmed () );
         }
-        if (!res.getMvelmin ().isEmpty ()) {
-            contenedor.put ( "mvelmin", res.getMvelmin () );
+        if (!res.getVelmin ().isEmpty ()) {
+            contenedor.put ( "mvelmin", res.getVelmin () );
         }
-        if (!res.getMcalorias ().isEmpty ()) {
-            contenedor.put ( "mcalorias", res.getMcalorias () );
+        if (!res.getCalorias ().isEmpty ()) {
+            contenedor.put ( "mcalorias", res.getCalorias () );
         }
-        if (!res.getMpuntomax ().isEmpty ()) {
-            contenedor.put ( "mpuntomax", res.getMpuntomax () );
-        }
-        if (!res.getMpuntomin ().isEmpty ()) {
-            contenedor.put ( "mpuntomin", res.getMpuntomin () );
-
-        }
-        if (!res.getMritmo ().isEmpty ()) {
-            contenedor.put ( "mritmo", res.getMritmo () );
-        }
-
-
         return (db.update ( "resultados", contenedor, "uid=" + "'" + res.getUid () + "'", null )) > 0;
     }
 
-    public Resultado ObtenerResultado(String id) {
+    public MiResultado ObtenerResultado(String id) {
         Cursor cursor = db.rawQuery ( "select *from resultados where uid=" + "'" + id + "'", null );
         cursor.moveToFirst ();
         if (cursor.getCount () > 0) {
-            resultado = new Resultado ( cursor.getString ( 0 ),
+            resultado = new MiResultado ( cursor.getString ( 0 ),
                     cursor.getString ( 1 ),
                     cursor.getString ( 2 ),
                     cursor.getString ( 3 ),
                     cursor.getString ( 4 ),
                     cursor.getString ( 5 ),
                     cursor.getString ( 6 ),
-                    cursor.getString ( 7 ),
-                    cursor.getString ( 8 ),
-                    cursor.getString ( 9 ),
-                    cursor.getString ( 10 )
+                    cursor.getString ( 7 )
             );
             return resultado;
         } else {
@@ -110,25 +90,21 @@ public class DaoResultados {
         }
     }
 
-    public ArrayList<Dato> ObtenerDatos() {
+    public ArrayList<MiResultado> ObtenerDatos() {
         lista.clear ();
         Cursor cursor = db.rawQuery ( "select *from resultados ", null );
         if (cursor != null && cursor.getCount () > 0) {
             cursor.moveToFirst ();
             do {
-                lista.add ( new Dato (
+                lista.add ( new MiResultado (
                         cursor.getString ( 0 ),
-                        cursor.getString ( 7 ),
+                        cursor.getString ( 1 ),
                         cursor.getString ( 2 ),
-                        "",
                         cursor.getString ( 3 ),
-                        "",
-                        cursor.getString ( 1 ),
-                        cursor.getString ( 1 ),
-                        "",
+                        cursor.getString ( 4 ),
                         cursor.getString ( 5 ),
-                        cursor.getString ( 5 ),
-                        cursor.getString ( 5 ) ) );
+                        cursor.getString ( 6 ),
+                        cursor.getString ( 7 ) ) );
             } while (cursor.moveToNext ());
             return lista;
         } else {

@@ -45,7 +45,7 @@ public class MaratonAdapter extends RecyclerView.Adapter<MaratonAdapter.MyViewHo
     @Override
     public void onBindViewHolder(MyViewHolder maratonViewHolder, int position) {
         maratonViewHolder.maratonname.setText ( mDataset.get ( position ).maratonname );
-        maratonViewHolder.maratondate.setText ( mDataset.get ( position ).date );
+        maratonViewHolder.maratondate.setText ( mDataset.get ( position ).maratondate );
         File img = new File ( mDataset.get ( position ).maratonimage );
         Picasso.with ( ctx ).load ( "file://" + img ).into ( maratonViewHolder.maratonimage );
         maratonViewHolder.maratondescription.setText ( mDataset.get ( position ).description );
