@@ -173,7 +173,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             CarreraResInfo = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( "Resultados" ).
                     child ( PostKey ).child ( current_user_id );
             Carrera = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).
-                    child ( "Nuevas" ).child ( PostKey ).child ( "estado" );
+                    child ( "Nuevas" ).child ( PostKey ).child ( "inicio" );
 
             horacarrera = Common.carrera.getMaratontime ();
             daoResultados = new DaoResultados ( this );
@@ -545,7 +545,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void GuardarFinal() {
         try {
             String hora = currentTime.format ( calFordTime.getTime () );
-            String tiempo = getDifferenceBetwenDates ( horacarrera, hora );
+            String tiempo = getDifferenceBetwenDates ( horacarrera + ":00", hora );
             String tiempot;
             if (horainicio == null) {
                 tiempot = "0:0:0";
@@ -707,7 +707,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             error.put ( "error", e.getMessage () );
             FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MapaActivity" ).child ( "Monitoreo" ).child ( current_user_id ).updateChildren ( error );
         }
-
     }
 
     private void GuardarResList() {

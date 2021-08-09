@@ -242,7 +242,7 @@ public class MiInscripcionActivity extends AppCompatActivity implements IFirebas
                 protected void onBindViewHolder(@NonNull MiMaratonViewHolder maratonViewHolder, int position, @NonNull Maraton maraton) {
 
                     maratonViewHolder.maratonname.setText ( maraton.maratonname );
-                    maratonViewHolder.maratondate.setText ( maraton.maratondate );
+                    maratonViewHolder.maratondate.setText ( "Fecha: " + maraton.maratondate );
                     maratonViewHolder.maratondescription.setText ( maraton.description );
                     Picasso.with ( getApplication () ).load ( maraton.maratonimage ).into ( maratonViewHolder.maratonimage );
                     final String PostKey = getRef ( position ).getKey ();

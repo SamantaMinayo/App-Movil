@@ -46,18 +46,18 @@ public class MaratonAdapter extends RecyclerView.Adapter<MaratonAdapter.MyViewHo
     public void onBindViewHolder(MyViewHolder maratonViewHolder, int position) {
         maratonViewHolder.maratonname.setText ( mDataset.get ( position ).maratonname );
         maratonViewHolder.maratondate.setText ( mDataset.get ( position ).maratondate );
-        File img = new File ( mDataset.get ( position ).maratonimage );
+        File img = new File ( mDataset.get ( position ).image );
         Picasso.with ( ctx ).load ( "file://" + img ).into ( maratonViewHolder.maratonimage );
         maratonViewHolder.maratondescription.setText ( mDataset.get ( position ).description );
         final String PostKey = mDataset.get ( position ).uid;
         maratonViewHolder.setiRecyclerItemClickListener ( new IRecyclerItemClickListener () {
             @Override
             public void onItemClickListener(View view, int position) {
-                if (activity == "ins") {
+                if (activity.equals ( "ins" )) {
                     Intent clickPostIntent = new Intent ( view.getContext (), ClickMaratonActivity.class );
                     clickPostIntent.putExtra ( "PostKey", PostKey );
                     view.getContext ().startActivity ( clickPostIntent );
-                } else if (activity == "fin") {
+                } else if (activity.equals ( "fin" )) {
                     Intent clickPostIntent = new Intent ( view.getContext (), ClickMiMaratonActivity.class );
                     clickPostIntent.putExtra ( "PostKey", PostKey );
                     view.getContext ().startActivity ( clickPostIntent );

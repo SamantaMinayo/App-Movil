@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/activity_profile"
-    android:background="@color/colorAccent"
     tools:context=".ProfileActivity">
 
     <Button
@@ -49,7 +48,7 @@
                     android:text="Profile Name"
                     android:textAlignment="center"
                     android:textAllCaps="false"
-                    android:textColor="@color/colortitle"
+                    android:textColor="@color/colorPrimaryDark"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
@@ -103,7 +102,7 @@
                         android:text="Informacion Personal"
                         android:textAlignment="center"
                         android:textAllCaps="false"
-                        android:textColor="@color/colortitle"
+                        android:textColor="@color/colorPrimaryDark"
                         android:textSize="16sp" />
 
                     <TextView
@@ -196,7 +195,7 @@
                         android:text="Informacion de Carreras"
                         android:textAlignment="center"
                         android:textAllCaps="false"
-                        android:textColor="@color/colortitle"
+                        android:textColor="@color/colorPrimaryDark"
                         android:textSize="16sp" />
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -457,7 +456,7 @@
                 android:text="Avance por carreras"
                 android:textAlignment="center"
                 android:textAllCaps="false"
-                android:textColor="@color/colortitle"
+                android:textColor="@color/colorPrimaryDark"
                 android:textSize="16sp" />
             <TextView
                 android:id="@+id/my_title_tiempo"

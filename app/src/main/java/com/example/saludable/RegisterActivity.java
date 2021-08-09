@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -24,7 +25,7 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText UserEmail, UserPassword, UserConfirmPassword;
     private Button CreateAccountButton;
     private ProgressDialog loadingBar;
-
+    private static final String TAG = "RegisterActivity";
     private FirebaseAuth mAuth;
 
 
@@ -81,11 +82,9 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void CreateNewAccount() {
         try {
-
             String email = UserEmail.getText ().toString ();
             String password = UserPassword.getText ().toString ();
             String confirmpassword = UserConfirmPassword.getText ().toString ();
-
             if (TextUtils.isEmpty ( email )) {
                 Toast.makeText ( this, "Porfavor ingrese su correo", Toast.LENGTH_SHORT ).show ();
             } else if (TextUtils.isEmpty ( password )) {
@@ -99,27 +98,29 @@ public class RegisterActivity extends AppCompatActivity {
                 loadingBar.setMessage ( "Espere mientras creamos su cuenta." );
                 loadingBar.show ();
                 loadingBar.setCanceledOnTouchOutside ( true );
-
-
                 mAuth.createUserWithEmailAndPassword ( email, password )
                         .addOnCompleteListener ( new OnCompleteListener<AuthResult> () {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                 if (task.isSuccessful ()) {
                                     SendUserToSetupActivity ();
-                                    Toast.makeText ( RegisterActivity.this, "Usted ha sido autenticado correctamente", Toast.LENGTH_SHORT ).show ();
+                                    Toast.makeText ( RegisterActivity.this,
+                                            "Usted ha sido autenticado correctamente",
+                                            Toast.LENGTH_SHORT ).show ();
                                     loadingBar.dismiss ();
                                 } else {
                                     String message = task.getException ().getMessage ();
-                                    Toast.makeText ( RegisterActivity.this, "Error Occured: " + message, Toast.LENGTH_SHORT ).show ();
+                                    Toast.makeText ( RegisterActivity.this,
+                                            "Error Occured: " +
+                                                    message, Toast.LENGTH_SHORT ).show ();
                                     loadingBar.dismiss ();
                                 }
                             }
                         } );
             }
         } catch (Exception e) {
+            Log.d ( TAG, "CreateNewAccount", e );
         }
-
     }
 
 

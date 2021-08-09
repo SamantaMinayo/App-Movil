@@ -168,12 +168,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void CheckUserExistence() {
         try {
-
             Common.loggedUser = daoUsers.ObtenerUsuario ();
-
             if (Common.loggedUser != null) {
                 NavProfileusername.setText ( Common.loggedUser.getFullname () );
-                Picasso.with ( MainActivity.this ).load ( "file://" + Common.loggedUser.getProfileimage () ).placeholder ( R.drawable.profile ).into ( NavProfileImage );
+                Picasso.with ( MainActivity.this ).load ( "file://" + Common.loggedUser.getImage () ).placeholder ( R.drawable.profile ).into ( NavProfileImage );
             } else {
                 UsersRef.addListenerForSingleValueEvent ( new ValueEventListener () {
                     @Override
@@ -186,13 +184,13 @@ public class MainActivity extends AppCompatActivity {
                             } else {
                                 Common.loggedUser = dataSnapshot.child ( "Informacion" ).getValue ( User.class );
                                 Common.loggedUser.setUid ( current_user_id );
+                                Common.loggedUser.setImage ( "" );
                                 NavProfileusername.setText ( Common.loggedUser.getFullname () );
                                 Picasso.with ( MainActivity.this ).load ( Common.loggedUser.getProfileimage () ).placeholder ( R.drawable.profile ).into ( NavProfileImage );
                                 LlenarDB ();
                             }
                         }
                     }
-
                     @Override
                     public void onCancelled(@NonNull DatabaseError databaseError) {
 
@@ -220,20 +218,18 @@ public class MainActivity extends AppCompatActivity {
         User usr = daoUsers.ObtenerUsuario ();
         if (usr == null) {
             daoUsers.Insert ( Common.loggedUser );
-            final long ONE_MEGABYTE = 512 * 512;
+            final long ONE_MEGABYTE = 1024 * 1024;
             FirebaseStorage.getInstance ().getReference ().child ( "ProfileImages" )
                     .child ( Common.loggedUser.getUid () + ".jpg" ).getBytes ( ONE_MEGABYTE )
                     .addOnSuccessListener ( new OnSuccessListener<byte[]> () {
                         @Override
                         public void onSuccess(byte[] bytes) {
                             Bitmap bitmap = BitmapFactory.decodeByteArray ( bytes, 0, bytes.length );
-
                             try {
                                 daoUsers.InsertImagen ( Common.loggedUser.getUid (), bitmap, getApplication () );
                             } catch (IOException e) {
                                 e.printStackTrace ();
                             }
-
                         }
                     } );
         }
@@ -287,7 +283,7 @@ public class MainActivity extends AppCompatActivity {
 
                                 }
                             } );
-                            final long ONE_MEGABYTE = 1024 * 1024;
+                            final long ONE_MEGABYTE = 512 * 512;
                             FirebaseStorage.getInstance ().getReference ().child ( "MarathonImages" )
                                     .child ( mar.getUid () ).getBytes ( ONE_MEGABYTE )
                                     .addOnSuccessListener ( new OnSuccessListener<byte[]> () {
@@ -537,7 +533,7 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             } );
                         }
-                        final long ONE_MEGABYTE = 1024 * 1024;
+                        final long ONE_MEGABYTE = 512 * 512;
                         FirebaseStorage.getInstance ().getReference ().child ( "MarathonImages" )
                                 .child ( mar.getUid () ).getBytes ( ONE_MEGABYTE )
                                 .addOnSuccessListener ( new OnSuccessListener<byte[]> () {
@@ -568,7 +564,6 @@ public class MainActivity extends AppCompatActivity {
         try {
             FirebaseRecyclerOptions<Post> options = new FirebaseRecyclerOptions.Builder<Post> ()
                     .setQuery ( PostRef, Post.class ).build ();
-
             firebaseRecyclerAdapter =
                     new FirebaseRecyclerAdapter<Post, PostViewHolder> ( options ) {
                         @Override
@@ -577,13 +572,11 @@ public class MainActivity extends AppCompatActivity {
                                     .inflate ( R.layout.all_post_layout, parent, false );
                             return new PostViewHolder ( view );
                         }
-
                         @Override
                         protected void onBindViewHolder(PostViewHolder postViewHolder, int position, @NonNull Post post) {
-
                             postViewHolder.postadname.setText ( post.fullname );
-                            postViewHolder.posttime.setText ( post.time );
-                            postViewHolder.postdate.setText ( post.date );
+                            postViewHolder.posttime.setText ( "  " + post.time );
+                            postViewHolder.postdate.setText ( " " + post.date );
                             postViewHolder.postdescript.setText ( post.description );
                             Picasso.with ( getApplication () ).load ( post.profileimage ).into ( postViewHolder.postimgprof );
                             Picasso.with ( getApplication () ).load ( post.postimage ).into ( postViewHolder.postimage );
@@ -591,7 +584,6 @@ public class MainActivity extends AppCompatActivity {
                     };
             postList.setAdapter ( firebaseRecyclerAdapter );
             firebaseRecyclerAdapter.startListening ();
-
         } catch (Exception e) {
             HashMap error = new HashMap ();
             error.put ( "error", e.getMessage () );
@@ -637,7 +629,8 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText ( this, "Ayuda", Toast.LENGTH_SHORT ).show ();
                     break;
                 case R.id.nav_Logout:
-                    daoUsers.Eliminar ( Common.loggedUser.getUid () );
+                    boolean eliminar = false;
+                    eliminar = daoUsers.Eliminar ( Common.loggedUser.getUid () );
                     mAuth.signOut ();
                     SendUserTologinActivity ();
                     break;

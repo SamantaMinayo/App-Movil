@@ -112,7 +112,8 @@ public class SettingsActivity extends AppCompatActivity {
             loadingBar = new ProgressDialog ( this );
             Common.loggedUser = daoUsers.ObtenerUsuario ();
             if (Common.loggedUser != null) {
-                Picasso.with ( SettingsActivity.this ).load ( "file://" + Common.loggedUser.getProfileimage () ).placeholder ( R.drawable.profile ).into ( userProfileImage );
+                Picasso.with ( SettingsActivity.this ).load ( "file://" +
+                        Common.loggedUser.getImage () ).placeholder ( R.drawable.profile ).into ( userProfileImage );
                 userName.setText ( Common.loggedUser.getUsername () );
                 userProfName.setText ( Common.loggedUser.getFullname () );
                 userStatus.setText ( Common.loggedUser.getStatus () );
@@ -223,7 +224,9 @@ public class SettingsActivity extends AppCompatActivity {
         } catch (Exception e) {
             HashMap error = new HashMap ();
             error.put ( "error", e.getMessage () );
-            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "SettingsActivity" ).child ( "openGallery" ).child ( currentUserId ).updateChildren ( error );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).
+                    child ( "SettingsActivity" ).child ( "openGallery" ).
+                    child ( currentUserId ).updateChildren ( error );
         }
     }
 
@@ -383,20 +386,19 @@ public class SettingsActivity extends AppCompatActivity {
             Common.loggedUser.setImc ( imc );
             Common.loggedUser.setRango ( rangos );
             Common.loggedUser.setPaso ( factorpaso );
-
+            Common.loggedUser.setEmail ( "" );
             SettingsUserRef.updateChildren ( userMap ).addOnCompleteListener ( new OnCompleteListener () {
                 @Override
                 public void onComplete(@NonNull Task task) {
                     if (task.isSuccessful ()) {
-                        daoUsers.Editar ( Common.loggedUser );
-                        final long ONE_MEGABYTE = 512 * 512;
+                        daoUsers.Insert ( Common.loggedUser );
+                        final long ONE_MEGABYTE = 1024 * 1024;
                         FirebaseStorage.getInstance ().getReference ().child ( "ProfileImages" )
                                 .child ( currentUserId + ".jpg" ).getBytes ( ONE_MEGABYTE )
                                 .addOnSuccessListener ( new OnSuccessListener<byte[]> () {
                                     @Override
                                     public void onSuccess(byte[] bytes) {
                                         Bitmap bitmap = BitmapFactory.decodeByteArray ( bytes, 0, bytes.length );
-
                                         try {
                                             daoUsers.InsertImagen ( Common.loggedUser.getUid (), bitmap, getApplication () );
                                         } catch (IOException e) {

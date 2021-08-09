@@ -15,11 +15,11 @@ public class User {
     public String imc;
     public String profileimage;
     public String status;
-
+    public String image;
     public String rango;
     public String paso;
 
-    public User(String uid, String email, String altura, String edad, String peso, String genero, String fullname, String username, String country, String imc, String profileimage, String status, String rango, String paso) {
+    public User(String uid, String email, String altura, String edad, String peso, String genero, String fullname, String username, String country, String imc, String profileimage, String status, String rango, String paso, String image) {
         this.uid = uid;
         this.email = email;
         this.altura = altura;
@@ -34,6 +34,7 @@ public class User {
         this.status = status;
         this.rango = rango;
         this.paso = paso;
+        this.image = image;
     }
 
     public User() {
@@ -150,4 +151,13 @@ public class User {
     public void setStatus(String status) {
         this.status = status;
     }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
 }

@@ -155,7 +155,8 @@
                     android:layout_margin="10dp"
                     android:background="@drawable/button"
                     android:padding="5dp"
-                    android:text="Create Account" />
+                    android:text="Create Account"
+                    android:textColor="@color/colortitle" />
 
             </LinearLayout>
 

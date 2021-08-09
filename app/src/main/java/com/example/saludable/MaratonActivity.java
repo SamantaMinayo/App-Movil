@@ -64,9 +64,7 @@ public class MaratonActivity extends AppCompatActivity implements IFirebaseLoadD
             searchBar.addTextChangeListener ( new TextWatcher () {
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
                 }
-
                 @Override
                 public void onTextChanged(CharSequence s, int start, int before, int count) {
                     List<String> suggest = new ArrayList<> ();
@@ -76,13 +74,10 @@ public class MaratonActivity extends AppCompatActivity implements IFirebaseLoadD
                     }
                     searchBar.setLastSuggestions ( suggest );
                 }
-
                 @Override
                 public void afterTextChanged(Editable s) {
-
                 }
             } );
-
             searchBar.setOnSearchActionListener ( new MaterialSearchBar.OnSearchActionListener () {
                 @Override
                 public void onSearchStateChanged(boolean enabled) {
@@ -92,16 +87,12 @@ public class MaratonActivity extends AppCompatActivity implements IFirebaseLoadD
                         }
                     }
                 }
-
                 @Override
                 public void onSearchConfirmed(CharSequence text) {
-
                     startSearch ( text.toString () );
                 }
-
                 @Override
                 public void onButtonClicked(int buttonCode) {
-
                 }
             } );
             recycler_all_maraton = findViewById ( R.id.all_maratons_post_list );
@@ -109,20 +100,15 @@ public class MaratonActivity extends AppCompatActivity implements IFirebaseLoadD
             RecyclerView.LayoutManager layoutManager = new LinearLayoutManager ( this );
             recycler_all_maraton.setLayoutManager ( layoutManager );
             recycler_all_maraton.addItemDecoration ( new DividerItemDecoration ( this, ((LinearLayoutManager) layoutManager).getOrientation () ) );
-
-
             firebaseLoadDone = this;
-
             loadMaratonList ();
             loadSearchData ();
-
         } catch (Exception e) {
             HashMap error = new HashMap ();
             error.put ( "error", e.getMessage () );
             FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MaratonActivity" ).child ( "OnCreate" ).child ( Common.loggedUser.getUid () ).updateChildren ( error );
         }
     }
-
     private void loadSearchData() {
         try {
             final List<String> lstMaratonName = new ArrayList<> ();
@@ -136,10 +122,8 @@ public class MaratonActivity extends AppCompatActivity implements IFirebaseLoadD
                         lstMaratonName.add ( maraton.maratonname );
                     }
                 }
-
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) {
-
                     firebaseLoadDone.onFirebaseLoadFaile ( databaseError.getMessage () );
                 }
             } );
@@ -152,23 +136,18 @@ public class MaratonActivity extends AppCompatActivity implements IFirebaseLoadD
 
     private void loadMaratonList() {
         try {
-            Query query = FirebaseDatabase.getInstance ().getReference ().
-                    child ( "Carreras" ).
-                    child ( "Nuevas" )
-                    .orderByChild ( "estado" )
-                    .equalTo ( "false" );
-
+            Query query = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" )
+                    .child ( "Nuevas" ).orderByChild ( "estado" ).equalTo ( "false" );
             FirebaseRecyclerOptions<Maraton> options = new FirebaseRecyclerOptions.Builder<Maraton> ()
-                    .setQuery ( query, Maraton.class )
-                    .build ();
-
+                    .setQuery ( query, Maraton.class ).build ();
             adapter = new FirebaseRecyclerAdapter<Maraton, MaratonViewHolder> ( options ) {
                 @Override
-                protected void onBindViewHolder(@NonNull MaratonViewHolder maratonViewHolder, int position, @NonNull Maraton maraton) {
-
+                protected void onBindViewHolder(@NonNull MaratonViewHolder maratonViewHolder,
+                                                int position, @NonNull Maraton maraton) {
                     maratones.add ( maraton );
                     maratonViewHolder.maratonname.setText ( maraton.maratonname );
-                    Picasso.with ( getApplication () ).load ( maraton.maratonimage ).into ( maratonViewHolder.maratonimage );
+                    Picasso.with ( getApplication () ).load ( maraton.maratonimage ).into (
+                            maratonViewHolder.maratonimage );
                     maratonViewHolder.maratondescription.setText ( maraton.description );
                     maratonViewHolder.maratonplace.setText ( maraton.place );
                     maratonViewHolder.maratondate.setText ( maraton.maratondate );
@@ -177,14 +156,13 @@ public class MaratonActivity extends AppCompatActivity implements IFirebaseLoadD
                     maratonViewHolder.setiRecyclerItemClickListener ( new IRecyclerItemClickListener () {
                         @Override
                         public void onItemClickListener(View view, int position) {
-                            Intent clickPostIntent = new Intent ( MaratonActivity.this, ClickMaratonActivity.class );
+                            Intent clickPostIntent = new Intent ( MaratonActivity.this,
+                                    ClickMaratonActivity.class );
                             clickPostIntent.putExtra ( "PostKey", PostKey );
                             startActivity ( clickPostIntent );
                         }
                     } );
-
                 }
-
                 @NonNull
                 @Override
                 public MaratonViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -193,7 +171,6 @@ public class MaratonActivity extends AppCompatActivity implements IFirebaseLoadD
                     return new MaratonViewHolder ( itemView );
                 }
             };
-
             adapter.startListening ();
             recycler_all_maraton.setAdapter ( adapter );
         } catch (Exception e) {

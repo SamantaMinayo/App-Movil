@@ -195,16 +195,12 @@ public class SetupActivity extends AppCompatActivity {
                     loadingBar.setMessage ( "Espere mientras cargamos su imagen de perfil" );
                     loadingBar.setCanceledOnTouchOutside ( true );
                     loadingBar.show ();
-
                     Uri resultUri = result.getUri ();
-
                     final StorageReference filePath = UserProfileImageRef.child ( currentUserID + ".jpg" );
-
                     filePath.putFile ( resultUri ).addOnCompleteListener ( new OnCompleteListener<UploadTask.TaskSnapshot> () {
                         @Override
                         public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                             if (task.isSuccessful ()) {
-
                                 filePath.getDownloadUrl ().addOnCompleteListener ( new OnCompleteListener<Uri> () {
                                     @Override
                                     public void onComplete(@NonNull Task<Uri> task) {
@@ -213,7 +209,8 @@ public class SetupActivity extends AppCompatActivity {
                                                 .addOnCompleteListener ( new OnCompleteListener<Void> () {
                                                     @Override
                                                     public void onComplete(@NonNull Task<Void> task) {
-
+                                                        daoUsers.Insert ( new User ( currentUserID, "", "", "",
+                                                                "", "", "", "", "", "", downloadUri, "Helo", "", "", "" ) );
                                                         if (task.isSuccessful ()) {
                                                             Toast.makeText ( SetupActivity.this, "Su imagen de perfil cargada correctamente", Toast.LENGTH_SHORT ).show ();
                                                             loadingBar.dismiss ();
@@ -226,7 +223,6 @@ public class SetupActivity extends AppCompatActivity {
                                                 } );
                                     }
                                 } );
-
                             } else {
                                 String message = task.getException ().getMessage ();
                                 Toast.makeText ( SetupActivity.this, "Error Occured: " + message, Toast.LENGTH_SHORT ).show ();
@@ -298,7 +294,7 @@ public class SetupActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task task) {
                         if (task.isSuccessful ()) {
                             daoUsers.Insert ( new User ( currentUserID, "", altura, edad,
-                                    peso, genero, fullname, username, country, imc, "", "Helo", rangos, factorpaso ) );
+                                    peso, genero, fullname, username, country, imc, "", "Helo", rangos, factorpaso, "" ) );
                             final long ONE_MEGABYTE = 512 * 512;
                             FirebaseStorage.getInstance ().getReference ().child ( "ProfileImages" )
                                     .child ( currentUserID + ".jpg" ).getBytes ( ONE_MEGABYTE )

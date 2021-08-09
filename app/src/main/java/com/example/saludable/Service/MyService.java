@@ -10,8 +10,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.location.Location;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
@@ -42,60 +40,23 @@ public class MyService extends Service {
     public static final String ACTION_BROADCAST = PACKAGE_NAME + ".broadcast";
     public static final String EXTRA_LOCATION = PACKAGE_NAME + ".location";
     private static final String TAG = MyService.class.getSimpleName ();
-    /**
-     * The name of the channel for notifications.
-     */
     private static final String CHANNEL_ID = "channel_01";
     private static final String EXTRA_STARTED_FROM_NOTIFICATION = PACKAGE_NAME +
             ".started_from_notification";
-    /**
-     * The desired interval for location updates. Inexact. Updates may be more or less frequent.
-     */
     private static final long UPDATE_INTERVAL_IN_MILLISECONDS = 10000;
-    /**
-     * The fastest rate for active location updates. Updates will never be more frequent
-     * than this value.
-     */
     private static final long FASTEST_UPDATE_INTERVAL_IN_MILLISECONDS =
             UPDATE_INTERVAL_IN_MILLISECONDS / 2;
-    /**
-     * The identifier for the notification displayed for the foreground service.
-     */
     private static final int NOTIFICATION_ID = 12345678;
     private final IBinder mBinder = new LocalBinder ();
-    /**
-     * Used to check whether the bound activity has really gone away and not unbound as part of an
-     * orientation change. We create a foreground service notification only if the former takes
-     * place.
-     */
     private boolean mChangingConfiguration = false;
-
     private NotificationManager mNotificationManager;
-
-    /**
-     * Contains parameters used by {@link com.google.android.gms.location.FusedLocationProviderApi}.
-     */
     private LocationRequest mLocationRequest;
-
-    /**
-     * Provides access to the Fused Location Provider API.
-     */
     private FusedLocationProviderClient mFusedLocationClient;
-
-    /**
-     * Callback for changes in location.
-     */
     private LocationCallback mLocationCallback;
-
     private Handler mServiceHandler;
-
-    /**
-     * The current location.
-     */
     private Location mLocationant;
     private Location mLocation;
     private float distancia = 0;
-
 
     public MyService() {
     }
@@ -111,24 +72,16 @@ public class MyService extends Service {
                 onNewLocation ( locationResult.getLastLocation () );
             }
         };
-
         createLocationRequest ();
-
         getLocation ();
-
         HandlerThread handlerThread = new HandlerThread ( TAG );
         handlerThread.start ();
         mServiceHandler = new Handler ( handlerThread.getLooper () );
         mNotificationManager = (NotificationManager) getSystemService ( NOTIFICATION_SERVICE );
-
-        // Android O requires a Notification Channel.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence name = getString ( R.string.app_name );
-            // Create the channel for the notification
             NotificationChannel mChannel =
                     new NotificationChannel ( CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT );
-
-            // Set the Notification Channel for the Notification Manager.
             mNotificationManager.createNotificationChannel ( mChannel );
         }
     }
@@ -138,13 +91,10 @@ public class MyService extends Service {
         Log.i ( TAG, "Service started" );
         boolean startedFromNotification = intent.getBooleanExtra ( EXTRA_STARTED_FROM_NOTIFICATION,
                 false );
-
-        // We got here because the user decided to remove location updates from the notification.
         if (startedFromNotification) {
             removeLocationUpdates ();
             stopSelf ();
         }
-        // Tells the system to not try to recreate the service after it has been killed.
         return START_NOT_STICKY;
     }
 
@@ -156,9 +106,6 @@ public class MyService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        // Called when a client (MainActivity in case of this sample) comes to the foreground
-        // and binds with this service. The service should cease to be a foreground service
-        // when that happens.
         Log.i ( TAG, "in onBind()" );
         stopForeground ( true );
         mChangingConfiguration = false;
@@ -167,9 +114,6 @@ public class MyService extends Service {
 
     @Override
     public void onRebind(Intent intent) {
-        // Called when a client (MainActivity in case of this sample) returns to the foreground
-        // and binds once again with this service. The service should cease to be a foreground
-        // service when that happens.
         Log.i ( TAG, "in onRebind()" );
         stopForeground ( true );
         mChangingConfiguration = false;
@@ -179,23 +123,17 @@ public class MyService extends Service {
     @Override
     public boolean onUnbind(Intent intent) {
         Log.i ( TAG, "Last client unbound from service" );
-
-        // Called when the last client (MainActivity in case of this sample) unbinds from this
-        // service. If this method is called due to a configuration change in MainActivity, we
-        // do nothing. Otherwise, we make this service a foreground service.
         if (!mChangingConfiguration && Utils.requestingLocationUpdates ( this )) {
             Log.i ( TAG, "Starting foreground service" );
-
             startForeground ( NOTIFICATION_ID, getNotification () );
         }
-        return true; // Ensures onRebind() is called when a client re-binds.
+        return true;
     }
 
     @Override
     public void onDestroy() {
         mServiceHandler.removeCallbacksAndMessages ( null );
     }
-
     /**
      * Makes a request for location updates. Note that in this sample we merely log the
      * {@link SecurityException}.
@@ -236,39 +174,23 @@ public class MyService extends Service {
      */
     private Notification getNotification() {
         Intent intent = new Intent ( this, MyService.class );
-
         CharSequence text = Utils.getLocationText ( mLocation, distancia );
-
-        // Extra to help us figure out if we arrived in onStartCommand via the notification or not.
         intent.putExtra ( EXTRA_STARTED_FROM_NOTIFICATION, true );
-
-        // The PendingIntent that leads to a call to onStartCommand() in this service.
         PendingIntent servicePendingIntent = PendingIntent.getService ( this, 0, intent,
                 PendingIntent.FLAG_UPDATE_CURRENT );
-
-        // The PendingIntent to launch activity.
         PendingIntent activityPendingIntent = PendingIntent.getActivity ( this, 0,
                 new Intent ( this, MapsActivity.class ), 0 );
-
-        Uri soundUri = RingtoneManager.getDefaultUri ( RingtoneManager.TYPE_ALL );
-
-
         NotificationCompat.Builder builder = new NotificationCompat.Builder ( this )
-                //.addAction ( R.drawable.ic_launch, getString ( R.string.launch_activity ),
-                //      activityPendingIntent )
-                //.addAction ( R.drawable.ic_cancel, getString ( R.string.remove_location_updates ),
-                //      servicePendingIntent )
                 .setContentText ( text )
                 .setOngoing ( true )
                 .setContentTitle ( "Saludable" )
                 .setPriority ( Notification.PRIORITY_HIGH )
                 .setSmallIcon ( R.mipmap.ic_launcher )
                 .setWhen ( System.currentTimeMillis () );
-        // Set the Channel ID for Android O.
+        builder.setSound ( null );
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             builder.setChannelId ( CHANNEL_ID ); // Channel ID
         }
-
         return builder.build ();
     }
 
@@ -310,17 +232,13 @@ public class MyService extends Service {
         if (mLocationant == null) {
             mLocationant = mLocation;
         }
-        // Notify anyone listening for broadcasts about the new location.
         Intent intent = new Intent ( ACTION_BROADCAST );
         intent.putExtra ( EXTRA_LOCATION, location );
         LocalBroadcastManager.getInstance ( getApplicationContext () ).sendBroadcast ( intent );
-
         distancia = distancia + mLocationant.distanceTo ( mLocation );
         mLocationant = mLocation;
-        // Update notification content if running as a foreground service.
         if (serviceIsRunningInForeground ( this )) {
             mNotificationManager.notify ( NOTIFICATION_ID, getNotification () );
-
         }
     }
 

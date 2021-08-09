@@ -154,20 +154,15 @@ public class LoginActivity extends AppCompatActivity {
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
         try {
 
-            Log.d ( TAG, "firebaseAuthWithGoogle:" + acct.getId () );
-
             AuthCredential credential = GoogleAuthProvider.getCredential ( acct.getIdToken (), null );
             mAuth.signInWithCredential ( credential )
                     .addOnCompleteListener ( this, new OnCompleteListener<AuthResult> () {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (task.isSuccessful ()) {
-                                // Sign in success, update UI with the signed-in user's information
-                                Log.d ( TAG, "signInWithCredential:success" );
                                 SendUserToMainActivity ();
                                 loadingBar.dismiss ();
                             } else {
-                                // If sign in fails, display a message to the user.
                                 Log.w ( TAG, "signInWithCredential:failure", task.getException () );
                                 String message = task.getException ().toString ();
                                 SendUserToLoginActivity ();
@@ -226,13 +221,13 @@ public class LoginActivity extends AppCompatActivity {
             }
         } catch (Exception e) {
         }
-
     }
 
     private boolean checkPermissions() {
         try {
             return PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission ( this,
-                    Manifest.permission.ACCESS_FINE_LOCATION ) && PackageManager.PERMISSION_GRANTED == ActivityCompat.checkSelfPermission ( this,
+                    Manifest.permission.ACCESS_FINE_LOCATION ) && PackageManager.PERMISSION_GRANTED ==
+                    ActivityCompat.checkSelfPermission ( this,
                     Manifest.permission.WRITE_EXTERNAL_STORAGE );
         } catch (Exception e) {
             return false;
@@ -241,9 +236,11 @@ public class LoginActivity extends AppCompatActivity {
 
     private void requestPermissions() {
         try {
-            ActivityCompat.requestPermissions ( LoginActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.WRITE_EXTERNAL_STORAGE}, CODIGO_PERMISO );
+            ActivityCompat.requestPermissions ( LoginActivity.this, new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE}, CODIGO_PERMISO );
         } catch (Exception e) {
-
+            Log.d ( TAG, "requestPermissions", e );
         }
     }
 
@@ -270,9 +267,11 @@ public class LoginActivity extends AppCompatActivity {
 
     private void SendUserToRegisterActivity() {
         try {
-            Intent registerIntent = new Intent ( LoginActivity.this, RegisterActivity.class );
+            Intent registerIntent = new Intent ( LoginActivity.this,
+                    RegisterActivity.class );
             startActivity ( registerIntent );
         } catch (Exception e) {
+            Log.d ( TAG, "SendUserToRegisterActivity", e );
         }
     }
 
@@ -295,7 +294,6 @@ public class LoginActivity extends AppCompatActivity {
                             .setAction ( R.string.settings, new View.OnClickListener () {
                                 @Override
                                 public void onClick(View view) {
-                                    // Build intent that displays the App settings screen.
                                     Intent intent = new Intent ();
                                     intent.setAction (
                                             Settings.ACTION_APPLICATION_DETAILS_SETTINGS );
@@ -311,6 +309,7 @@ public class LoginActivity extends AppCompatActivity {
             }
 
         } catch (Exception e) {
+            Log.d ( TAG, "onRequestPermissionsResult", e );
         }
     }
 

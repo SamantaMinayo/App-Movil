@@ -277,11 +277,24 @@
 
                 </LinearLayout>
 
+                <Button
+                    android:id="@+id/web"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+
+                    android:layout_alignParentStart="true"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:text="Ver trayectoria"
+                    android:textColor="@color/colorPrimaryDark"
+                    android:textSize="13sp" />
                 <WebView
                     android:id="@+id/maraton_trayectoria"
+                    android:layout_below="@+id/web"
                     android:layout_width="match_parent"
                     android:layout_height="250dp"
                     android:layout_margin="10dp"></WebView>
+
 
                 <LinearLayout
                     android:layout_width="match_parent"

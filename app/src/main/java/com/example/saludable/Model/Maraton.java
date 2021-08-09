@@ -18,8 +18,9 @@ public class Maraton {
     public String maratondist;
     public String maratontrayectoriaweb;
 
+    public String image;
 
-    public Maraton(String uid, String time, String date, String maratonimage, String description, String contactname, String contactnumber, String maratontime, String maratondate, String place, String maratonname, String codigo, String estado, String distancia, String maratontrayectoriaweb) {
+    public Maraton(String uid, String time, String date, String maratonimage, String description, String contactname, String contactnumber, String maratontime, String maratondate, String place, String maratonname, String codigo, String estado, String distancia, String maratontrayectoriaweb, String image) {
         this.uid = uid;
         this.time = time;
         this.date = date;
@@ -35,17 +36,27 @@ public class Maraton {
         this.estado = estado;
         this.maratondist = distancia;
         this.maratontrayectoriaweb = maratontrayectoriaweb;
+        this.image = image;
+    }
+
+    public Maraton(String maratonname, String maratonimagen, String maratondescription, String date, String uid, String image) {
+        this.maratonname = maratonname;
+        this.maratonimage = maratonimagen;
+        this.description = maratondescription;
+        this.maratondate = date;
+        this.image = image;
+        this.uid = uid;
+    }
+
+    public String getImage() {
+        return image;
     }
 
     public Maraton() {
     }
 
-    public Maraton(String maratonname, String maratonimagen, String maratondescription, String date, String uid) {
-        this.maratonname = maratonname;
-        this.maratonimage = maratonimagen;
-        this.description = maratondescription;
-        this.maratondate = date;
-        this.uid = uid;
+    public void setImage(String image) {
+        this.image = image;
     }
 
     public Maraton(int id, String uid, String estado) {

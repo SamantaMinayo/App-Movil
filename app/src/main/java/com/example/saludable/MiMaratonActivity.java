@@ -127,19 +127,15 @@ public class MiMaratonActivity extends AppCompatActivity implements IFirebaseLoa
                 }
             } );
 
-            lista = daoUsrMrtn.ObtenerMaratonList ( "fin" );
+
             recycler_all_mi_maraton = findViewById ( R.id.all_my_maratons_post_list );
             recycler_all_mi_maraton.setHasFixedSize ( true );
             LayoutManager layoutManager = new LinearLayoutManager ( this );
             recycler_all_mi_maraton.setLayoutManager ( layoutManager );
             recycler_all_mi_maraton.addItemDecoration ( new DividerItemDecoration ( this, ((LinearLayoutManager) layoutManager).getOrientation () ) );
 
-
             firebaseLoadDone = this;
-
-            loadMiMaratonList ();
             loadSearchData ();
-
         } catch (Exception e) {
             HashMap error = new HashMap ();
             error.put ( "error", e.getMessage () );
@@ -147,6 +143,13 @@ public class MiMaratonActivity extends AppCompatActivity implements IFirebaseLoa
         }
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart ();
+        lista = daoUsrMrtn.ObtenerMaratonList ( "fin" );
+        loadMiMaratonList ();
+
+    }
     private void loadSearchData() {
         try {
             final List<String> lstMiMaratonName = new ArrayList<> ();
@@ -217,6 +220,8 @@ public class MiMaratonActivity extends AppCompatActivity implements IFirebaseLoa
                 recycler_all_mi_maraton.setLayoutManager ( layoutManager );
                 recycler_all_mi_maraton.setAdapter ( mAdapter );
             }
+
+
         } catch (Exception e) {
             HashMap error = new HashMap ();
             error.put ( "error", e.getMessage () );

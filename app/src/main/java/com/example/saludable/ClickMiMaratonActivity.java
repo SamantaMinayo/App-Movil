@@ -39,7 +39,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.picasso.Picasso;
 
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -114,41 +113,21 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
             if (Common.carrera == null) {
                 CargarDatosCarrera ();
             } else {
-                if (Common.carrera.getEstado () != "fin") {
-                    MaratonDatosRef.addValueEventListener ( new ValueEventListener () {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            if (dataSnapshot.exists ()) {
-                                daoMaraton.InsertEditar ( dataSnapshot.getValue ( Maraton.class ) );
-                                Picasso.with ( ClickMiMaratonActivity.this ).load ( "file://" + Common.carrera.maratonimage ).into ( imagen );
-                                descripcion.setText ( Common.carrera.description );
-                                fecha.setText ( Common.carrera.maratondate + " " + Common.carrera.maratontime );
-                                lugar.setText ( "Lugar: " + Common.carrera.place );
-                                nombre.setText ( Common.carrera.maratonname );
-                                distancia.setText ( "Distancia: " + Common.carrera.maratondist + " km" );
-
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                        }
-                    } );
-                    Picasso.with ( ClickMiMaratonActivity.this ).load ( "file://" + Common.carrera.maratonimage ).into ( imagen );
+                if (!Common.carrera.getEstado ().equals ( "fin" )) {
+                    CargarDatosCarrera ();
+                    Picasso.with ( ClickMiMaratonActivity.this ).load ( "file://" + Common.carrera.image ).into ( imagen );
                     descripcion.setText ( Common.carrera.description );
                     fecha.setText ( Common.carrera.maratondate );
                     lugar.setText ( "Lugar: " + Common.carrera.place );
                     nombre.setText ( Common.carrera.maratonname );
                     distancia.setText ( "Distancia: " + Common.carrera.maratondist + " km" );
                 } else {
-                    Picasso.with ( ClickMiMaratonActivity.this ).load ( "file://" + Common.carrera.maratonimage ).into ( imagen );
+                    Picasso.with ( ClickMiMaratonActivity.this ).load ( "file://" + Common.carrera.image ).into ( imagen );
                     descripcion.setText ( Common.carrera.description );
                     fecha.setText ( Common.carrera.maratondate );
                     lugar.setText ( "Lugar: " + Common.carrera.place );
                     nombre.setText ( Common.carrera.maratonname );
                     distancia.setText ( "Distancia: " + Common.carrera.maratondist + " km" );
-
                 }
             }
 
@@ -228,21 +207,16 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     if (dataSnapshot.exists ()) {
                         Common.carrera = dataSnapshot.getValue ( Maraton.class );
+                        Common.carrera.setImage ( "" );
                         daoMaraton.InsertEditar ( Common.carrera );
-                        Picasso.with ( ClickMiMaratonActivity.this ).load ( "file://" + Common.carrera.maratonimage ).into ( imagen );
+                        Picasso.with ( ClickMiMaratonActivity.this ).load ( Common.carrera.maratonimage ).into ( imagen );
 
                         descripcion.setText ( Common.carrera.description );
                         fecha.setText ( Common.carrera.maratondate + " " + Common.carrera.maratontime );
                         lugar.setText ( "Lugar: " + Common.carrera.place );
                         nombre.setText ( Common.carrera.maratonname );
                         distancia.setText ( "Distancia: " + Common.carrera.maratondist + " km" );
-                        imagen.buildDrawingCache ();
-                        bitmap = imagen.getDrawingCache ();
-                        try {
-                            daoMaraton.InsertImagen ( PostKey, bitmap, getApplication () );
-                        } catch (IOException e) {
-                            e.printStackTrace ();
-                        }
+
                     }
                 }
 

@@ -32,7 +32,6 @@ public class Utils {
                 .putBoolean ( KEY_REQUESTING_LOCATION_UPDATES, requestingLocationUpdates )
                 .apply ();
     }
-
     /**
      * Returns the {@code location} object as a human readable string.
      *
@@ -40,17 +39,10 @@ public class Utils {
      */
     public static String getLocationText(Location location, float distancia) {
         formato1 = new DecimalFormat ( "#.00" );
-
         if (location == null) {
-
             return "Unknown location";
         } else {
-
             return "(" + formato1.format ( distancia ) + "m, vel: " + formato1.format ( location.getSpeed () ) + " m/s )";
-
         }
-
     }
-
-
 }

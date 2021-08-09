@@ -70,7 +70,8 @@ public class DaoUsrMrtn {
                                 nuevo.getString ( 3 ),
                                 nuevo.getString ( 4 ),
                                 nuevo.getString ( 8 ),
-                                nuevo.getString ( 0 )
+                                nuevo.getString ( 0 ),
+                                nuevo.getString ( 15 )
                         ) );
                     } while (nuevo.moveToNext ());
                 }

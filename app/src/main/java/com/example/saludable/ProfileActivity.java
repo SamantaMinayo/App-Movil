@@ -58,11 +58,8 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         try {
-
             super.onCreate ( savedInstanceState );
             setContentView ( R.layout.activity_profile );
-
-
             TChart = findViewById ( R.id.timechart );
             VChart = findViewById ( R.id.velchart );
             CChart = findViewById ( R.id.calchart );
@@ -107,7 +104,9 @@ public class ProfileActivity extends AppCompatActivity {
             userProfileImage = findViewById ( R.id.my_profile_pic );
 
             Common.loggedUser = daoUsers.ObtenerUsuario ();
-            Picasso.with ( ProfileActivity.this ).load ( "file://" + Common.loggedUser.getProfileimage () ).placeholder ( R.drawable.profile ).into ( userProfileImage );
+            Picasso.with ( ProfileActivity.this ).load ( "file://" +
+                    Common.loggedUser.getImage () ).placeholder ( R.drawable.profile ).
+                    into ( userProfileImage );
             userName.setText ( "@" + Common.loggedUser.getUsername () );
             userFullname.setText ( Common.loggedUser.getFullname () );
             userStatus.setText ( Common.loggedUser.getStatus () );
@@ -136,26 +135,24 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void CargarDatos() {
         try {
-
-            MaratonDatosUser.addListenerForSingleValueEvent ( new ValueEventListener () {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    miresultado.clear ();
-                    for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
-                        miresultado.add ( postSnapshot.getValue ( MiResultado.class ) );
-                    }
-                    GenerarDatos ();
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            } );
-
             if (daoResultados.ObtenerDatos () != null) {
                 miresultado = daoResultados.ObtenerDatos ();
                 GenerarDatos ();
+            } else {
+                MaratonDatosUser.addListenerForSingleValueEvent ( new ValueEventListener () {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        miresultado.clear ();
+                        for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
+                            miresultado.add ( postSnapshot.getValue ( MiResultado.class ) );
+                        }
+                        GenerarDatos ();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                    }
+                } );
             }
         } catch (Exception e) {
             HashMap error = new HashMap ();
@@ -175,12 +172,7 @@ public class ProfileActivity extends AppCompatActivity {
             ArrayList<PointValue> DValues = new ArrayList<PointValue> ();
             DValues.add ( new PointValue ( 0, 0 ) );
             int cont = 0;
-            float velprom = 0;
-            float timprom = 0;
-            float distotal = 0;
-            float caltotal = 0;
-            float pastotal = 0;
-
+            float velprom = 0, timprom = 0, distotal = 0, caltotal = 0, pastotal = 0;
             for (int i = miresultado.size (); i > 0; i -= 1) {
                 cont = cont + 1;
                 if (i == 1) {
@@ -200,7 +192,6 @@ public class ProfileActivity extends AppCompatActivity {
                 CValues.add ( new PointValue ( cont, Float.valueOf ( miresultado.get ( i - 1 ).calorias ) / 1000 ) );
                 DValues.add ( new PointValue ( cont, Float.valueOf ( miresultado.get ( i - 1 ).distancia ) / 1000 ) );
             }
-
             velpromtot.setText ( String.valueOf ( velprom / cont ) );
             tiempromtot.setText ( String.valueOf ( timprom / cont ) );
             disttot.setText ( String.valueOf ( distotal / 1000 ) );
@@ -210,7 +201,6 @@ public class ProfileActivity extends AppCompatActivity {
             Graficar ( VValues, VChart, "Velocidad media [m/s]", " Carrera" );
             Graficar ( CValues, CChart, "Calorias [kcal]", "Carrera" );
             Graficar ( DValues, DChart, "Distancia [km]", " Carrera" );
-
         } catch (Exception e) {
             HashMap error = new HashMap ();
             error.put ( "error", e.getMessage () );
@@ -243,7 +233,6 @@ public class ProfileActivity extends AppCompatActivity {
             error.put ( "error", e.getMessage () );
             FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "ProfileActivity" ).child ( "Graficar" ).child ( currentUserId ).updateChildren ( error );
         }
-
     }
 
     private void SendUserToSettingsActivity() {
@@ -276,4 +265,20 @@ public class ProfileActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onStart() {
+        try {
+            super.onStart ();
+            userProfileImage = findViewById ( R.id.my_profile_pic );
+            Common.loggedUser = daoUsers.ObtenerUsuario ();
+            Picasso.with ( ProfileActivity.this ).load ( "" ).placeholder ( R.drawable.profile ).
+                    into ( userProfileImage );
+
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "ProfileActivity" ).child ( "OnCreate" ).child ( currentUserId ).updateChildren ( error );
+        }
+
+    }
 }

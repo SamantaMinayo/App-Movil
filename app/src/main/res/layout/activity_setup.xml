@@ -379,7 +379,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_centerHorizontal="true"
-                            android:background="@drawable/button"
+                            android:background="@drawable/buttonsuccess"
                             android:padding="5dp"
                             android:text="GUARDAR" />
                     </LinearLayout>

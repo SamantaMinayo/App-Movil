@@ -23,7 +23,7 @@ public class DaoMaraton {
             "uid text primary key,time text,date text,maratonimage text,description text," +
             "contactname text,contactnumber text,maratontime text,maratondate text,place text," +
             "maratonname text,estado text,codigo text,maratondist text," +
-            "maratontrayectoriaweb text)";
+            "maratontrayectoriaweb text,image text)";
 
     public DaoMaraton(Context c) {
         this.ctx = c;
@@ -48,6 +48,7 @@ public class DaoMaraton {
             contenedor.put ( "codigo", mara.getCodigo () );
             contenedor.put ( "maratondist", mara.getMaratondist () );
             contenedor.put ( "maratontrayectoriaweb", mara.getMaratontrayectoriaweb () );
+            contenedor.put ( "image", mara.getImage () );
             return (db.insert ( "maraton", null, contenedor )) > 0;
         } else {
             ContentValues contenedor = new ContentValues ();
@@ -96,6 +97,9 @@ public class DaoMaraton {
                 contenedor.put ( "maratontrayectoriaweb", mara.getMaratontrayectoriaweb () );
             }
 
+            if (!mara.getImage ().isEmpty ()) {
+                contenedor.put ( "image", mara.getImage () );
+            }
             return (db.update ( "maraton", contenedor, "uid=" + "'" + maraton.getUid () + "'", null )) > 0;
         }
 
@@ -123,7 +127,8 @@ public class DaoMaraton {
                     cursor.getString ( 12 ),
                     cursor.getString ( 11 ),
                     cursor.getString ( 13 ),
-                    cursor.getString ( 14 )
+                    cursor.getString ( 14 ),
+                    cursor.getString ( 15 )
             );
             return maraton;
         } else {
@@ -148,7 +153,7 @@ public class DaoMaraton {
         out.close ();
         String path = file.getAbsolutePath ();
         ContentValues contenedor = new ContentValues ();
-        contenedor.put ( "maratonimage", path );
+        contenedor.put ( "image", path );
         contenedor.put ( "uid", uid );
         if (ObtenerMaraton ( uid ) != null) {
             return (db.update ( "maraton", contenedor, "uid=" + "'" + uid + "'", null )) > 0;
