@@ -115,14 +115,14 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
             } else {
                 if (!Common.carrera.getEstado ().equals ( "fin" )) {
                     CargarDatosCarrera ();
-                    Picasso.with ( ClickMiMaratonActivity.this ).load ( "file://" + Common.carrera.image ).into ( imagen );
+                    Picasso.with ( ClickMiMaratonActivity.this ).load ( Common.carrera.maratonimage ).into ( imagen );
                     descripcion.setText ( Common.carrera.description );
                     fecha.setText ( Common.carrera.maratondate );
                     lugar.setText ( "Lugar: " + Common.carrera.place );
                     nombre.setText ( Common.carrera.maratonname );
                     distancia.setText ( "Distancia: " + Common.carrera.maratondist + " km" );
                 } else {
-                    Picasso.with ( ClickMiMaratonActivity.this ).load ( "file://" + Common.carrera.image ).into ( imagen );
+                    Picasso.with ( ClickMiMaratonActivity.this ).load ( Common.carrera.maratonimage ).into ( imagen );
                     descripcion.setText ( Common.carrera.description );
                     fecha.setText ( Common.carrera.maratondate );
                     lugar.setText ( "Lugar: " + Common.carrera.place );
@@ -607,7 +607,11 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
                 maxvel.setText ( Common.maratonResult.getVelmax () );
                 minvel.setText ( Common.maratonResult.getVelmin () );
                 tiempoprom.setText ( Common.maratonResult.getTime () );
-                mejtime.setText ( Common.maratonResult.getMejtime () );
+                if (Common.maratonResult.getMejtime ().split ( ":" )[1].length () < 2) {
+                    mejtime.setText ( Common.maratonResult.getMejtime ().split ( ":" )[0] + ":" + "0" + Common.maratonResult.getMejtime ().split ( ":" )[1] + ":" + Common.maratonResult.getMejtime ().split ( ":" )[2] );
+                } else {
+                    mejtime.setText ( Common.maratonResult.getMejtime () );
+                }
                 peortime.setText ( Common.maratonResult.getPeortime () );
                 mejritmo.setText ( Common.maratonResult.getMaxritmo () );
                 peorritmo.setText ( Common.maratonResult.getMinritmo () );

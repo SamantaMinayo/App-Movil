@@ -171,7 +171,13 @@ public class MainActivity extends AppCompatActivity {
             Common.loggedUser = daoUsers.ObtenerUsuario ();
             if (Common.loggedUser != null) {
                 NavProfileusername.setText ( Common.loggedUser.getFullname () );
-                Picasso.with ( MainActivity.this ).load ( "file://" + Common.loggedUser.getImage () ).placeholder ( R.drawable.profile ).into ( NavProfileImage );
+                String urlimage = "";
+                if (Common.loggedUser.getImage ().length () > 7) {
+                    urlimage = "file://" + Common.loggedUser.getImage ();
+                } else {
+                    urlimage = Common.loggedUser.getProfileimage ();
+                }
+                Picasso.with ( MainActivity.this ).load ( urlimage ).placeholder ( R.drawable.profile ).into ( NavProfileImage );
             } else {
                 UsersRef.addListenerForSingleValueEvent ( new ValueEventListener () {
                     @Override

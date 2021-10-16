@@ -112,8 +112,14 @@ public class SettingsActivity extends AppCompatActivity {
             loadingBar = new ProgressDialog ( this );
             Common.loggedUser = daoUsers.ObtenerUsuario ();
             if (Common.loggedUser != null) {
-                Picasso.with ( SettingsActivity.this ).load ( "file://" +
-                        Common.loggedUser.getImage () ).placeholder ( R.drawable.profile ).into ( userProfileImage );
+                String urlimage = "";
+                if (Common.loggedUser.getImage ().length () > 7) {
+                    urlimage = "file://" + Common.loggedUser.getImage ();
+                } else {
+                    urlimage = Common.loggedUser.getProfileimage ();
+                }
+                Picasso.with ( SettingsActivity.this ).load ( urlimage ).placeholder ( R.drawable.profile ).into ( userProfileImage );
+
                 userName.setText ( Common.loggedUser.getUsername () );
                 userProfName.setText ( Common.loggedUser.getFullname () );
                 userStatus.setText ( Common.loggedUser.getStatus () );

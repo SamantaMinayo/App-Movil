@@ -104,14 +104,18 @@ public class ProfileActivity extends AppCompatActivity {
             userProfileImage = findViewById ( R.id.my_profile_pic );
 
             Common.loggedUser = daoUsers.ObtenerUsuario ();
-            Picasso.with ( ProfileActivity.this ).load ( "file://" +
-                    Common.loggedUser.getImage () ).placeholder ( R.drawable.profile ).
-                    into ( userProfileImage );
+            String urlimage = "";
+            if (Common.loggedUser.getImage ().length () > 7) {
+                urlimage = "file://" + Common.loggedUser.getImage ();
+            } else {
+                urlimage = Common.loggedUser.getProfileimage ();
+            }
+            Picasso.with ( ProfileActivity.this ).load ( urlimage ).placeholder ( R.drawable.profile ).into ( userProfileImage );
             userName.setText ( "@" + Common.loggedUser.getUsername () );
             userFullname.setText ( Common.loggedUser.getFullname () );
             userStatus.setText ( Common.loggedUser.getStatus () );
             userGenero.setText ( "Genero: " + Common.loggedUser.getGenero () );
-            userCountry.setText ( "Country: " + Common.loggedUser.getCountry () );
+            userCountry.setText ( "País: " + Common.loggedUser.getCountry () );
             userPeso.setText ( "Peso: " + Common.loggedUser.getPeso () );
             userAltura.setText ( "Altura: " + Common.loggedUser.getAltura () );
             userEdad.setText ( "Edad: " + Common.loggedUser.getEdad () );
@@ -176,21 +180,21 @@ public class ProfileActivity extends AppCompatActivity {
             for (int i = miresultado.size (); i > 0; i -= 1) {
                 cont = cont + 1;
                 if (i == 1) {
-                    velpromult.setText ( String.valueOf ( miresultado.get ( i - 1 ).velocidad ) );
+                    velpromult.setText ( String.valueOf ( miresultado.get ( i - 1 ).velmed ) );
                     tiempromult.setText ( String.valueOf ( Float.valueOf ( miresultado.get ( i - 1 ).getTiempo () ) / (Float.valueOf ( miresultado.get ( i - 1 ).getDistancia () ) / 1000) ) );
                     distult.setText ( String.valueOf ( Float.valueOf ( miresultado.get ( i - 1 ).distancia ) / 1000 ) );
                     calult.setText ( String.valueOf ( Float.valueOf ( miresultado.get ( i - 1 ).calorias ) / 1000 ) );
                     pasult.setText ( String.valueOf ( miresultado.get ( i - 1 ).pasos ) );
                 }
                 TValues.add ( new PointValue ( cont, Float.valueOf ( miresultado.get ( i - 1 ).getTiempo () ) / (Float.valueOf ( miresultado.get ( i - 1 ).getDistancia () ) / 1000) ) );
-                VValues.add ( new PointValue ( cont, Float.valueOf ( miresultado.get ( i - 1 ).getVelocidad () ) ) );
-                velprom = Float.valueOf ( miresultado.get ( i - 1 ).getVelocidad () ) + velprom;
+                VValues.add ( new PointValue ( cont, Float.valueOf ( miresultado.get ( i - 1 ).getVelmed () ) ) );
+                velprom = Float.valueOf ( miresultado.get ( i - 1 ).getVelmed () ) + velprom;
                 timprom = Float.valueOf ( miresultado.get ( i - 1 ).getTiempo () ) / (Float.valueOf ( miresultado.get ( i - 1 ).getDistancia () ) / 1000) + timprom;
                 distotal = distotal + Float.valueOf ( miresultado.get ( i - 1 ).distancia );
                 caltotal = caltotal + Float.valueOf ( miresultado.get ( i - 1 ).calorias );
                 pastotal = pastotal + Float.valueOf ( miresultado.get ( i - 1 ).pasos );
                 CValues.add ( new PointValue ( cont, Float.valueOf ( miresultado.get ( i - 1 ).calorias ) / 1000 ) );
-                DValues.add ( new PointValue ( cont, Float.valueOf ( miresultado.get ( i - 1 ).distancia ) / 1000 ) );
+                DValues.add ( new PointValue ( cont, Float.valueOf ( distotal ) / 1000 ) );
             }
             velpromtot.setText ( String.valueOf ( velprom / cont ) );
             tiempromtot.setText ( String.valueOf ( timprom / cont ) );

@@ -132,11 +132,18 @@ public class DaoUsers {
     }
 
     public boolean InsertImagen(String uid, Bitmap bitmap, Context ctx) throws IOException {
-
+        boolean success = true;
         File dir = new File ( Environment.getExternalStorageDirectory () + "/.MiCarpeta/" );
         if (!dir.exists ()) {
             System.out.println ( "creando directorio: " + "MiCarpeta" );
-            dir.mkdir ();
+            success = dir.mkdirs ();
+        }
+        if (success) {
+            System.out.println ( "Se creo: " + "MiCarpeta" );
+            // Do something on success
+        } else {
+            System.out.println ( "No se creo: " + "MiCarpeta" );
+// Do something else on failure
         }
         File file = new File ( dir, uid + ".jpg" );
         if (file.exists ()) {

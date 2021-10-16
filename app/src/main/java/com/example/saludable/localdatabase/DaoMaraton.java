@@ -48,7 +48,7 @@ public class DaoMaraton {
             contenedor.put ( "codigo", mara.getCodigo () );
             contenedor.put ( "maratondist", mara.getMaratondist () );
             contenedor.put ( "maratontrayectoriaweb", mara.getMaratontrayectoriaweb () );
-            contenedor.put ( "image", mara.getImage () );
+            contenedor.put ( "maratonimage", mara.getMaratonimage () );
             return (db.insert ( "maraton", null, contenedor )) > 0;
         } else {
             ContentValues contenedor = new ContentValues ();
@@ -98,7 +98,7 @@ public class DaoMaraton {
             }
 
             if (!mara.getImage ().isEmpty ()) {
-                contenedor.put ( "image", mara.getImage () );
+                contenedor.put ( "maratonimage", mara.getMaratonimage () );
             }
             return (db.update ( "maraton", contenedor, "uid=" + "'" + maraton.getUid () + "'", null )) > 0;
         }
@@ -156,9 +156,12 @@ public class DaoMaraton {
         contenedor.put ( "image", path );
         contenedor.put ( "uid", uid );
         if (ObtenerMaraton ( uid ) != null) {
-            return (db.update ( "maraton", contenedor, "uid=" + "'" + uid + "'", null )) > 0;
+            return true;
+            //     return (db.update ( "maraton", contenedor, "uid=" + "'" + uid + "'", null )) > 0;
         } else {
-            return (db.insert ( "maraton", null, contenedor )) > 0;
+            return true;
+
+            //   return (db.insert ( "maraton", null, contenedor )) > 0;
         }
     }
 }

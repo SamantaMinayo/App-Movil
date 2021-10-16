@@ -46,8 +46,12 @@ public class MaratonAdapter extends RecyclerView.Adapter<MaratonAdapter.MyViewHo
     public void onBindViewHolder(MyViewHolder maratonViewHolder, int position) {
         maratonViewHolder.maratonname.setText ( mDataset.get ( position ).maratonname );
         maratonViewHolder.maratondate.setText ( mDataset.get ( position ).maratondate );
-        File img = new File ( mDataset.get ( position ).image );
-        Picasso.with ( ctx ).load ( "file://" + img ).into ( maratonViewHolder.maratonimage );
+        if (mDataset.get ( position ).image != null) {
+            File img = new File ( mDataset.get ( position ).image );
+            Picasso.with ( ctx ).load ( "file://" + img ).into ( maratonViewHolder.maratonimage );
+        } else {
+            Picasso.with ( ctx ).load ( mDataset.get ( position ).maratonimage ).into ( maratonViewHolder.maratonimage );
+        }
         maratonViewHolder.maratondescription.setText ( mDataset.get ( position ).description );
         final String PostKey = mDataset.get ( position ).uid;
         maratonViewHolder.setiRecyclerItemClickListener ( new IRecyclerItemClickListener () {
