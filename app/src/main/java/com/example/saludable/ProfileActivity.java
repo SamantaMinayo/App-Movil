@@ -177,24 +177,24 @@ public class ProfileActivity extends AppCompatActivity {
             DValues.add ( new PointValue ( 0, 0 ) );
             int cont = 0;
             float velprom = 0, timprom = 0, distotal = 0, caltotal = 0, pastotal = 0;
-            for (int i = miresultado.size (); i > 0; i -= 1) {
+            for (int i = 0; i <miresultado.size (); i += 1) {
                 cont = cont + 1;
-                if (i == 1) {
-                    velpromult.setText ( String.valueOf ( miresultado.get ( i - 1 ).velmed ) );
-                    tiempromult.setText ( String.valueOf ( Float.valueOf ( miresultado.get ( i - 1 ).getTiempo () ) / (Float.valueOf ( miresultado.get ( i - 1 ).getDistancia () ) / 1000) ) );
-                    distult.setText ( String.valueOf ( Float.valueOf ( miresultado.get ( i - 1 ).distancia ) / 1000 ) );
-                    calult.setText ( String.valueOf ( Float.valueOf ( miresultado.get ( i - 1 ).calorias ) / 1000 ) );
-                    pasult.setText ( String.valueOf ( miresultado.get ( i - 1 ).pasos ) );
+                if (i == miresultado.size ()-1) {
+                    velpromult.setText ( String.valueOf ( miresultado.get ( i ).velmed ) );
+                    tiempromult.setText ( String.valueOf ( Float.valueOf ( miresultado.get ( i  ).getTiempo () ) / (Float.valueOf ( miresultado.get ( i  ).getDistancia () ) / 1000) ) );
+                    distult.setText ( String.valueOf ( Float.valueOf ( miresultado.get ( i ).distancia ) / 1000 ) );
+                    calult.setText ( String.valueOf ( Float.valueOf ( miresultado.get ( i  ).calorias ) / 1000 ) );
+                    pasult.setText ( String.valueOf ( miresultado.get ( i ).pasos ) );
                 }
-                TValues.add ( new PointValue ( cont, Float.valueOf ( miresultado.get ( i - 1 ).getTiempo () ) / (Float.valueOf ( miresultado.get ( i - 1 ).getDistancia () ) / 1000) ) );
-                VValues.add ( new PointValue ( cont, Float.valueOf ( miresultado.get ( i - 1 ).getVelmed () ) ) );
-                velprom = Float.valueOf ( miresultado.get ( i - 1 ).getVelmed () ) + velprom;
-                timprom = Float.valueOf ( miresultado.get ( i - 1 ).getTiempo () ) / (Float.valueOf ( miresultado.get ( i - 1 ).getDistancia () ) / 1000) + timprom;
-                distotal = distotal + Float.valueOf ( miresultado.get ( i - 1 ).distancia );
-                caltotal = caltotal + Float.valueOf ( miresultado.get ( i - 1 ).calorias );
-                pastotal = pastotal + Float.valueOf ( miresultado.get ( i - 1 ).pasos );
-                CValues.add ( new PointValue ( cont, Float.valueOf ( miresultado.get ( i - 1 ).calorias ) / 1000 ) );
-                DValues.add ( new PointValue ( cont, Float.valueOf ( distotal ) / 1000 ) );
+                TValues.add ( new PointValue ( cont, Float.valueOf ( miresultado.get ( i  ).getTiempo () ) / (Float.valueOf ( miresultado.get ( i  ).getDistancia () ) / 1000) ) );
+                VValues.add ( new PointValue ( cont, Float.valueOf ( miresultado.get ( i  ).getVelmed () ) ) );
+                velprom = Float.valueOf ( miresultado.get ( i  ).getVelmed () ) + velprom;
+                timprom = Float.valueOf ( miresultado.get ( i  ).getTiempo () ) / (Float.valueOf ( miresultado.get ( i  ).getDistancia () ) / 1000) + timprom;
+                distotal = distotal + Float.valueOf ( miresultado.get ( i ).distancia );
+                caltotal = caltotal + Float.valueOf ( miresultado.get ( i ).calorias );
+                pastotal = pastotal + Float.valueOf ( miresultado.get ( i ).pasos );
+                CValues.add ( new PointValue ( cont, Float.valueOf ( miresultado.get ( i ).calorias ) / 1000 ) );
+                DValues.add ( new PointValue ( cont, Float.valueOf ( miresultado.get ( i ).distancia) / 1000 ) );
             }
             velpromtot.setText ( String.valueOf ( velprom / cont ) );
             tiempromtot.setText ( String.valueOf ( timprom / cont ) );

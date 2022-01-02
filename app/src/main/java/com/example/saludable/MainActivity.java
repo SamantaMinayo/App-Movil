@@ -326,11 +326,11 @@ public class MainActivity extends AppCompatActivity {
                         }
                         if (daoMarRes.ObtenerMaratonRes ( mar.getUid () ) == null) {
                             FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( "Resultados" ).child ( mar.getUid () )
-                                    .orderByChild ( "velocidad" ).limitToFirst ( 1 ).addValueEventListener ( new ValueEventListener () {
+                                    .orderByChild ( "velmed" ).limitToFirst ( 1 ).addValueEventListener ( new ValueEventListener () {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
-                                        MaratonResult nuevo = new MaratonResult ( mar.getUid (), "", postSnapshot.getValue ( MiResultado.class ).getVelocidad (), "", "", "", "", "", "", "", "", "" );
+                                        MaratonResult nuevo = new MaratonResult ( mar.getUid (), "", "", "", postSnapshot.getValue ( MiResultado.class ).getVelmed (), "", "", "", "", "", "", "" );
                                         MaratonResult resultado = daoMarRes.ObtenerMaratonRes ( mar.getUid () );
                                         if (resultado == null) {
                                             daoMarRes.Insert ( nuevo );
@@ -346,11 +346,11 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             } );
                             FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( "Resultados" ).child ( mar.getUid () )
-                                    .orderByChild ( "velocidad" ).limitToLast ( 1 ).addValueEventListener ( new ValueEventListener () {
+                                    .orderByChild ( "velmed" ).limitToLast ( 1 ).addValueEventListener ( new ValueEventListener () {
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                     for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
-                                        MaratonResult nuevo = new MaratonResult ( mar.getUid (), "", "", "", postSnapshot.getValue ( MiResultado.class ).getVelocidad (), "", "", "", "", "", "", "" );
+                                        MaratonResult nuevo = new MaratonResult ( mar.getUid (), "", postSnapshot.getValue ( MiResultado.class ).getVelmed (), "", "", "", "", "", "", "", "", "" );
                                         MaratonResult resultado = daoMarRes.ObtenerMaratonRes ( mar.getUid () );
                                         if (resultado == null) {
                                             daoMarRes.Insert ( nuevo );
@@ -474,7 +474,7 @@ public class MainActivity extends AppCompatActivity {
             for (MiResultado dato : listaresultadosglobales) {
                 cantglo = cantglo + 1;
                 tiempoglo = tiempoglo + Float.valueOf ( dato.getTiempo () );
-                velocidadglo = velocidadglo + Float.valueOf ( dato.getVelocidad () );
+                velocidadglo = velocidadglo + Float.valueOf ( dato.getVelmed () );
                 pasosglo = pasosglo + Float.valueOf ( dato.getPasos () );
                 caloriasglo = caloriasglo + Float.valueOf ( dato.getCalorias () );
                 ritmopro = ritmopro + Float.valueOf ( dato.getTiempo () ) / (Float.valueOf ( dato.getDistancia () ) / 1000);
@@ -504,6 +504,7 @@ public class MainActivity extends AppCompatActivity {
             } else {
                 daoMarRes.Editar ( nuevo );
             }
+            listaresultadosglobales = new ArrayList<MiResultado> ();
         } catch (Exception e) {
             HashMap error = new HashMap ();
             error.put ( "error", e.getMessage () );
@@ -632,7 +633,7 @@ public class MainActivity extends AppCompatActivity {
                     SendUserToMiMaratonActivity ();
                     break;
                 case R.id.nav_ayuda:
-                    Toast.makeText ( this, "Ayuda", Toast.LENGTH_SHORT ).show ();
+                    SendUserToAyudaActivity ();
                     break;
                 case R.id.nav_Logout:
                     boolean eliminar = false;
@@ -707,7 +708,17 @@ public class MainActivity extends AppCompatActivity {
             FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MainActivity" ).child ( "SendUserToMiMaratonActivity" ).child ( Common.loggedUser.getUid () ).updateChildren ( error );
         }
     }
-
+    private void SendUserToAyudaActivity() {
+        try {
+            Intent addNewPostIntent = new Intent ( MainActivity.this, AyudaActivity.class );
+            startActivity ( addNewPostIntent );
+            finish ();
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "MainActivity" ).child ( "SendUserToHelpActivity" ).child ( Common.loggedUser.getUid () ).updateChildren ( error );
+        }
+    }
     private void SendUserToMiInscripcionActivity() {
         try {
             Intent addNewPostIntent = new Intent ( MainActivity.this, MiInscripcionActivity.class );

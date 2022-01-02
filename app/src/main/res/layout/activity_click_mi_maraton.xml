@@ -719,6 +719,30 @@
                 android:textSize="15dp" />
 
             <TextView
+                android:id="@+id/graf_tiempok"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/chart_previewvel"
+                android:layout_alignParentStart="true"
+                android:background="@drawable/tableborder"
+                android:padding="5dp"
+                android:text="Tiempo por kilometro"
+                android:textAlignment="center"
+                android:textColor="@android:color/black"
+                android:textSize="15dp" />
+            <TextView
+                android:id="@+id/graf_velocidadk"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/charttiempok"
+                android:layout_alignParentStart="true"
+                android:background="@drawable/tableborder"
+                android:padding="5dp"
+                android:text="Velocidad por kilometro"
+                android:textAlignment="center"
+                android:textColor="@android:color/black"
+                android:textSize="15dp" />
+            <TextView
                 android:id="@+id/mi_maraton_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -810,6 +834,29 @@
                 android:layout_weight="1"
                 android:padding="5dp"></lecho.lib.hellocharts.view.LineChartView>
 
+            <lecho.lib.hellocharts.view.LineChartView
+                android:id="@+id/charttiempok"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_below="@+id/graf_tiempok"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginEnd="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_weight="1"
+                android:padding="5dp"></lecho.lib.hellocharts.view.LineChartView>
+            <lecho.lib.hellocharts.view.LineChartView
+                android:id="@+id/chartvelocidadk"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_below="@+id/graf_velocidadk"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginEnd="5dp"
+                android:layout_marginBottom="5dp"
+                android:layout_weight="1"
+                android:padding="5dp"></lecho.lib.hellocharts.view.LineChartView>
+
             <lecho.lib.hellocharts.view.PreviewLineChartView
                 android:id="@+id/chart_preview"
                 android:layout_width="match_parent"
@@ -827,6 +874,9 @@
                 android:layout_margin="5dp"
                 android:layout_weight="1"
                 android:padding="5dp"></lecho.lib.hellocharts.view.PreviewLineChartView>
+
+
+
         </RelativeLayout>
     </ScrollView>
 

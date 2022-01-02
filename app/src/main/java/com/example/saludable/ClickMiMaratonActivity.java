@@ -62,10 +62,11 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
 
     private GoogleMap mMap;
     private String PostKey, current_user_id;
-    private DatabaseReference DatosCarreraResult, ResultadoCarrera, MaratonDatosRef, MaratonPointsRef;
+    private DatabaseReference DatosCarreraResult, ResultadoCarrera, MaratonDatosRef, MaratonPointsRef,MaratonPointKil;
     private FirebaseAuth mAuth;
     private ArrayList<MiResultado> listaresultadosglobales = new ArrayList<MiResultado> ();
     private ArrayList<Punto> listadatosloc = new ArrayList<Punto> ();
+    private ArrayList<MiResultado> listadatoskil = new ArrayList<MiResultado> ();
 
     private DaoMaraton daoMaraton;
     private DaoResultados daoResultados;
@@ -84,15 +85,16 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
     private ArrayList<MiResultado> miresultado = new ArrayList<MiResultado> ();
     private List<PointValue> TValues = new ArrayList<PointValue> ();
     private List<PointValue> VValues = new ArrayList<PointValue> ();
+    private List<MiResultado> mires= new ArrayList<MiResultado>();
 
     private LineChartView chart;
     private PreviewLineChartView previewChart;
     private LineChartData data;
     private LineChartData previewData;
 
-    private LineChartView chartvel;
+    private LineChartView chartvel,charttiempok,chartvelk;
     private PreviewLineChartView previewChartvel;
-    private LineChartData datavel;
+    private LineChartData datavel,datatiempok,datavelk;
     private LineChartData previewDatavel;
     private Marker marcador;
     private Bitmap bitmap;
@@ -109,6 +111,7 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
             mapFragment.getMapAsync ( this );
 
             Instanciar ();
+            CargarDatosCarreraKil();
             Common.carrera = daoMaraton.ObtenerMaraton ( PostKey );
             if (Common.carrera == null) {
                 CargarDatosCarrera ();
@@ -172,8 +175,9 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
         previewChart = findViewById ( R.id.chart_preview );
 
         chartvel = findViewById ( R.id.chartvel );
+        charttiempok=findViewById ( R.id.charttiempok );
+        chartvelk=findViewById ( R.id.chartvelocidadk);
         previewChartvel = findViewById ( R.id.chart_previewvel );
-
         daoMaraton = new DaoMaraton ( this );
         daoResultados = new DaoResultados ( this );
         daoMarRes = new DaoMarRes ( this );
@@ -197,7 +201,7 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
         MaratonDatosRef = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( "Nuevas" ).child ( PostKey );
         DatosCarreraResult = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( "Resultados" ).child ( PostKey );
         MaratonPointsRef = FirebaseDatabase.getInstance ().getReference ().child ( "Carreras" ).child ( "Datos" ).child ( PostKey ).child ( current_user_id );
-
+        MaratonPointKil=FirebaseDatabase.getInstance().getReference().child("Carreras").child("Kilometro").child ( PostKey );
     }
 
     private void CargarDatosCarrera() {
@@ -232,24 +236,81 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
         }
     }
 
-    private void CargarMisResultados() {
-
-        Common.miResult = daoResultados.ObtenerResultado ( PostKey );
-        if (Common.miResult == null) {
-            ResultadoCarrera.addListenerForSingleValueEvent ( new ValueEventListener () {
+    private void CargarDatosCarreraKil() {
+        try {
+            MaratonPointKil.addListenerForSingleValueEvent ( new ValueEventListener () {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    //miresultado.add ( dataSnapshot.getValue ( MiResultado.class ) );
-                    //for (MiResultado datos : miresultado) {
-                    MiResultado datos = dataSnapshot.getValue ( MiResultado.class );
-                    datos.setUid ( dataSnapshot.getKey () );
-                        pasos.setText ( datos.getPasos () );
-                        velocidad.setText ( datos.getVelocidad () + " m/s" );
-                        calorias.setText ( datos.getCalorias () + " cal" );
+                    if (dataSnapshot.exists ()) {
+                        for (DataSnapshot ptSnapshot : dataSnapshot.getChildren ()) {
+                             double velocidadpromk=0;
+                             double caloriaspromk=0;
+                             double tiempopromk=0;
+                             double pasospromk=0;
+                             int cantidad=0;
+                                for(DataSnapshot kil : ptSnapshot.getChildren()){
+                                    cantidad=cantidad+1;
+                                    String calorias= (String) kil.child("calorias").getValue();
+                                    String pasos= (String) kil.child("pasos").getValue();
+                                    String velocidad= (String) kil.child("velocidad").getValue();
+                                    String[] tiempos=((String) kil.child("tiempo").getValue()).split(":");
+                                    double newtempo=Double.parseDouble(tiempos[0])*60+Double.parseDouble(tiempos[1])+Double.parseDouble(tiempos[2])/60;
+                                    velocidadpromk= velocidadpromk+Double.parseDouble(velocidad);
+                                    caloriaspromk=caloriaspromk+Double.parseDouble(calorias);
+                                    pasospromk=pasospromk+Double.parseDouble(pasos);
+                                    tiempopromk=tiempopromk+newtempo;
+                                    if(kil.getKey().equals(current_user_id)){
+                                        MiResultado miresult= new MiResultado();
+                                        miresult.setCalorias(calorias);
+                                        miresult.setPasos(pasos);
+                                        miresult.setVelocidadmed(velocidad);
+                                        miresult.setTiempomed(String.valueOf(newtempo));
+                                        mires.add(miresult);
+                                    }
+                                }
+                            MiResultado mrkilometro= new MiResultado();
+                            mrkilometro.setCalorias(String.valueOf(caloriaspromk/cantidad));
+                            mrkilometro.setVelocidadmed(String.valueOf(velocidadpromk/cantidad));
+                            mrkilometro.setPasos(String.valueOf(pasospromk/cantidad));
+                            mrkilometro.setTiempomed(String.valueOf(tiempopromk/cantidad));
+                            listadatoskil.add(mrkilometro);
 
-                        float distance = Float.valueOf ( datos.getDistancia () ) / 1000;
-                        dist.setText ( distance + "km" );
-                        float time = Float.valueOf ( datos.getTiempo () );
+                        }
+                        ///Mandar a graficar
+                        GenerarGraficaKilometro();
+                    }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            } );
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "ClickMiMaratonActivity" ).child ( "CargarDatosCarrera" ).child ( Common.loggedUser.getUid () ).updateChildren ( error );
+        }
+    }
+
+    private void CargarMisResultados() {
+        try {
+            Common.miResult = daoResultados.ObtenerResultado(PostKey);
+            if (Common.miResult == null) {
+                ResultadoCarrera.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        //miresultado.add ( dataSnapshot.getValue ( MiResultado.class ) );
+                        //for (MiResultado datos : miresultado) {
+                        MiResultado datos = dataSnapshot.getValue(MiResultado.class);
+                        datos.setUid(dataSnapshot.getKey());
+                        pasos.setText(datos.getPasos());
+                        velocidad.setText(datos.getVelocidad() + " m/s");
+                        calorias.setText(datos.getCalorias() + " cal");
+
+                        float distance = Float.valueOf(datos.getDistancia()) / 1000;
+                        dist.setText(distance + "km");
+                        float time = Float.valueOf(datos.getTiempo());
                         float segundos = time % 1;
                         float mintotales = time - segundos;
                         float calculo = mintotales / 60;
@@ -260,14 +321,14 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
                         if (segundos < 10) {
                             sec = "0" + (int) segundos;
                         } else {
-                            sec = String.valueOf ( (int) segundos );
+                            sec = String.valueOf((int) segundos);
                         }
                         if (minutos < 10) {
                             minutosm = "0" + (int) minutos;
                         } else {
-                            minutosm = String.valueOf ( (int) minutos );
+                            minutosm = String.valueOf((int) minutos);
                         }
-                        tiempo.setText ( (int) horas + ":" + minutosm + ":" + sec );
+                        tiempo.setText((int) horas + ":" + minutosm + ":" + sec);
                         float ritmo = time / distance;
                         float rsegundos = ritmo % 1;
                         float rmintotales = ritmo - rsegundos;
@@ -275,53 +336,57 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
                         float rdecimales = rcalculo % 1;
                         float rhoras = rcalculo - rdecimales;
                         float rminutos = rmintotales - rhoras * 60;
-                        miritmo.setText ( (int) rminutos + "'" + (int) (rsegundos * 60) + "''" );
-                    daoResultados.Insert ( datos );
-                    //}
-                }
+                        miritmo.setText((int) rminutos + "'" + (int) (rsegundos * 60) + "''");
+                        daoResultados.Insert(datos);
+                        //}
+                    }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
 
+                    }
+                });
+            } else {
+                float time = Float.valueOf(Common.miResult.getTiempo());
+                float segundos = time % 1;
+                float mintotales = time - segundos;
+                float calculo = mintotales / 60;
+                float decimales = calculo % 1;
+                float horas = calculo - decimales;
+                float minutos = mintotales - horas * 60;
+                String sec, minutosm;
+                if (segundos < 10) {
+                    sec = "0" + (int) segundos;
+                } else {
+                    sec = String.valueOf((int) segundos);
                 }
-            } );
-        } else {
-            float time = Float.valueOf ( Common.miResult.getTiempo () );
-            float segundos = time % 1;
-            float mintotales = time - segundos;
-            float calculo = mintotales / 60;
-            float decimales = calculo % 1;
-            float horas = calculo - decimales;
-            float minutos = mintotales - horas * 60;
-            String sec, minutosm;
-            if (segundos < 10) {
-                sec = "0" + (int) segundos;
-            } else {
-                sec = String.valueOf ( (int) segundos );
+                if (minutos < 10) {
+                    minutosm = "0" + (int) minutos;
+                } else {
+                    minutosm = String.valueOf((int) minutos);
+                }
+                float distance = Float.valueOf(Common.miResult.getDistancia()) / 1000;
+                float ritmo = time / distance;
+                float rsegundos = ritmo % 1;
+                float rmintotales = ritmo - rsegundos;
+                float rcalculo = rmintotales / 60;
+                float rdecimales = rcalculo % 1;
+                float rhoras = rcalculo - rdecimales;
+                float rminutos = rmintotales - rhoras * 60;
+                miritmo.setText((int) rminutos + "'" + (int) (rsegundos * 60) + "''");
+                tiempo.setText((int) horas + ":" + minutosm + ":" + sec);
+                pasos.setText(Common.miResult.getPasos());
+                velocidad.setText(Common.miResult.getVelmed() + " m/s");
+                calorias.setText(Common.miResult.getCalorias() + " cal");
+                dist.setText(formato1.format(distance) + " km");
+                mivelmas.setText(formato1.format(Float.valueOf(Common.miResult.getVelmax())) + " m/s");
+                mivelmin.setText(formato1.format(Float.valueOf(Common.miResult.getVelmin())) + " m/s");
             }
-            if (minutos < 10) {
-                minutosm = "0" + (int) minutos;
-            } else {
-                minutosm = String.valueOf ( (int) minutos );
-            }
-            float distance = Float.valueOf ( Common.miResult.getDistancia () ) / 1000;
-            float ritmo = time / distance;
-            float rsegundos = ritmo % 1;
-            float rmintotales = ritmo - rsegundos;
-            float rcalculo = rmintotales / 60;
-            float rdecimales = rcalculo % 1;
-            float rhoras = rcalculo - rdecimales;
-            float rminutos = rmintotales - rhoras * 60;
-            miritmo.setText ( (int) rminutos + "'" + (int) (rsegundos * 60) + "''" );
-            tiempo.setText ( (int) horas + ":" + minutosm + ":" + sec );
-            pasos.setText ( Common.miResult.getPasos () );
-            velocidad.setText ( Common.miResult.getVelmed () + " m/s" );
-            calorias.setText ( Common.miResult.getCalorias () + " cal" );
-            dist.setText ( formato1.format ( distance ) + " km" );
-            mivelmas.setText ( formato1.format ( Float.valueOf ( Common.miResult.getVelmax () ) ) + " m/s" );
-            mivelmin.setText ( formato1.format ( Float.valueOf ( Common.miResult.getVelmin () ) ) + " m/s" );
+        }catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+           FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "ClickMiMaratonActivity" ).child ( "CargarMisResultados" ).child ( Common.loggedUser.getUid () ).updateChildren ( error );
         }
-
     }
 
     private void CargarResultadosCarrera() {
@@ -330,12 +395,12 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
             Common.maratonResult = daoMarRes.ObtenerMaratonRes ( PostKey );
             if (Common.maratonResult == null) {
                 if (daoMaraton.ObtenerMaraton ( PostKey ).getEstado () == "fin") {
-                    DatosCarreraResult.orderByChild ( "velocidad" ).limitToFirst ( 1 ).addValueEventListener ( new ValueEventListener () {
+                    DatosCarreraResult.orderByChild ( "velmed" ).limitToFirst ( 1 ).addValueEventListener ( new ValueEventListener () {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
-                                maxvel.setText ( postSnapshot.getValue ( MiResultado.class ).getVelocidad () + "m/s" );
-                                MaratonResult nuevo = new MaratonResult ( PostKey, "", postSnapshot.getValue ( MiResultado.class ).getVelocidad (), "", "", "", "", "", "", "", "", "" );
+                                maxvel.setText ( postSnapshot.getValue ( MiResultado.class ).getVelmed()+ "m/s" );
+                                MaratonResult nuevo = new MaratonResult ( PostKey, "", "","", postSnapshot.getValue ( MiResultado.class ).getVelocidad (), "", "", "", "", "", "", "" );
                                 MaratonResult resultado = daoMarRes.ObtenerMaratonRes ( PostKey );
                                 if (resultado == null) {
                                     daoMarRes.Insert ( nuevo );
@@ -350,12 +415,12 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
 
                         }
                     } );
-                    DatosCarreraResult.orderByChild ( "velocidad" ).limitToLast ( 1 ).addValueEventListener ( new ValueEventListener () {
+                    DatosCarreraResult.orderByChild ( "velmed" ).limitToLast ( 1 ).addValueEventListener ( new ValueEventListener () {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
-                                minvel.setText ( postSnapshot.getValue ( MiResultado.class ).getVelocidad () + "m/s" );
-                                MaratonResult nuevo = new MaratonResult ( PostKey, "", "", "", postSnapshot.getValue ( MiResultado.class ).getVelocidad (), "", "", "", "", "", "", "" );
+                                minvel.setText ( postSnapshot.getValue ( MiResultado.class ).getVelmed() + "m/s" );
+                                MaratonResult nuevo = new MaratonResult ( PostKey, "", postSnapshot.getValue ( MiResultado.class ).getVelocidad (), "", "", "", "", "", "", "", "", "" );
                                 MaratonResult resultado = daoMarRes.ObtenerMaratonRes ( PostKey );
                                 if (resultado == null) {
                                     daoMarRes.Insert ( nuevo );
@@ -480,11 +545,11 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
                         }
                     } );
                 } else {
-                    DatosCarreraResult.orderByChild ( "velocidad" ).limitToFirst ( 1 ).addValueEventListener ( new ValueEventListener () {
+                    DatosCarreraResult.orderByChild ( "velmed" ).limitToFirst ( 1 ).addValueEventListener ( new ValueEventListener () {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
-                                maxvel.setText ( postSnapshot.getValue ( MiResultado.class ).getVelocidad () + "m/s" );
+                                maxvel.setText ( postSnapshot.getValue ( MiResultado.class ).getVelmed () + "m/s" );
                             }
                         }
 
@@ -493,11 +558,11 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
 
                         }
                     } );
-                    DatosCarreraResult.orderByChild ( "velocidad" ).limitToLast ( 1 ).addValueEventListener ( new ValueEventListener () {
+                    DatosCarreraResult.orderByChild ( "velmed" ).limitToLast ( 1 ).addValueEventListener ( new ValueEventListener () {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             for (DataSnapshot postSnapshot : dataSnapshot.getChildren ()) {
-                                minvel.setText ( postSnapshot.getValue ( MiResultado.class ).getVelocidad () + "m/s" );
+                                minvel.setText ( postSnapshot.getValue ( MiResultado.class ).getVelmed () + "m/s" );
                             }
                         }
 
@@ -673,7 +738,7 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
             for (MiResultado dato : listaresultadosglobales) {
                 cantglo = cantglo + 1;
                 tiempoglo = tiempoglo + Float.valueOf ( dato.getTiempo () );
-                velocidadglo = velocidadglo + Float.valueOf ( dato.getVelocidad () );
+                velocidadglo = velocidadglo + Float.valueOf ( dato.getVelmed());
                 pasosglo = pasosglo + Float.valueOf ( dato.getPasos () );
                 caloriasglo = caloriasglo + Float.valueOf ( dato.getCalorias () );
                 ritmopro = ritmopro + Float.valueOf ( dato.getTiempo () ) / (Float.valueOf ( dato.getDistancia () ) / 1000);
@@ -789,73 +854,163 @@ public class ClickMiMaratonActivity extends AppCompatActivity implements OnMapRe
         } catch (Exception e) {
             HashMap error = new HashMap ();
             error.put ( "error", e.getMessage () );
-            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "ProfileActivity" ).child ( "GenerarDatos" ).child ( current_user_id ).updateChildren ( error );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "ClickMiMaratonActivity" ).child ( "GenerarDatos" ).child ( current_user_id ).updateChildren ( error );
         }
     }
 
     private void GraficaVelocidad() {
-        Line line = new Line ( VValues );
-        line.setColor ( ChartUtils.COLOR_GREEN );
-        line.setHasPoints ( false );// too many values so don't draw points.
-        List<Line> lines = new ArrayList<Line> ();
-        lines.add ( line );
-        datavel = new LineChartData ( lines );
-        Axis axisX = new Axis ();
-        Axis axisY = new Axis ().setHasLines ( true );
-        axisX.setName ( "Distancia [m]" );
-        axisX.setTextColor ( ChartUtils.COLOR_BLUE );
-        axisX.setMaxLabelChars ( 4 );
-        axisX.setFormatter ( new SimpleAxisValueFormatter ().setAppendedText ( "km".toCharArray () ) );
-        axisY.setName ( "Velocidad [m/s]" ).setTextColor ( ChartUtils.COLOR_BLUE );
-        datavel.setAxisXBottom ( axisX );
-        datavel.setAxisYLeft ( axisY );
-        previewDatavel = new LineChartData ( datavel );
-        previewDatavel.getLines ().get ( 0 ).setColor ( ChartUtils.DEFAULT_DARKEN_COLOR );
+        try {
+            Line line = new Line(VValues);
+            line.setColor(ChartUtils.COLOR_GREEN);
+            line.setHasPoints(false);// too many values so don't draw points.
+            List<Line> lines = new ArrayList<Line>();
+            lines.add(line);
+            datavel = new LineChartData(lines);
+            Axis axisX = new Axis();
+            Axis axisY = new Axis().setHasLines(true);
+            axisX.setName("Distancia [m]");
+            axisX.setTextColor(ChartUtils.COLOR_BLUE);
+            axisX.setMaxLabelChars(4);
+            axisX.setFormatter(new SimpleAxisValueFormatter().setAppendedText("km".toCharArray()));
+            axisY.setName("Velocidad [m/s]").setTextColor(ChartUtils.COLOR_BLUE);
+            datavel.setAxisXBottom(axisX);
+            datavel.setAxisYLeft(axisY);
+            previewDatavel = new LineChartData(datavel);
+            previewDatavel.getLines().get(0).setColor(ChartUtils.DEFAULT_DARKEN_COLOR);
 
-        chartvel.setLineChartData ( datavel );
-        chartvel.setZoomEnabled ( false );
-        chartvel.setScrollEnabled ( false );
+            chartvel.setLineChartData(datavel);
+            chartvel.setZoomEnabled(false);
+            chartvel.setScrollEnabled(false);
 
-        previewChartvel.setLineChartData ( previewDatavel );
-        previewChartvel.setViewportChangeListener ( new ViewportListenervel () );
-        Viewport tempViewport = new Viewport ( chartvel.getMaximumViewport () );
-        float dx = tempViewport.width () / 3;
-        tempViewport.inset ( dx, 0 );
-        previewChartvel.setCurrentViewport ( tempViewport );
-        previewChartvel.setZoomType ( ZoomType.HORIZONTAL );
+            previewChartvel.setLineChartData(previewDatavel);
+            previewChartvel.setViewportChangeListener(new ViewportListenervel());
+            Viewport tempViewport = new Viewport(chartvel.getMaximumViewport());
+            float dx = tempViewport.width() / 3;
+            tempViewport.inset(dx, 0);
+            previewChartvel.setCurrentViewport(tempViewport);
+            previewChartvel.setZoomType(ZoomType.HORIZONTAL);
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "ClickMiMaratonActivity" ).child ( "Grafica Velocidad" ).child ( current_user_id ).updateChildren ( error );
+        }
     }
 
     private void GraficaTiempo() {
-        Line line = new Line ( TValues );
-        line.setColor ( ChartUtils.COLOR_BLUE );
-        line.setHasPoints ( false );// too many values so don't draw points.
-        List<Line> lines = new ArrayList<Line> ();
-        lines.add ( line );
-        data = new LineChartData ( lines );
-        Axis axisX = new Axis ();
-        axisX.setName ( "Distancia [km]" );
-        axisX.setTextColor ( ChartUtils.COLOR_BLUE );
-        axisX.setMaxLabelChars ( 4 );
-        axisX.setFormatter ( new SimpleAxisValueFormatter ().setAppendedText ( "km".toCharArray () ) );
-        Axis axisY = new Axis ().setHasLines ( true );
-        axisY.setName ( "tiempo [s]" );
-        axisY.setTextColor ( ChartUtils.COLOR_BLUE );
-        data.setAxisXBottom ( axisX );
-        data.setAxisYLeft ( axisY );
-        previewData = new LineChartData ( data );
-        previewData.getLines ().get ( 0 ).setColor ( ChartUtils.DEFAULT_DARKEN_COLOR );
+        try{
+            Line line = new Line ( TValues );
+            line.setColor ( ChartUtils.COLOR_BLUE );
+            line.setHasPoints ( false );// too many values so don't draw points.
+            List<Line> lines = new ArrayList<Line> ();
+            lines.add ( line );
+            data = new LineChartData ( lines );
+            Axis axisX = new Axis ();
+            axisX.setName ( "Distancia [km]" );
+            axisX.setTextColor ( ChartUtils.COLOR_BLUE );
+            axisX.setMaxLabelChars ( 4 );
+            axisX.setFormatter ( new SimpleAxisValueFormatter ().setAppendedText ( "km".toCharArray () ) );
+            Axis axisY = new Axis ().setHasLines ( true );
+            axisY.setName ( "tiempo [s]" );
+            axisY.setTextColor ( ChartUtils.COLOR_BLUE );
+            data.setAxisXBottom ( axisX );
+            data.setAxisYLeft ( axisY );
+            previewData = new LineChartData ( data );
+            previewData.getLines ().get ( 0 ).setColor ( ChartUtils.DEFAULT_DARKEN_COLOR );
 
-        chart.setLineChartData ( data );
-        chart.setZoomEnabled ( false );
-        chart.setScrollEnabled ( false );
+            chart.setLineChartData ( data );
+            chart.setZoomEnabled ( false );
+            chart.setScrollEnabled ( false );
 
-        previewChart.setLineChartData ( previewData );
-        previewChart.setViewportChangeListener ( new ViewportListener () );
-        Viewport tempViewport = new Viewport ( chart.getMaximumViewport () );
-        float dx = tempViewport.width () / 3;
-        tempViewport.inset ( dx, 0 );
-        previewChart.setCurrentViewport ( tempViewport );
-        previewChart.setZoomType ( ZoomType.HORIZONTAL );
+            previewChart.setLineChartData ( previewData );
+            previewChart.setViewportChangeListener ( new ViewportListener () );
+            Viewport tempViewport = new Viewport ( chart.getMaximumViewport () );
+            float dx = tempViewport.width () / 3;
+            tempViewport.inset ( dx, 0 );
+            previewChart.setCurrentViewport ( tempViewport );
+            previewChart.setZoomType ( ZoomType.HORIZONTAL );
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "ClickMiMaratonActivity" ).child ( "GraficaTiempo" ).child ( current_user_id ).updateChildren ( error );
+        }
+    }
+
+    private void GenerarGraficaKilometro() {
+        try {
+            List<PointValue> KVelocidad = new ArrayList<PointValue>();
+            List<PointValue> MKVelocidad = new ArrayList<PointValue>();
+            List<PointValue> KTiempo = new ArrayList<PointValue>();
+            List<PointValue> MKTiempo = new ArrayList<PointValue>();
+            KTiempo.add(new PointValue(0, 0));
+            MKTiempo.add(new PointValue(0, 0));
+            KVelocidad.add(new PointValue(0, 0));
+            MKVelocidad.add(new PointValue(0, 0));
+            int k = 0;
+            for (MiResultado m : listadatoskil) {
+                KTiempo.add(new PointValue(k + 1, Float.valueOf(m.getTiempomed())));
+                KVelocidad.add(new PointValue(k + 1, Float.valueOf(m.getVelocidadmed())));
+                k = k + 1;
+            }
+            int j = 0;
+            for (MiResultado m : mires) {
+                MKTiempo.add(new PointValue(j + 1, Float.valueOf(m.getTiempomed())));
+                MKVelocidad.add(new PointValue(j + 1, Float.valueOf(m.getVelocidadmed())));
+                j = j + 1;
+            }
+            Line line = new Line(KTiempo);
+            line.setColor(ChartUtils.COLOR_GREEN);
+            Line mline = new Line(MKTiempo);
+            mline.setColor(ChartUtils.COLOR_BLUE);
+            line.setHasPoints(true);// too many values so don't draw points.
+            mline.setHasPoints(true);// too many values so don't draw points.
+
+            Line linev = new Line(KVelocidad);
+            linev.setColor(ChartUtils.COLOR_GREEN);
+            Line mlinev = new Line(MKVelocidad);
+            mlinev.setColor(ChartUtils.COLOR_BLUE);
+            linev.setHasPoints(true);// too many values so don't draw points.
+            mlinev.setHasPoints(true);// too many values so don't draw points.
+
+            List<Line> lines = new ArrayList<Line>();
+            lines.add(line);
+            lines.add(mline);
+
+            List<Line> linesv = new ArrayList<Line>();
+            linesv.add(linev);
+            linesv.add(mlinev);
+
+            datatiempok = new LineChartData(lines);
+            Axis axisX = new Axis();
+            Axis axisY = new Axis().setHasLines(true);
+            axisX.setName("Distancia [km]");
+            axisX.setTextColor(ChartUtils.COLOR_BLUE);
+            axisX.setMaxLabelChars(4);
+            axisX.setFormatter(new SimpleAxisValueFormatter().setAppendedText("km".toCharArray()));
+            axisY.setName("Tiempo [min]").setTextColor(ChartUtils.COLOR_BLUE);
+            datatiempok.setAxisXBottom(axisX);
+            datatiempok.setAxisYLeft(axisY);
+            charttiempok.setLineChartData(datatiempok);
+            charttiempok.setZoomEnabled(false);
+            charttiempok.setScrollEnabled(false);
+
+            datavelk = new LineChartData(linesv);
+            Axis axisXv = new Axis();
+            Axis axisYv = new Axis().setHasLines(true);
+            axisXv.setName("Distancia [km]");
+            axisXv.setTextColor(ChartUtils.COLOR_BLUE);
+            axisXv.setMaxLabelChars(4);
+            axisXv.setFormatter(new SimpleAxisValueFormatter().setAppendedText("km".toCharArray()));
+            axisYv.setName("Velociad [m/s]").setTextColor(ChartUtils.COLOR_BLUE);
+            datavelk.setAxisXBottom(axisXv);
+            datavelk.setAxisYLeft(axisYv);
+            chartvelk.setLineChartData(datavelk);
+            chartvelk.setZoomEnabled(false);
+            chartvelk.setScrollEnabled(false);
+        } catch (Exception e) {
+            HashMap error = new HashMap ();
+            error.put ( "error", e.getMessage () );
+            FirebaseDatabase.getInstance ().getReference ().child ( "Error" ).child ( "ClickMiMaratonActivity" ).child ( "GenerarGraficaKilometro" ).child ( current_user_id ).updateChildren ( error );
+        }
     }
 
     @Override
